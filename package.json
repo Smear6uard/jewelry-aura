@@ -1,0 +1,44 @@
+{
+  "name": "jewelry-aura",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "start": "node .output/server/index.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Smear6uard/jewelry-aura.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Smear6uard/jewelry-aura/issues"
+  },
+  "homepage": "https://github.com/Smear6uard/jewelry-aura#readme",
+  "dependencies": {
+    "@tailwindcss/vite": "^4.2.2",
+    "@tanstack/react-router": "^1.168.3",
+    "@tanstack/react-start": "^1.167.6",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.38.0",
+    "lenis": "^1.3.20",
+    "lucide-react": "^1.6.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "tailwind-merge": "^3.5.0",
+    "tailwindcss": "^4.2.2"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.2",
+    "vite-tsconfig-paths": "^6.1.1"
+  }
+}

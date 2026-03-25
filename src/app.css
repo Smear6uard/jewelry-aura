@@ -1,0 +1,290 @@
+@import "tailwindcss";
+
+@theme {
+  --color-obsidian: #0A0A0A;
+  --color-obsidian-light: #111111;
+  --color-aura-gold: #D4AF37;
+  --color-aura-gold-light: #E8C84A;
+  --color-aura-gold-dim: rgba(212, 175, 55, 0.08);
+
+  --font-serif: "Playfair Display", "Georgia", serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+
+  --animate-shimmer: shimmer 3s ease-in-out infinite;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-pulse-gold: pulse-gold 2s ease-in-out infinite;
+  --animate-grain: grain 8s steps(10) infinite;
+  --animate-marquee: marquee 30s linear infinite;
+  --animate-fade-up: fade-up 0.8s ease-out forwards;
+  --animate-glow: glow 3s ease-in-out infinite alternate;
+}
+
+/* ═══════════════════════════════════════════
+   KEYFRAMES — Luxury Motion Library
+   ═══════════════════════════════════════════ */
+
+@keyframes shimmer {
+  0% { transform: translateX(-200%) skewX(-15deg); }
+  100% { transform: translateX(200%) skewX(-15deg); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33% { transform: translateY(-10px) rotate(1deg); }
+  66% { transform: translateY(5px) rotate(-1deg); }
+}
+
+@keyframes pulse-gold {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+@keyframes grain {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-5%, -10%); }
+  20% { transform: translate(-15%, 5%); }
+  30% { transform: translate(7%, -25%); }
+  40% { transform: translate(-5%, 25%); }
+  50% { transform: translate(-15%, 10%); }
+  60% { transform: translate(15%, 0%); }
+  70% { transform: translate(0%, 15%); }
+  80% { transform: translate(3%, 35%); }
+  90% { transform: translate(-10%, 10%); }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes fade-up {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.1), 0 0 60px rgba(212, 175, 55, 0.05); }
+  100% { box-shadow: 0 0 30px rgba(212, 175, 55, 0.2), 0 0 80px rgba(212, 175, 55, 0.1); }
+}
+
+@keyframes spin-slow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes dash {
+  0% { stroke-dashoffset: 300; }
+  100% { stroke-dashoffset: 0; }
+}
+
+/* ═══════════════════════════════════════════
+   BASE LAYER
+   ═══════════════════════════════════════════ */
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    background-color: var(--color-obsidian);
+    color: white;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+  }
+
+  ::selection {
+    background: var(--color-aura-gold);
+    color: black;
+  }
+
+  /* Custom scrollbar — minimal gold accent */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-obsidian);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(212, 175, 55, 0.3);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(212, 175, 55, 0.5);
+  }
+}
+
+/* ═══════════════════════════════════════════
+   UTILITY LAYER — Luxury Design System
+   ═══════════════════════════════════════════ */
+
+@layer utilities {
+  /* Glassmorphism panel */
+  .glass-panel {
+    background: linear-gradient(
+      135deg,
+      rgba(20, 20, 20, 0.6) 0%,
+      rgba(10, 10, 10, 0.4) 100%
+    );
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    border: 1px solid rgba(212, 175, 55, 0.12);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  }
+
+  .glass-panel-hover {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .glass-panel-hover:hover {
+    border-color: rgba(212, 175, 55, 0.35);
+    box-shadow:
+      0 12px 48px rgba(0, 0, 0, 0.5),
+      0 0 30px rgba(212, 175, 55, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  /* Gold text shadow */
+  .text-shadow-gold {
+    text-shadow: 0 0 40px rgba(212, 175, 55, 0.3), 0 0 80px rgba(212, 175, 55, 0.1);
+  }
+
+  /* Gold shimmer sweep on buttons */
+  .gold-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+  .gold-shimmer::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      105deg,
+      transparent 40%,
+      rgba(255, 255, 255, 0.25) 45%,
+      rgba(255, 255, 255, 0.35) 50%,
+      rgba(255, 255, 255, 0.25) 55%,
+      transparent 60%
+    );
+    animation: shimmer 3s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  /* Film grain overlay */
+  .grain-overlay::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    right: -50%;
+    bottom: -50%;
+    width: 200%;
+    height: 200%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    animation: grain 8s steps(10) infinite;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.5;
+  }
+
+  /* Gold divider line */
+  .gold-divider {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(212, 175, 55, 0.5) 50%,
+      transparent 100%
+    );
+  }
+
+  /* Radial gold glow background */
+  .gold-radial {
+    background: radial-gradient(
+      ellipse at 50% 0%,
+      rgba(212, 175, 55, 0.08) 0%,
+      transparent 60%
+    );
+  }
+
+  /* Stagger delay utilities for animation orchestration */
+  .stagger-1 { animation-delay: 0.1s; }
+  .stagger-2 { animation-delay: 0.2s; }
+  .stagger-3 { animation-delay: 0.3s; }
+  .stagger-4 { animation-delay: 0.4s; }
+  .stagger-5 { animation-delay: 0.5s; }
+  .stagger-6 { animation-delay: 0.6s; }
+}
+
+/* ═══════════════════════════════════════════
+   COMPONENT STYLES
+   ═══════════════════════════════════════════ */
+
+/* Mobile menu overlay */
+.mobile-menu-overlay {
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  background: rgba(10, 10, 10, 0.92);
+}
+
+/* Hero section gold accent bar */
+.hero-accent-bar {
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-aura-gold), transparent);
+}
+
+/* Service card inner glow on hover */
+.service-card-glow {
+  position: relative;
+}
+.service-card-glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at 50% 0%,
+    rgba(212, 175, 55, 0.08) 0%,
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.service-card-glow:hover::before {
+  opacity: 1;
+}
+
+/* Map container dark mode filter */
+.map-dark-filter {
+  filter: grayscale(100%) invert(92%) contrast(83%);
+}
+
+/* Luxury link underline animation */
+.luxury-link {
+  position: relative;
+  display: inline-block;
+}
+.luxury-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0%;
+  height: 1px;
+  background: var(--color-aura-gold);
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.luxury-link:hover::after {
+  width: 100%;
+}
