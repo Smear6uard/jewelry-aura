@@ -21,10 +21,12 @@ import {
   Menu,
   X,
   Star,
-  Sparkles,
   ChevronDown,
 } from 'lucide-react'
 import Lenis from 'lenis'
+
+import { Hero, MagneticButton } from '../components/Hero'
+import { BentoGrid } from '../components/BentoGrid'
 
 // ═══════════════════════════════════════════
 // ROUTE CONFIG + SEO
@@ -121,60 +123,6 @@ const scaleIn = {
 }
 
 // ═══════════════════════════════════════════
-// MAGNETIC BUTTON
-// ═══════════════════════════════════════════
-
-function MagneticButton({
-  children,
-  className = '',
-  as: Tag = 'button',
-  ...props
-}: {
-  children: React.ReactNode
-  className?: string
-  as?: 'button' | 'a'
-  [key: string]: any
-}) {
-  const ref = useRef<HTMLElement>(null)
-  const x = useMotionValue(0)
-  const y = useMotionValue(0)
-  const springX = useSpring(x, { stiffness: 300, damping: 20 })
-  const springY = useSpring(y, { stiffness: 300, damping: 20 })
-
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent) => {
-      if (!ref.current) return
-      const rect = ref.current.getBoundingClientRect()
-      const dx = (e.clientX - (rect.left + rect.width / 2)) * 0.25
-      const dy = (e.clientY - (rect.top + rect.height / 2)) * 0.25
-      x.set(dx)
-      y.set(dy)
-    },
-    [x, y],
-  )
-
-  const handleMouseLeave = useCallback(() => {
-    x.set(0)
-    y.set(0)
-  }, [x, y])
-
-  const MotionTag = Tag === 'a' ? motion.a : motion.button
-
-  return (
-    <MotionTag
-      ref={ref as any}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      style={{ x: springX, y: springY }}
-      className={className}
-      {...props}
-    >
-      {children}
-    </MotionTag>
-  )
-}
-
-// ═══════════════════════════════════════════
 // ANIMATED SECTION HEADING
 // ═══════════════════════════════════════════
 
@@ -214,61 +162,6 @@ function SectionHeading({
         transition={{ duration: 0.8, delay: 0.4 }}
         className="gold-divider w-20 mx-auto mt-8"
       />
-    </div>
-  )
-}
-
-// ═══════════════════════════════════════════
-// FLOATING GOLD PARTICLES (Hero background)
-// ═══════════════════════════════════════════
-
-// Deterministic particle positions to avoid SSR hydration mismatch
-const PARTICLE_DATA = [
-  { x: 5, y: 12, size: 2, dur: 9, del: 0.5 },
-  { x: 15, y: 68, size: 1.5, dur: 11, del: 1.2 },
-  { x: 23, y: 35, size: 3, dur: 7, del: 0.8 },
-  { x: 32, y: 88, size: 1.2, dur: 13, del: 2.1 },
-  { x: 41, y: 22, size: 2.5, dur: 8, del: 0.3 },
-  { x: 48, y: 55, size: 1.8, dur: 10, del: 1.7 },
-  { x: 56, y: 78, size: 2.2, dur: 12, del: 3.0 },
-  { x: 63, y: 15, size: 1.3, dur: 9, del: 0.9 },
-  { x: 72, y: 42, size: 2.8, dur: 7, del: 2.5 },
-  { x: 78, y: 91, size: 1.6, dur: 11, del: 1.4 },
-  { x: 85, y: 28, size: 2.1, dur: 14, del: 3.5 },
-  { x: 91, y: 65, size: 1.4, dur: 8, del: 0.6 },
-  { x: 8, y: 48, size: 2.6, dur: 10, del: 2.8 },
-  { x: 37, y: 72, size: 1.1, dur: 12, del: 1.0 },
-  { x: 68, y: 8, size: 3.2, dur: 9, del: 3.8 },
-  { x: 52, y: 95, size: 1.7, dur: 11, del: 0.2 },
-]
-
-function GoldParticles() {
-
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none z-[5]">
-      {PARTICLE_DATA.map((p, i) => (
-        <motion.div
-          key={i}
-          className="absolute rounded-full bg-[#D4AF37]"
-          style={{
-            width: p.size,
-            height: p.size,
-            left: `${p.x}%`,
-            top: `${p.y}%`,
-          }}
-          animate={{
-            y: [0, -60, -20, -80, 0],
-            x: [0, 15, -10, 20, 0],
-            opacity: [0, 0.6, 0.3, 0.7, 0],
-          }}
-          transition={{
-            duration: p.dur,
-            delay: p.del,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-        />
-      ))}
     </div>
   )
 }
@@ -319,7 +212,6 @@ function Navigation() {
         <div className="container mx-auto px-5 md:px-12 flex justify-between items-center">
           {/* Logo */}
           <a href="#" className="flex items-center gap-1.5 group">
-            <Sparkles className="w-5 h-5 text-[#D4AF37] opacity-70 group-hover:opacity-100 transition-opacity" />
             <span className="text-xl md:text-2xl font-serif font-bold tracking-wider">
               Jewelry
             </span>
@@ -433,181 +325,6 @@ function Navigation() {
         )}
       </AnimatePresence>
     </>
-  )
-}
-
-// ═══════════════════════════════════════════
-// HERO SECTION
-// ═══════════════════════════════════════════
-
-function Hero() {
-  const { scrollY } = useScroll()
-  const heroY = useTransform(scrollY, [0, 800], [0, 150])
-  const heroOpacity = useTransform(scrollY, [0, 500], [1, 0])
-  const imageScale = useTransform(scrollY, [0, 800], [1, 1.15])
-
-  return (
-    <section className="relative h-svh min-h-[700px] flex items-center overflow-hidden">
-      {/* Background image with parallax */}
-      <motion.div
-        style={{ y: heroY, scale: imageScale }}
-        className="absolute inset-0 z-0"
-      >
-        <img
-          src="https://images.unsplash.com/photo-1599643478524-fb6b17fc36d9?q=80&w=2000&auto=format&fit=crop"
-          alt=""
-          className="w-full h-full object-cover opacity-50"
-        />
-      </motion.div>
-
-      {/* Layered gradients for depth */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0A] via-[#0A0A0A]/85 to-[#0A0A0A]/40 z-[1]" />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-transparent to-[#0A0A0A]/30 z-[2]" />
-
-      {/* Gold particles */}
-      <GoldParticles />
-
-      {/* Decorative gold line — left edge */}
-      <div className="hidden lg:block absolute left-12 top-1/4 bottom-1/4 w-px bg-gradient-to-b from-transparent via-[#D4AF37]/30 to-transparent z-10" />
-
-      {/* Main content */}
-      <motion.div
-        style={{ opacity: heroOpacity }}
-        className="container mx-auto px-5 md:px-12 relative z-20"
-      >
-        <div className="max-w-3xl">
-          {/* Eyebrow */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="flex items-center gap-4 mb-8"
-          >
-            <div className="hero-accent-bar" />
-            <span className="text-[#D4AF37] uppercase tracking-[0.35em] text-[11px] md:text-xs font-semibold">
-              Norridge, Illinois
-            </span>
-          </motion.div>
-
-          {/* Headline — staggered word reveal */}
-          <h1 className="text-[clamp(3rem,8vw,7rem)] font-serif leading-[1.05] mb-10 font-medium">
-            <motion.span
-              initial={{ opacity: 0, y: 40, clipPath: 'inset(100% 0 0 0)' }}
-              animate={{ opacity: 1, y: 0, clipPath: 'inset(0% 0 0 0)' }}
-              transition={{
-                duration: 1,
-                delay: 0.5,
-                ease: [0.25, 0.46, 0.45, 0.94],
-              }}
-              className="block"
-            >
-              Crafting
-            </motion.span>
-            <motion.span
-              initial={{ opacity: 0, y: 40, clipPath: 'inset(100% 0 0 0)' }}
-              animate={{ opacity: 1, y: 0, clipPath: 'inset(0% 0 0 0)' }}
-              transition={{
-                duration: 1,
-                delay: 0.7,
-                ease: [0.25, 0.46, 0.45, 0.94],
-              }}
-              className="block italic text-[#D4AF37] text-shadow-gold"
-            >
-              Elegance.
-            </motion.span>
-            <motion.span
-              initial={{ opacity: 0, y: 40, clipPath: 'inset(100% 0 0 0)' }}
-              animate={{ opacity: 1, y: 0, clipPath: 'inset(0% 0 0 0)' }}
-              transition={{
-                duration: 1,
-                delay: 0.9,
-                ease: [0.25, 0.46, 0.45, 0.94],
-              }}
-              className="block"
-            >
-              Defining You.
-            </motion.span>
-          </h1>
-
-          {/* Subtext */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1.2, delay: 1.3 }}
-            className="text-gray-400 max-w-md text-sm md:text-base tracking-wide leading-relaxed font-sans mb-12"
-          >
-            Experience affordable luxury. Discover exclusive custom pendants,
-            masterful repairs, and brilliant diamonds — right in your community.
-          </motion.p>
-
-          {/* CTA row */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 1.6 }}
-            className="flex flex-col sm:flex-row items-start gap-4"
-          >
-            <MagneticButton
-              as="a"
-              href="tel:6309656464"
-              className="gold-shimmer bg-[#D4AF37] text-[#0A0A0A] px-10 py-4 rounded-full font-bold uppercase tracking-[0.18em] text-xs flex items-center gap-3 group cursor-pointer hover:bg-white transition-colors duration-300"
-            >
-              <Phone className="w-4 h-4" />
-              <span>Call 630-965-6464</span>
-            </MagneticButton>
-            <MagneticButton
-              as="a"
-              href="#services"
-              className="border border-white/20 text-white px-10 py-4 rounded-full font-semibold uppercase tracking-[0.18em] text-xs flex items-center gap-3 group cursor-pointer hover:border-[#D4AF37]/60 hover:text-[#D4AF37] transition-all duration-300"
-            >
-              <span>Our Services</span>
-              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-            </MagneticButton>
-          </motion.div>
-        </div>
-      </motion.div>
-
-      {/* Scroll indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2.2, duration: 1 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2"
-      >
-        <span className="text-[10px] uppercase tracking-[0.3em] text-gray-500">
-          Scroll
-        </span>
-        <motion.div
-          animate={{ y: [0, 6, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-        >
-          <ChevronDown className="w-4 h-4 text-[#D4AF37]/60" />
-        </motion.div>
-      </motion.div>
-    </section>
-  )
-}
-
-// ═══════════════════════════════════════════
-// MARQUEE DIVIDER
-// ═══════════════════════════════════════════
-
-function MarqueeDivider() {
-  const text =
-    'Custom Pendants \u00B7 Jewelry Repair \u00B7 Watch Repair \u00B7 Gold & Diamonds \u00B7 Affordable Luxury \u00B7 Norridge, IL \u00B7 '
-  return (
-    <div className="relative py-6 overflow-hidden border-y border-[#D4AF37]/10 bg-[#0A0A0A]">
-      <div className="flex whitespace-nowrap animate-marquee">
-        {[...Array(4)].map((_, i) => (
-          <span
-            key={i}
-            className="text-[#D4AF37]/30 text-xs uppercase tracking-[0.4em] font-semibold mx-0"
-          >
-            {text}
-          </span>
-        ))}
-      </div>
-    </div>
   )
 }
 
@@ -749,130 +466,7 @@ function TrustBanner() {
 }
 
 // ═══════════════════════════════════════════
-// SOCIAL FEED — "The Aura"
-// ═══════════════════════════════════════════
 
-const feedImages = [
-  'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=800&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1611591437281-460d3d528b76?q=80&w=800&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1601121141461-9d6647bca1ed?q=80&w=800&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1596944924616-7b38e7cfac36?q=80&w=800&auto=format&fit=crop',
-]
-
-function SocialFeed() {
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: '-80px' })
-
-  return (
-    <section id="aura" ref={ref} className="py-28 md:py-36 bg-[#0A0A0A]">
-      <div className="container mx-auto px-5 md:px-12">
-        {/* Header row */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-6">
-          <div>
-            <motion.span
-              variants={fadeUp}
-              initial="hidden"
-              animate={isInView ? 'visible' : 'hidden'}
-              custom={0}
-              className="text-[#D4AF37] text-xs uppercase tracking-[0.4em] font-sans font-semibold block mb-5"
-            >
-              Instagram
-            </motion.span>
-            <motion.h2
-              variants={fadeUp}
-              initial="hidden"
-              animate={isInView ? 'visible' : 'hidden'}
-              custom={0.1}
-              className="text-4xl md:text-5xl lg:text-6xl font-serif"
-            >
-              The <span className="text-[#D4AF37] italic">Aura</span>
-            </motion.h2>
-            <motion.p
-              variants={fadeUp}
-              initial="hidden"
-              animate={isInView ? 'visible' : 'hidden'}
-              custom={0.2}
-              className="text-gray-500 tracking-wide text-sm mt-4"
-            >
-              Follow our journey{' '}
-              <a
-                href="https://instagram.com/Jewelryaura01"
-                className="text-[#D4AF37] luxury-link"
-              >
-                @Jewelryaura01
-              </a>
-            </motion.p>
-          </div>
-          <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            animate={isInView ? 'visible' : 'hidden'}
-            custom={0.3}
-          >
-            <MagneticButton
-              as="a"
-              href="https://instagram.com/Jewelryaura01"
-              className="hidden md:flex items-center gap-2.5 border border-[#D4AF37]/40 text-[#D4AF37] px-7 py-3.5 rounded-full hover:bg-[#D4AF37] hover:text-black transition-all duration-300 uppercase tracking-[0.18em] text-[11px] font-semibold cursor-pointer"
-            >
-              <Camera className="w-4 h-4" />
-              <span>Follow</span>
-            </MagneticButton>
-          </motion.div>
-        </div>
-
-        {/* Image grid */}
-        <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          animate={isInView ? 'visible' : 'hidden'}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4"
-        >
-          {feedImages.map((src, idx) => (
-            <motion.a
-              href="https://instagram.com/Jewelryaura01"
-              key={idx}
-              variants={scaleIn}
-              custom={idx * 0.08}
-              whileHover={{ scale: 0.97, transition: { duration: 0.3 } }}
-              className="relative aspect-square overflow-hidden group rounded-xl md:rounded-2xl"
-            >
-              <img
-                src={src}
-                alt={`Jewelry Aura Instagram ${idx + 1}`}
-                className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                loading="lazy"
-              />
-              {/* Hover overlay */}
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center backdrop-blur-[2px]">
-                <div className="flex flex-col items-center gap-2 scale-90 group-hover:scale-100 transition-transform duration-500">
-                  <Camera className="w-6 h-6 text-white" />
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-white/80">
-                    View
-                  </span>
-                </div>
-              </div>
-              {/* Gold corner accent */}
-              <div className="absolute top-0 right-0 w-12 h-12 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                <div className="absolute top-3 right-3 w-4 h-4 border-t border-r border-[#D4AF37]/60" />
-              </div>
-            </motion.a>
-          ))}
-        </motion.div>
-
-        {/* Mobile follow CTA */}
-        <div className="md:hidden mt-8 text-center">
-          <a
-            href="https://instagram.com/Jewelryaura01"
-            className="inline-flex items-center gap-2.5 border border-[#D4AF37]/40 text-[#D4AF37] px-7 py-3.5 rounded-full hover:bg-[#D4AF37] hover:text-black transition-all duration-300 uppercase tracking-[0.18em] text-[11px] font-semibold"
-          >
-            <Camera className="w-4 h-4" />
-            <span>Follow on Instagram</span>
-          </a>
-        </div>
-      </div>
-    </section>
-  )
-}
 
 // ═══════════════════════════════════════════
 // FOOTER / VISIT SECTION
@@ -1076,10 +670,9 @@ function LandingPage() {
       <main className="bg-[#0A0A0A] text-white">
         <Navigation />
         <Hero />
-        <MarqueeDivider />
+        <BentoGrid />
         <Services />
         <TrustBanner />
-        <SocialFeed />
         <Footer />
       </main>
     </div>
