@@ -22,8 +22,13 @@
   --color-champagne: #C4A875;
   --color-oxblood: #6B2317;
 
+  /* Display serif — Fraunces is variable on optical size + weight + italic,
+     which gives the hero its editorial / magazine character. Playfair stays
+     as the legacy serif for sections that haven't been migrated yet. */
+  --font-display: "Fraunces", "Playfair Display", "Georgia", serif;
   --font-serif: "Playfair Display", "Georgia", serif;
-  --font-sans: "Inter", system-ui, sans-serif;
+  --font-sans: "Manrope", "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
   --animate-shimmer: shimmer 3s ease-in-out infinite;
   --animate-float: float 6s ease-in-out infinite;
@@ -102,6 +107,27 @@
 @keyframes spin-slow {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* Hero marquee — slow horizontal scroll for the editorial ticker.
+   Two copies of the content sit inside the track, so the loop
+   wraps seamlessly when the first copy slides off-screen. */
+@keyframes hero-ticker {
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+
+/* Hero portrait frame aspect — taller on mobile (matches the vertical
+   asset), more landscape on desktop (matches the horizontal asset).
+   Lives in CSS rather than inline style so the breakpoint override
+   doesn't collide with style-attribute specificity. */
+.hero-frame-aspect {
+  aspect-ratio: 4 / 5;
+}
+@media (min-width: 1024px) {
+  .hero-frame-aspect {
+    aspect-ratio: 5 / 6;
+  }
 }
 
 @keyframes dash {
