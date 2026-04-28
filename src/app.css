@@ -17,6 +17,23 @@
   --animate-marquee: marquee 30s linear infinite;
   --animate-fade-up: fade-up 0.8s ease-out forwards;
   --animate-glow: glow 3s ease-in-out infinite alternate;
+
+  /* ─── Motion system tokens ──────────────────────────────────────────
+     CSS-side mirror of src/lib/motion.ts. Use these for elements driven
+     by CSS transitions (button hovers, link underlines, simple opacity
+     shifts). Anything Framer Motion drives reads from motion.ts directly.
+     Generated utilities: duration-{name}, ease-{name}.
+     ─────────────────────────────────────────────────────────────────── */
+  --duration-instant: 100ms;
+  --duration-hover: 180ms;
+  --duration-micro: 300ms;
+  --duration-content: 600ms;
+  --duration-hero: 900ms;
+  --duration-page: 1200ms;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-apple: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-sharp-out: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ═══════════════════════════════════════════
