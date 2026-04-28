@@ -1,11 +1,26 @@
 @import "tailwindcss";
 
 @theme {
+  /* Legacy obsidian/gold palette — used by older sections (BentoGrid,
+     Services, Footer). The hero and rebuilt header use the forest-green
+     palette below. Both coexist until later prompts migrate the rest. */
   --color-obsidian: #0A0A0A;
   --color-obsidian-light: #111111;
   --color-aura-gold: #D4AF37;
   --color-aura-gold-light: #E8C84A;
   --color-aura-gold-dim: rgba(212, 175, 55, 0.08);
+
+  /* ─── Brand palette (forest green / champagne) ─────────────────────
+     Introduced with the hero rebuild. Champagne is the only warm metal
+     tone — never pair it with the legacy aura-gold yellow. Oxblood is
+     reserved for seasonal accents and is intentionally absent from
+     the hero composition. */
+  --color-forest: #14261F;
+  --color-forest-surface: #1A332A;
+  --color-cream: #F0EBE0;
+  --color-cream-muted: #C0B8A6;
+  --color-champagne: #C4A875;
+  --color-oxblood: #6B2317;
 
   --font-serif: "Playfair Display", "Georgia", serif;
   --font-sans: "Inter", system-ui, sans-serif;

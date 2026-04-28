@@ -7,6 +7,7 @@ import {
   Scripts,
 } from '@tanstack/react-router'
 import '../app.css'
+import { LenisProvider } from '~/lib/lenis'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -34,7 +35,13 @@ export const Route = createRootRoute({
 function RootComponent() {
   return (
     <RootDocument>
-      <Outlet />
+      {/* LenisProvider wraps the whole app so every section's
+          scroll-bound animation reads from a single smoothed source.
+          Routes are NOT allowed to spin up their own Lenis instance —
+          two instances fight each other on the wheel events. */}
+      <LenisProvider>
+        <Outlet />
+      </LenisProvider>
     </RootDocument>
   )
 }

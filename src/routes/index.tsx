@@ -1,31 +1,23 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useRef } from 'react'
 import {
   motion,
-  useScroll,
-  useTransform,
   useInView,
-  AnimatePresence,
-  useMotionValue,
-  useSpring,
 } from 'framer-motion'
 import {
   MapPin,
   Phone,
-  Camera,
-  ArrowRight,
   Clock,
+  ArrowRight,
   ShieldCheck,
   Diamond,
   Wrench,
-  Menu,
-  X,
   Star,
-  ChevronDown,
 } from 'lucide-react'
-import Lenis from 'lenis'
 
-import { Hero, MagneticButton } from '../components/Hero'
+import { Hero } from '~/components/sections/Hero'
+import { Header } from '~/components/layout/Header'
+import { MagneticButton } from '~/components/ui/MagneticButton'
 import { BentoGrid } from '../components/BentoGrid'
 
 // ═══════════════════════════════════════════
@@ -167,166 +159,10 @@ function SectionHeading({
 }
 
 // ═══════════════════════════════════════════
-// NAVIGATION
+// Header lives in ~/components/layout/Header. The previous inline
+// Navigation component (with its own scroll listener and mobile drawer)
+// was deleted as part of the hero rebuild.
 // ═══════════════════════════════════════════
-
-function Navigation() {
-  const [scrolled, setScrolled] = useState(false)
-  const [mobileOpen, setMobileOpen] = useState(false)
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 60)
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  useEffect(() => {
-    if (mobileOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [mobileOpen])
-
-  const navLinks = [
-    { label: 'Services', href: '#services' },
-    { label: 'Aura Feed', href: '#aura' },
-    { label: 'Visit', href: '#visit' },
-  ]
-
-  return (
-    <>
-      <motion.header
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
-        className={`fixed top-0 w-full z-50 transition-all duration-700 ease-out ${
-          scrolled
-            ? 'bg-[#0A0A0A]/85 backdrop-blur-xl border-b border-[#D4AF37]/15 py-3'
-            : 'bg-transparent py-5 md:py-6'
-        }`}
-      >
-        <div className="container mx-auto px-5 md:px-12 flex justify-between items-center">
-          {/* Logo */}
-          <a href="#" className="flex items-center gap-1.5 group">
-            <span className="text-xl md:text-2xl font-serif font-bold tracking-wider">
-              Jewelry
-            </span>
-            <span className="text-xl md:text-2xl font-serif font-bold tracking-wider text-[#D4AF37]">
-              Aura
-            </span>
-          </a>
-
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-10">
-            {navLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                className="luxury-link text-xs tracking-[0.2em] uppercase font-medium text-gray-300 hover:text-[#D4AF37] transition-colors duration-300"
-              >
-                {link.label}
-              </a>
-            ))}
-          </nav>
-
-          {/* Desktop CTA */}
-          <div className="hidden md:block">
-            <MagneticButton className="gold-shimmer bg-[#D4AF37] text-[#0A0A0A] px-7 py-2.5 rounded-full font-semibold uppercase tracking-[0.15em] text-[11px] hover:bg-white transition-colors duration-300 flex items-center gap-2 group cursor-pointer">
-              <span>Visit Shop</span>
-              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-            </MagneticButton>
-          </div>
-
-          {/* Mobile hamburger */}
-          <button
-            onClick={() => setMobileOpen(true)}
-            className="md:hidden p-2 text-white"
-            aria-label="Open menu"
-          >
-            <Menu className="w-6 h-6" />
-          </button>
-        </div>
-      </motion.header>
-
-      {/* Mobile menu overlay */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-[100] mobile-menu-overlay"
-          >
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="absolute right-0 top-0 h-full w-full max-w-sm bg-[#0A0A0A] border-l border-[#D4AF37]/15 flex flex-col"
-            >
-              <div className="flex justify-between items-center p-6 border-b border-white/5">
-                <span className="font-serif text-lg tracking-wider">
-                  Jewelry <span className="text-[#D4AF37]">Aura</span>
-                </span>
-                <button
-                  onClick={() => setMobileOpen(false)}
-                  className="p-2"
-                  aria-label="Close menu"
-                >
-                  <X className="w-6 h-6 text-gray-400" />
-                </button>
-              </div>
-              <nav className="flex flex-col p-8 gap-1">
-                {navLinks.map((link, i) => (
-                  <motion.a
-                    key={link.label}
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.15 + i * 0.08 }}
-                    className="text-2xl font-serif py-4 border-b border-white/5 hover:text-[#D4AF37] transition-colors"
-                  >
-                    {link.label}
-                  </motion.a>
-                ))}
-              </nav>
-              <div className="mt-auto p-8 space-y-4">
-                <a
-                  href="tel:6309656464"
-                  className="flex items-center gap-3 text-gray-400 hover:text-[#D4AF37] transition-colors"
-                >
-                  <Phone className="w-4 h-4" />
-                  <span className="text-sm tracking-wider">630-965-6464</span>
-                </a>
-                <a
-                  href="https://instagram.com/Jewelryaura01"
-                  className="flex items-center gap-3 text-gray-400 hover:text-[#D4AF37] transition-colors"
-                >
-                  <Camera className="w-4 h-4" />
-                  <span className="text-sm tracking-wider">@Jewelryaura01</span>
-                </a>
-                <div className="flex items-start gap-3 text-gray-400 pt-2">
-                  <MapPin className="w-4 h-4 mt-0.5 shrink-0" />
-                  <span className="text-sm tracking-wider leading-relaxed">
-                    4104 N Harlem Ave
-                    <br />
-                    Norridge, IL 60706
-                  </span>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
-  )
-}
 
 // ═══════════════════════════════════════════
 // SERVICES SECTION
@@ -645,30 +481,14 @@ function Footer() {
 // ═══════════════════════════════════════════
 
 function LandingPage() {
-  useEffect(() => {
-    const lenis = new Lenis({
-      duration: 1.4,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: 'vertical',
-      gestureOrientation: 'vertical',
-      smoothWheel: true,
-      wheelMultiplier: 0.8,
-      touchMultiplier: 1.5,
-    })
-
-    function raf(time: number) {
-      lenis.raf(time)
-      requestAnimationFrame(raf)
-    }
-    requestAnimationFrame(raf)
-
-    return () => lenis.destroy()
-  }, [])
+  // Lenis is now provided once at the root (~/lib/lenis.LenisProvider).
+  // Spawning a second instance here would conflict with the provider's
+  // wheel handling — leave the smoothing to the root.
 
   return (
     <div className="grain-overlay">
       <main className="bg-[#0A0A0A] text-white">
-        <Navigation />
+        <Header />
         <Hero />
         <BentoGrid />
         <Services />
