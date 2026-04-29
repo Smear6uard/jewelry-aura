@@ -4,19 +4,11 @@ import {
   motion,
   useInView,
 } from 'framer-motion'
-import {
-  MapPin,
-  Phone,
-  Clock,
-  ArrowRight,
-  ShieldCheck,
-  Diamond,
-  Wrench,
-  Star,
-} from 'lucide-react'
+import { MapPin, Phone, Clock, Star } from 'lucide-react'
 
 import { Hero } from '~/components/sections/Hero'
 import { CustomPieces } from '~/components/sections/CustomPieces'
+import { Services } from '~/components/sections/Services'
 import { Header } from '~/components/layout/Header'
 import { MagneticButton } from '~/components/ui/MagneticButton'
 
@@ -115,142 +107,13 @@ const scaleIn = {
 }
 
 // ═══════════════════════════════════════════
-// ANIMATED SECTION HEADING
-// ═══════════════════════════════════════════
-
-function SectionHeading({
-  eyebrow,
-  children,
-  className = '',
-}: {
-  eyebrow: string
-  children: React.ReactNode
-  className?: string
-}) {
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: '-80px' })
-
-  return (
-    <div ref={ref} className={`text-center mb-20 ${className}`}>
-      <motion.span
-        initial={{ opacity: 0, y: 10 }}
-        animate={isInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.6 }}
-        className="text-[#D4AF37] text-xs uppercase tracking-[0.4em] font-sans font-semibold block mb-5"
-      >
-        {eyebrow}
-      </motion.span>
-      <motion.h2
-        initial={{ opacity: 0, y: 20 }}
-        animate={isInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.8, delay: 0.15 }}
-        className="text-4xl md:text-5xl lg:text-6xl font-serif"
-      >
-        {children}
-      </motion.h2>
-      <motion.div
-        initial={{ scaleX: 0 }}
-        animate={isInView ? { scaleX: 1 } : {}}
-        transition={{ duration: 0.8, delay: 0.4 }}
-        className="gold-divider w-20 mx-auto mt-8"
-      />
-    </div>
-  )
-}
-
-// ═══════════════════════════════════════════
 // Header lives in ~/components/layout/Header. The previous inline
 // Navigation component (with its own scroll listener and mobile drawer)
 // was deleted as part of the hero rebuild.
+//
+// Services lives in ~/components/sections/Services as an editorial
+// numbered-list rebuild — no icons, no cards.
 // ═══════════════════════════════════════════
-
-// ═══════════════════════════════════════════
-// SERVICES SECTION
-// ═══════════════════════════════════════════
-
-const services = [
-  {
-    title: 'Custom Pendants',
-    desc: 'The centerpiece of expression. Masterfully crafted to your exact specifications with meticulous attention to every facet.',
-    icon: Diamond,
-    accent: 'from-[#D4AF37]/20 to-transparent',
-  },
-  {
-    title: 'Jewelry Repair',
-    desc: 'Trust-focused restoration. Breathing brilliant new life into your cherished heirlooms with master-level precision.',
-    icon: Wrench,
-    accent: 'from-[#D4AF37]/15 to-transparent',
-  },
-  {
-    title: 'Watch Repair',
-    desc: 'Precision-focused care. Expert servicing for modern, vintage, and luxury timepieces by certified horologists.',
-    icon: Clock,
-    accent: 'from-[#D4AF37]/15 to-transparent',
-  },
-  {
-    title: 'Gold & Diamonds',
-    desc: 'Luxury-focused selection. Highly curated, premium quality rings, chains, and loose stones at unmatched value.',
-    icon: ShieldCheck,
-    accent: 'from-[#D4AF37]/20 to-transparent',
-  },
-]
-
-function Services() {
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: '-100px' })
-
-  return (
-    <section
-      id="services"
-      ref={ref}
-      className="relative py-28 md:py-36 bg-[#0A0A0A] gold-radial"
-    >
-      {/* Subtle corner decorations */}
-      <div className="absolute top-0 left-0 w-32 h-32 border-t border-l border-[#D4AF37]/10 pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-32 h-32 border-b border-r border-[#D4AF37]/10 pointer-events-none" />
-
-      <div className="container mx-auto px-5 md:px-12 relative z-10">
-        <SectionHeading eyebrow="Our Expertise">Services</SectionHeading>
-
-        <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          animate={isInView ? 'visible' : 'hidden'}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6"
-        >
-          {services.map((service, idx) => {
-            const Icon = service.icon
-            return (
-              <motion.div
-                key={idx}
-                variants={staggerItem}
-                whileHover={{ y: -8, transition: { duration: 0.3 } }}
-                className="glass-panel glass-panel-hover service-card-glow p-7 md:p-8 rounded-2xl flex flex-col items-start group cursor-default"
-              >
-                {/* Icon with gradient bg */}
-                <div
-                  className={`bg-gradient-to-br ${service.accent} p-4 rounded-xl mb-7 border border-[#D4AF37]/10 group-hover:border-[#D4AF37]/30 transition-colors duration-500`}
-                >
-                  <Icon className="w-7 h-7 text-[#D4AF37]" />
-                </div>
-                <h3 className="text-lg md:text-xl font-serif mb-3 text-white tracking-wide">
-                  {service.title}
-                </h3>
-                <p className="text-gray-500 text-sm leading-relaxed tracking-wide flex-1">
-                  {service.desc}
-                </p>
-                <div className="mt-8 flex items-center text-[#D4AF37] text-[11px] uppercase tracking-[0.2em] font-semibold opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-1 group-hover:translate-y-0">
-                  <span>Explore</span>
-                  <ArrowRight className="w-3 h-3 ml-2 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </motion.div>
-            )
-          })}
-        </motion.div>
-      </div>
-    </section>
-  )
-}
 
 // ═══════════════════════════════════════════
 // TRUST BANNER
