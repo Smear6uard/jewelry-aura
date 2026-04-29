@@ -117,6 +117,14 @@
   100% { transform: translate3d(-50%, 0, 0); }
 }
 
+/* Hero scroll-indicator hairline — pulses opacity on a 2s loop so
+   the user picks up the prompt without it shouting. The only signal
+   that more content lives below the wordless first frame. */
+@keyframes hero-pulse {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 0.8; }
+}
+
 /* Hero portrait frame aspect — taller on mobile (matches the vertical
    asset), more landscape on desktop (matches the horizontal asset).
    Lives in CSS rather than inline style so the breakpoint override

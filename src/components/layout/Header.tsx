@@ -1,39 +1,34 @@
 /**
  * components/layout/Header.tsx — global persistent site header
  *
- * Two visual states keyed off scroll position:
- *   • At rest (scrollY ≤ 80px): fully transparent, sits over the hero.
- *   • Scrolled (scrollY > 80px): forest-green @ 92% with backdrop blur,
- *     0.5px champagne hairline along the bottom, vertical padding
- *     compresses (24px → 12px) so the surface feels lower-profile once
- *     it's no longer over the photograph.
+ * Two visual states keyed off the hero section's exit:
+ *   • At rest (hero still on screen): fully transparent, sits over the
+ *     photograph. No background, no blur, no border.
+ *   • Scrolled (hero has fully exited the viewport top): forest-green
+ *     @ 92% with backdrop blur, 0.5px champagne hairline along the
+ *     bottom, and tighter vertical padding so the surface feels
+ *     lower-profile once it's no longer over the photograph.
  *
- * Why subscribe directly to the Lenis instance instead of `useScroll`:
- *   Lenis is the source of truth for the smoothed scroll position. Its
- *   internal RAF tick can land *between* Framer's tick if we read
- *   window.scrollY through `useScroll`, producing a 1-frame jitter on
- *   the state flip. Subscribing via `useLenis().on('scroll', …)` keeps
- *   us aligned with Lenis's own update cadence — one source, no race.
+ * Trigger mechanism:
+ *   The hero renders a 1px sentinel at its bottom edge with the
+ *   attribute `[data-hero-end]`. On every Lenis scroll tick we read
+ *   that element's bounding rect — when its top crosses ≤ 0 the
+ *   header flips to scrolled state. This is the "after the hero
+ *   releases" trigger; it adapts cleanly when the hero's height
+ *   changes (e.g. from a 150svh pinned section to the static
+ *   reduced-motion fallback) without needing a hard-coded pixel
+ *   threshold. We subscribe to Lenis directly rather than to
+ *   `window.scroll` so the read happens in lockstep with the same
+ *   smoothed source the rest of the page reads from.
  *
- * Why an event subscription instead of `useScrollProgress`:
- *   The on/off threshold is an absolute 80px, not a percentage of the
- *   document. `useScrollProgress` is the right tool for percent-based
- *   parallax (used in Hero); a pixel threshold is cleaner against the
- *   raw `lenis.scroll` value.
- *
- * Mobile: nav links collapse off-screen (md-and-up only). Logo and the
- * "Book consultation" CTA remain so the primary action is always one
- * tap away. A full mobile drawer is intentionally out of scope for
- * this prompt.
+ * Mobile: nav links collapse off-screen (md-and-up only). Logo and
+ * the "Book consultation" CTA remain so the primary action is always
+ * one tap away. A full mobile drawer is intentionally out of scope.
  */
 
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import {
-  DURATION,
-  easeApple,
-  easeOutExpo,
-} from '~/lib/motion'
+import { DURATION, easeApple } from '~/lib/motion'
 import { useLenis } from '~/lib/lenis'
 
 const NAV_LINKS = [
@@ -42,48 +37,69 @@ const NAV_LINKS = [
   { label: 'Visit', href: '#visit' },
 ] as const
 
-const SCROLL_THRESHOLD = 80
-
 export function Header() {
   const lenis = useLenis()
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
     if (!lenis) return
-    // Seed once in case the user lands mid-page (deep link / refresh).
-    setScrolled(lenis.scroll > SCROLL_THRESHOLD)
 
-    const onScroll = ({ scroll }: { scroll: number }) => {
-      // Cheap diff: only flip React state when crossing the threshold.
-      setScrolled((prev) => {
-        const next = scroll > SCROLL_THRESHOLD
-        return prev === next ? prev : next
-      })
+    // The hero renders different sentinels per breakpoint (one
+    // inside the desktop pinned wrapper, one inside the mobile
+    // photograph). Both share the `[data-hero-end]` attribute and
+    // both exist in the DOM at all times — the inactive one is
+    // hidden via `display:none` on its branch. We pick the one
+    // that has a non-zero bounding box (i.e., the rendered branch).
+    //
+    // We re-query each tick rather than caching, so a hero that
+    // mounts after the header (or remounts on hot-reload, or swaps
+    // branches on a viewport resize) is picked up on the next
+    // scroll event. Querying an attribute selector is cheap.
+    const check = () => {
+      const sentinels = document.querySelectorAll<HTMLElement>('[data-hero-end]')
+      let active: HTMLElement | null = null
+      for (const el of sentinels) {
+        // offsetParent is null when the element (or any ancestor)
+        // is `display:none`. Faster than reading getBoundingClientRect
+        // and discriminates the rendered branch reliably.
+        if (el.offsetParent !== null) {
+          active = el
+          break
+        }
+      }
+      if (!active) {
+        setScrolled(false)
+        return
+      }
+      // rect.top is viewport-relative. Sentinel ≤ 0 means the hero's
+      // bottom edge has crossed the viewport top — user has passed
+      // the photograph. getBoundingClientRect on a 1px, never-animated
+      // element doesn't trigger layout.
+      const passed = active.getBoundingClientRect().top <= 0
+      setScrolled((prev) => (prev === passed ? prev : passed))
     }
+
+    // Seed once on mount (deep links / refreshes mid-page).
+    check()
+
+    const onScroll = () => check()
     lenis.on('scroll', onScroll)
+    // Backstop for any scroll that bypasses Lenis (programmatic
+    // window.scrollTo, anchor navigation, devtools).
+    window.addEventListener('scroll', onScroll, { passive: true })
+
     return () => {
       lenis.off('scroll', onScroll)
+      window.removeEventListener('scroll', onScroll)
     }
   }, [lenis])
 
   return (
-    <motion.header
-      // The hero photograph fades in at 0.0s; the header fades in at
-      // 0.2s so the image has visually "landed" before the chrome
-      // arrives over it. See Hero.tsx for the rest of the sequence.
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: DURATION.content, delay: 0.2, ease: easeOutExpo }}
-      className="fixed inset-x-0 top-0 z-50"
-    >
+    <header className="fixed inset-x-0 top-0 z-50">
       <motion.div
         initial="top"
         animate={scrolled ? 'scrolled' : 'top'}
         variants={{
-          // backdrop-filter is supported unprefixed in every browser
-          // we target (Safari 18+, Chrome, FF). The -webkit- prefix
-          // was needed pre-2024 only — dropping it lets Framer's
-          // Variant type accept the object cleanly.
           top: {
             backgroundColor: 'rgba(20, 38, 31, 0)',
             backdropFilter: 'blur(0px) saturate(100%)',
@@ -100,14 +116,14 @@ export function Header() {
           },
         }}
         transition={{ duration: DURATION.micro, ease: easeApple }}
-        // Hairline drawn at sub-pixel weight so it reads as a precision
-        // line, not a divider. The color animates in/out via variants.
+        // Sub-pixel hairline so the divider reads as precision, not
+        // weight. Color animates in/out via variants.
         style={{ borderBottomWidth: '0.5px', borderBottomStyle: 'solid' }}
       >
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 md:px-12">
           <a
             href="#"
-            className="font-serif text-[clamp(1.05rem,1.4vw,1.25rem)] tracking-[0.01em] text-cream"
+            className="font-serif text-[clamp(1.05rem,1.4vw,1.25rem)] tracking-[0.01em]"
             style={{ color: '#F0EBE0' }}
           >
             Jewelry Aura
@@ -125,8 +141,6 @@ export function Header() {
                 style={{ letterSpacing: '0.06em' }}
               >
                 {link.label}
-                {/* Underline draws in from the left on hover. scaleX
-                    keeps the line crisp without re-layout. */}
                 <span
                   aria-hidden
                   className="pointer-events-none absolute -bottom-1 left-0 right-0 origin-left scale-x-0 transition-transform duration-hover ease-apple group-hover:scale-x-100"
@@ -139,16 +153,16 @@ export function Header() {
           <BookConsultationButton />
         </div>
       </motion.div>
-    </motion.header>
+    </header>
   )
 }
 
 /**
- * Pill button with a champagne hairline. On hover the fill flushes to
- * champagne and the label inverts to forest-green. Framer drives the
- * color tween so the timing stays in lockstep with the rest of the
- * site — every hover tween in the system runs at duration-hover with
- * easeApple.
+ * Pill button with a champagne hairline. On hover the fill flushes
+ * to champagne and the label inverts to forest-green. Framer drives
+ * the color tween so the timing stays in lockstep with the rest of
+ * the site — every hover tween in the system runs at duration-hover
+ * with easeApple.
  */
 function BookConsultationButton() {
   return (
