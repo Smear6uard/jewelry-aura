@@ -293,7 +293,7 @@ function PinnedDesktopHero() {
             sits ~80px above the bottom edge with the headline
             dominating the lower half. */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10">
-          <div className="mx-auto flex max-w-[1440px] items-end px-10 pb-14 lg:px-16 lg:pb-20">
+          <div className="mx-auto flex max-w-[1440px] items-end px-10 pb-8 lg:px-16 lg:pb-10">
             <div className="pointer-events-auto w-full max-w-[640px] lg:w-[54%]">
               <DesktopEyebrow y={eyebrowY} opacity={eyebrowOpacity} />
               <DesktopHeadline lineY1={lineY1} lineY2={lineY2} lineY3={lineY3} />
@@ -393,7 +393,7 @@ function DesktopHeadline({
       style={{
         color: CREAM,
         fontWeight: 400,
-        fontSize: 'clamp(3.25rem, 7.4vw, 7.4rem)',
+        fontSize: 'clamp(2.75rem, 6.3vw, 6.3rem)',
         lineHeight: 0.98,
         letterSpacing: '-0.035em',
         fontVariationSettings: '"opsz" 144',
@@ -430,7 +430,7 @@ function DesktopBody({
   return (
     <motion.p
       style={{ opacity, y, color: CREAM_MUTED }}
-      className="mt-9 max-w-[34ch] font-sans text-[15px] leading-[1.65] md:text-[16px]"
+      className="mt-14 max-w-[34ch] font-sans text-[15px] leading-[1.65] md:text-[16px]"
     >
       A small atelier in Norridge. We design, set, and finish every chain,
       pendant, and bridal piece by hand — no two ever the same.
@@ -548,7 +548,7 @@ function MobileHero() {
         variants={mobileCascadeParent}
         initial="hidden"
         animate="visible"
-        className="absolute inset-x-0 bottom-0 z-10 px-6 pb-14 md:px-10"
+        className="absolute inset-x-0 bottom-0 z-10 px-6 pb-8 md:px-10"
       >
         {/* Eyebrow */}
         <motion.div
@@ -580,7 +580,7 @@ function MobileHero() {
           style={{
             color: CREAM,
             fontWeight: 400,
-            fontSize: 'clamp(2.85rem, 14vw, 5.4rem)',
+            fontSize: 'clamp(2.4rem, 11.9vw, 4.6rem)',
             lineHeight: 0.98,
             letterSpacing: '-0.035em',
             fontVariationSettings: '"opsz" 144',
@@ -606,7 +606,7 @@ function MobileHero() {
         {/* Body */}
         <motion.p
           variants={mobileCascadeChild}
-          className="mt-7 max-w-[34ch] font-sans text-[15px] leading-[1.65]"
+          className="mt-10 max-w-[34ch] font-sans text-[15px] leading-[1.65]"
           style={{ color: CREAM_MUTED }}
         >
           A small atelier in Norridge. We design, set, and finish every chain,
@@ -762,7 +762,7 @@ function StaticHero() {
       />
 
       {/* Type stack — lower-left overlay, no choreography */}
-      <div className="absolute inset-x-0 bottom-0 z-10 px-6 pb-14 md:px-10 lg:px-16 lg:pb-20">
+      <div className="absolute inset-x-0 bottom-0 z-10 px-6 pb-8 md:px-10 lg:px-16 lg:pb-10">
         <div className="mx-auto max-w-[1440px]">
           <div className="w-full max-w-[640px] lg:w-[54%]">
             <div className="mb-7 flex items-center gap-3">
@@ -788,7 +788,7 @@ function StaticHero() {
               style={{
                 color: CREAM,
                 fontWeight: 400,
-                fontSize: 'clamp(2.85rem, 7.2vw, 6.8rem)',
+                fontSize: 'clamp(2.4rem, 6.1vw, 5.8rem)',
                 lineHeight: 0.98,
                 letterSpacing: '-0.035em',
                 fontVariationSettings: '"opsz" 144',
@@ -800,7 +800,7 @@ function StaticHero() {
             </h1>
 
             <p
-              className="mt-8 max-w-[34ch] font-sans text-[15px] leading-[1.65] md:text-[16px]"
+              className="mt-12 max-w-[34ch] font-sans text-[15px] leading-[1.65] md:text-[16px]"
               style={{ color: CREAM_MUTED }}
             >
               A small atelier in Norridge. We design, set, and finish every
