@@ -6,6 +6,14 @@ import { Services } from '~/components/sections/Services'
 import { Stats } from '~/components/sections/Stats'
 import { Visit } from '~/components/sections/Visit'
 import { Header } from '~/components/layout/Header'
+import {
+  HERO_SOCIAL_IMAGE,
+  SITE_DESCRIPTION,
+  SITE_TITLE,
+  SITE_URL,
+  localBusinessSchema,
+  organizationSchema,
+} from '~/lib/seo'
 
 // ═══════════════════════════════════════════
 // ROUTE CONFIG + SEO
@@ -15,46 +23,37 @@ export const Route = createFileRoute('/')({
   component: LandingPage,
   head: () => ({
     meta: [
-      { title: 'Jewelry Aura | Affordable Luxury in Norridge' },
+      { title: SITE_TITLE },
       {
         name: 'description',
-        content:
-          'Experience affordable luxury at Jewelry Aura in Norridge, IL. Custom pendants, expert jewelry repair, watch repair, and high-end gold & diamonds.',
+        content: SITE_DESCRIPTION,
+      },
+      { name: 'robots', content: 'index, follow' },
+      { property: 'og:title', content: SITE_TITLE },
+      { property: 'og:description', content: SITE_DESCRIPTION },
+      { property: 'og:image', content: HERO_SOCIAL_IMAGE },
+      { property: 'og:type', content: 'website' },
+      { property: 'og:url', content: SITE_URL },
+      { property: 'og:site_name', content: 'Jewelry Aura' },
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'twitter:title', content: SITE_TITLE },
+      { name: 'twitter:description', content: SITE_DESCRIPTION },
+      { name: 'twitter:image', content: HERO_SOCIAL_IMAGE },
+    ],
+    links: [
+      {
+        rel: 'canonical',
+        href: SITE_URL,
       },
     ],
     scripts: [
       {
         type: 'application/ld+json',
-        children: JSON.stringify({
-          '@context': 'https://schema.org',
-          '@type': 'JewelryStore',
-          name: 'Jewelry Aura',
-          telephone: '630-965-6464',
-          address: {
-            '@type': 'PostalAddress',
-            streetAddress: '4104 N Harlem Ave',
-            addressLocality: 'Norridge',
-            addressRegion: 'IL',
-            postalCode: '60706',
-            addressCountry: 'US',
-          },
-          openingHoursSpecification: [
-            {
-              '@type': 'OpeningHoursSpecification',
-              dayOfWeek: [
-                'Monday',
-                'Tuesday',
-                'Wednesday',
-                'Thursday',
-                'Friday',
-                'Saturday',
-              ],
-              opens: '10:00',
-              closes: '18:00',
-            },
-          ],
-          sameAs: ['https://instagram.com/Jewelryaura01'],
-        }),
+        children: JSON.stringify(localBusinessSchema),
+      },
+      {
+        type: 'application/ld+json',
+        children: JSON.stringify(organizationSchema),
       },
     ],
   }),
@@ -80,8 +79,8 @@ export const Route = createFileRoute('/')({
 function LandingPage() {
   return (
     <div className="grain-overlay">
+      <Header />
       <main style={{ backgroundColor: '#14261F' }} className="text-white">
-        <Header />
         <Hero />
         <CustomPieces />
         <Services />

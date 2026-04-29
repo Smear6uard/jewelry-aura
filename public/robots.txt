@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://jewelry-aura.com/sitemap.xml

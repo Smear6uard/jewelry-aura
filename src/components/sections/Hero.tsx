@@ -76,7 +76,13 @@ import { useLenis } from '~/lib/lenis'
 import { useSmoothScrollTo } from '~/lib/scroll-to'
 
 const PHOTO_WIDE = '/hero-portrait-wide.png'
+const PHOTO_WIDE_AVIF = '/hero-portrait-wide.avif'
+const PHOTO_WIDE_WEBP = '/hero-portrait-wide.webp'
+const PHOTO_WIDE_JPG = '/hero-portrait-wide.jpg'
 const PHOTO_TALL = '/hero-portrait-tall.png'
+const PHOTO_TALL_AVIF = '/hero-portrait-tall.avif'
+const PHOTO_TALL_WEBP = '/hero-portrait-tall.webp'
+const PHOTO_TALL_JPG = '/hero-portrait-tall.jpg'
 const PHOTO_ALT =
   'A man in a black open-collar shirt wearing a heavy gold rope chain, photographed against deep forest-green velvet — a frame from a Jewelry Aura custom commission.'
 
@@ -119,6 +125,7 @@ export function Hero() {
       className="relative w-full"
       style={{ backgroundColor: FOREST }}
     >
+      <h1 className="sr-only">Iced. Custom. Yours.</h1>
       <div className="hidden lg:block">
         <PinnedDesktopHero />
       </div>
@@ -245,10 +252,13 @@ function PinnedDesktopHero() {
           }}
         >
           <picture className="block h-full w-full">
-            <source media="(min-width: 1024px)" srcSet={PHOTO_WIDE} />
+            <source media="(min-width: 1024px)" type="image/avif" srcSet={PHOTO_WIDE_AVIF} />
+            <source media="(min-width: 1024px)" type="image/webp" srcSet={PHOTO_WIDE_WEBP} />
             <img
-              src={PHOTO_WIDE}
+              src={PHOTO_WIDE_JPG}
               alt={PHOTO_ALT}
+              width={1536}
+              height={1024}
               fetchPriority="high"
               decoding="async"
               className="h-full w-full object-cover"
@@ -388,8 +398,8 @@ function DesktopHeadline({
   ] as const
 
   return (
-    <h1
-      aria-label="Iced. Custom. Yours."
+    <div
+      aria-hidden
       className="font-display"
       style={{
         color: CREAM,
@@ -417,7 +427,7 @@ function DesktopHeadline({
           </motion.span>
         </span>
       ))}
-    </h1>
+    </div>
   )
 }
 
@@ -510,10 +520,13 @@ function MobileHero() {
 
       {/* Photograph — full-bleed. */}
       <picture className="absolute inset-0 block">
-        <source media="(max-width: 1023px)" srcSet={PHOTO_TALL} />
+        <source media="(max-width: 1023px)" type="image/avif" srcSet={PHOTO_TALL_AVIF} />
+        <source media="(max-width: 1023px)" type="image/webp" srcSet={PHOTO_TALL_WEBP} />
         <img
-          src={PHOTO_TALL}
+          src={PHOTO_TALL_JPG}
           alt={PHOTO_ALT}
+          width={1122}
+          height={1402}
           fetchPriority="high"
           decoding="async"
           className="h-full w-full object-cover"
@@ -574,8 +587,8 @@ function MobileHero() {
         </motion.div>
 
         {/* Headline */}
-        <motion.h1
-          aria-label="Iced. Custom. Yours."
+        <motion.div
+          aria-hidden
           variants={mobileLineParent}
           className="font-display"
           style={{
@@ -602,7 +615,7 @@ function MobileHero() {
               </motion.span>
             </span>
           ))}
-        </motion.h1>
+        </motion.div>
 
         {/* Body */}
         <motion.p
@@ -733,12 +746,19 @@ function StaticHero() {
       className="relative h-[100svh] w-full overflow-hidden"
       style={{ backgroundColor: FOREST }}
     >
+      <h1 className="sr-only">Iced. Custom. Yours.</h1>
       {/* Photograph */}
       <picture className="absolute inset-0 block">
-        <source media="(min-width: 1024px)" srcSet={PHOTO_WIDE} />
+        <source media="(min-width: 1024px)" type="image/avif" srcSet={PHOTO_WIDE_AVIF} />
+        <source media="(min-width: 1024px)" type="image/webp" srcSet={PHOTO_WIDE_WEBP} />
+        <source media="(min-width: 1024px)" type="image/jpeg" srcSet={PHOTO_WIDE_JPG} />
+        <source media="(max-width: 1023px)" type="image/avif" srcSet={PHOTO_TALL_AVIF} />
+        <source media="(max-width: 1023px)" type="image/webp" srcSet={PHOTO_TALL_WEBP} />
         <img
-          src={PHOTO_TALL}
+          src={PHOTO_TALL_JPG}
           alt={PHOTO_ALT}
+          width={1122}
+          height={1402}
           fetchPriority="high"
           decoding="async"
           className="h-full w-full object-cover"
@@ -786,7 +806,8 @@ function StaticHero() {
               </span>
             </div>
 
-            <h1
+            <div
+              aria-hidden
               className="font-display"
               style={{
                 color: CREAM,
@@ -800,7 +821,7 @@ function StaticHero() {
               <span className="block">Iced.</span>
               <span className="block">Custom.</span>
               <span className="block">Yours.</span>
-            </h1>
+            </div>
 
             <p
               className="mt-12 max-w-[34ch] font-sans text-[15px] leading-[1.65] md:text-[16px]"

@@ -1,0 +1,33 @@
+{
+  "name": "Jewelry Aura",
+  "short_name": "Jewelry Aura",
+  "description": "Custom jewelry and repair in Norridge, IL.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#14261F",
+  "theme_color": "#14261F",
+  "icons": [
+    {
+      "src": "/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -95,6 +95,8 @@ type Piece = {
   name: string
   meta: string
   image: string
+  width: number
+  height: number
   alt: string
   /** objectPosition for the photograph crop. */
   focus?: string
@@ -106,6 +108,8 @@ const PIECES: Piece[] = [
     name: 'Twenty-Three',
     meta: 'White gold · Praying-hands plate',
     image: '/JA-image1.png',
+    width: 1122,
+    height: 1402,
     alt: 'Custom 23 plate pendant with praying-hands cap, set in white gold and baguette diamonds, photographed on forest velvet.',
     focus: '52% 50%',
   },
@@ -114,6 +118,8 @@ const PIECES: Piece[] = [
     name: 'Kemo',
     meta: 'White gold · Custom monogram',
     image: '/JA-image2.png',
+    width: 1122,
+    height: 1402,
     alt: 'Custom KEMO monogram pendant in white gold, fully iced with round and baguette stones, on forest velvet.',
     focus: '52% 50%',
   },
@@ -122,6 +128,8 @@ const PIECES: Piece[] = [
     name: 'Queen',
     meta: 'Yellow gold · Heart drop · Two-tone',
     image: '/JA-image3.png',
+    width: 1122,
+    height: 1402,
     alt: 'Custom Queen script pendant with heart drop, yellow gold and pavé diamonds, on forest velvet.',
     focus: '50% 50%',
   },
@@ -130,6 +138,8 @@ const PIECES: Piece[] = [
     name: 'ATDB',
     meta: 'Two-tone · Hand-engraved plate',
     image: '/JA-image4.png',
+    width: 1122,
+    height: 1402,
     alt: 'Custom ATDB block pendant in two-tone gold with engraved tagline, hand-set diamonds, on forest velvet.',
     focus: '52% 50%',
   },
@@ -138,6 +148,8 @@ const PIECES: Piece[] = [
     name: 'ATDB · Suspended',
     meta: 'Two-tone · Cuban link suspension',
     image: '/JA-image5.png',
+    width: 1086,
+    height: 1448,
     alt: 'Custom ATDB plate suspended on a baguette-set Cuban link chain, two-tone gold, on forest velvet.',
     focus: '48% 45%',
   },
@@ -459,6 +471,7 @@ function SectionHeader({ total }: { total: number }) {
 
 function PieceCard({ piece, index }: { piece: Piece; index: number }) {
   const onCTAClick = useSmoothScrollTo('visit')
+  const imageBase = piece.image.replace(/\.png$/, '')
   return (
     <motion.figure
       // The card animates between two states (rest / hover). Framer's
@@ -506,14 +519,20 @@ function PieceCard({ piece, index }: { piece: Piece; index: number }) {
             boxShadow: 'inset 0 0 0 0.5px rgba(196,168,117,0.28)',
           }}
         >
-          <img
-            src={piece.image}
-            alt={piece.alt}
-            loading="lazy"
-            decoding="async"
-            className="h-full w-full object-cover"
-            style={{ objectPosition: piece.focus ?? '50% 50%' }}
-          />
+          <picture className="block h-full w-full">
+            <source type="image/avif" srcSet={`${imageBase}.avif`} />
+            <source type="image/webp" srcSet={`${imageBase}.webp`} />
+            <img
+              src={`${imageBase}.jpg`}
+              alt={piece.alt}
+              width={piece.width}
+              height={piece.height}
+              loading="lazy"
+              decoding="async"
+              className="h-full w-full object-cover"
+              style={{ objectPosition: piece.focus ?? '50% 50%' }}
+            />
+          </picture>
 
           {/* Warm light shift on hover — barely-perceptible champagne
               radial that fades in over the photo. The mix-blend-overlay
@@ -988,6 +1007,7 @@ function MobileCarousel() {
 }
 
 function MobilePieceCard({ piece }: { piece: Piece }) {
+  const imageBase = piece.image.replace(/\.png$/, '')
   return (
     <motion.figure
       initial="rest"
@@ -1006,14 +1026,20 @@ function MobilePieceCard({ piece }: { piece: Piece }) {
           boxShadow: 'inset 0 0 0 0.5px rgba(196,168,117,0.28)',
         }}
       >
-        <img
-          src={piece.image}
-          alt={piece.alt}
-          loading="lazy"
-          decoding="async"
-          className="h-full w-full object-cover"
-          style={{ objectPosition: piece.focus ?? '50% 50%' }}
-        />
+        <picture className="block h-full w-full">
+          <source type="image/avif" srcSet={`${imageBase}.avif`} />
+          <source type="image/webp" srcSet={`${imageBase}.webp`} />
+          <img
+            src={`${imageBase}.jpg`}
+            alt={piece.alt}
+            width={piece.width}
+            height={piece.height}
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover"
+            style={{ objectPosition: piece.focus ?? '50% 50%' }}
+          />
+        </picture>
         <motion.div
           aria-hidden
           className="pointer-events-none absolute inset-0 mix-blend-overlay"
@@ -1257,52 +1283,7 @@ function StaticDesktop() {
 
         <div className="grid grid-cols-1 gap-y-20">
           {PIECES.map((piece) => (
-            <figure
-              key={piece.id}
-              className="grid grid-cols-1 items-center gap-10 md:grid-cols-12"
-            >
-              <div
-                className="relative col-span-7 overflow-hidden"
-                style={{
-                  aspectRatio: '3 / 4',
-                  boxShadow: 'inset 0 0 0 0.5px rgba(196,168,117,0.28)',
-                  backgroundColor: FOREST_DEEP,
-                }}
-              >
-                <img
-                  src={piece.image}
-                  alt={piece.alt}
-                  loading="lazy"
-                  className="h-full w-full object-cover"
-                  style={{ objectPosition: piece.focus ?? '50% 50%' }}
-                />
-              </div>
-              <figcaption className="col-span-5 flex flex-col">
-                <span
-                  className="font-mono text-[10px] uppercase"
-                  style={{ color: CHAMPAGNE, letterSpacing: '0.32em' }}
-                >
-                  No. {piece.id}
-                </span>
-                <h3
-                  className="mt-3 font-display"
-                  style={{
-                    color: CREAM,
-                    fontWeight: 400,
-                    fontSize: '2rem',
-                    letterSpacing: '-0.02em',
-                  }}
-                >
-                  {piece.name}
-                </h3>
-                <span
-                  className="mt-2 font-mono text-[11px]"
-                  style={{ color: CREAM_MUTED, letterSpacing: '0.06em' }}
-                >
-                  {piece.meta}
-                </span>
-              </figcaption>
-            </figure>
+            <StaticPieceFigure key={piece.id} piece={piece} />
           ))}
         </div>
       </div>
@@ -1313,3 +1294,60 @@ function StaticDesktop() {
 // Suppress unused-import lint until we wire the variant elsewhere. The
 // easeOutExpo import is exposed for future motion adjustments.
 void easeOutExpo
+
+function StaticPieceFigure({ piece }: { piece: Piece }) {
+  const imageBase = piece.image.replace(/\.png$/, '')
+
+  return (
+    <figure className="grid grid-cols-1 items-center gap-10 md:grid-cols-12">
+      <div
+        className="relative col-span-7 overflow-hidden"
+        style={{
+          aspectRatio: '3 / 4',
+          boxShadow: 'inset 0 0 0 0.5px rgba(196,168,117,0.28)',
+          backgroundColor: FOREST_DEEP,
+        }}
+      >
+        <picture className="block h-full w-full">
+          <source type="image/avif" srcSet={`${imageBase}.avif`} />
+          <source type="image/webp" srcSet={`${imageBase}.webp`} />
+          <img
+            src={`${imageBase}.jpg`}
+            alt={piece.alt}
+            width={piece.width}
+            height={piece.height}
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover"
+            style={{ objectPosition: piece.focus ?? '50% 50%' }}
+          />
+        </picture>
+      </div>
+      <figcaption className="col-span-5 flex flex-col">
+        <span
+          className="font-mono text-[10px] uppercase"
+          style={{ color: CHAMPAGNE, letterSpacing: '0.32em' }}
+        >
+          No. {piece.id}
+        </span>
+        <h3
+          className="mt-3 font-display"
+          style={{
+            color: CREAM,
+            fontWeight: 400,
+            fontSize: '2rem',
+            letterSpacing: '-0.02em',
+          }}
+        >
+          {piece.name}
+        </h3>
+        <span
+          className="mt-2 font-mono text-[11px]"
+          style={{ color: CREAM_MUTED, letterSpacing: '0.06em' }}
+        >
+          {piece.meta}
+        </span>
+      </figcaption>
+    </figure>
+  )
+}

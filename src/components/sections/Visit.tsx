@@ -46,6 +46,8 @@ const GRAIN_SVG =
 
 const PHONE = '630-965-6464'
 const PHONE_HREF = 'tel:6309656464'
+const MAP_SRC =
+  'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2966.86016187766!2d-87.809403823481!3d41.95992956030999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x880fcb1ab8f51ab1%3A0xe5a3c0a52df2ed3b!2s4104%20N%20Harlem%20Ave%2C%20Norridge%2C%20IL%2060706!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2sus'
 
 export function Visit() {
   const ref = useRef<HTMLElement>(null)
@@ -109,7 +111,7 @@ export function Visit() {
                 title="Store Hours"
                 inView={inView}
                 delay={0.5}
-                lines={['Mon–Sat · 10:00 AM – 6:00 PM', 'Sun · By appointment']}
+                lines={['Mon–Sat · 10:00 AM – 6:00 PM', 'Sun · Closed']}
               />
             </div>
 
@@ -255,7 +257,7 @@ function InfoBlock({
           backgroundColor: 'rgba(196,168,117,0.7)',
         }}
       />
-      <h4
+      <h3
         className="font-display"
         style={{
           color: CREAM,
@@ -266,7 +268,7 @@ function InfoBlock({
         }}
       >
         {title}
-      </h4>
+      </h3>
       <div className="mt-2 space-y-1">
         {lines.map((line) => (
           <p
@@ -352,7 +354,7 @@ function MapPanel({ inView }: { inView: boolean }) {
       }}
     >
       <iframe
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2966.86016187766!2d-87.809403823481!3d41.95992956030999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x880fcb1ab8f51ab1%3A0xe5a3c0a52df2ed3b!2s4104%20N%20Harlem%20Ave%2C%20Norridge%2C%20IL%2060706!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2sus"
+        src={inView ? MAP_SRC : 'about:blank'}
         width="100%"
         height="100%"
         style={{
@@ -422,7 +424,7 @@ function MapPanel({ inView }: { inView: boolean }) {
 
 function FooterRule() {
   return (
-    <div className="mt-24 pt-8" style={{ borderTop: '0.5px solid rgba(196,168,117,0.2)' }}>
+    <footer className="mt-24 pt-8" style={{ borderTop: '0.5px solid rgba(196,168,117,0.2)' }}>
       <div className="flex flex-col items-start justify-between gap-3 md:flex-row md:items-center">
         <p
           className="font-mono text-[10px] uppercase"
@@ -437,7 +439,7 @@ function FooterRule() {
           <FooterLink href={PHONE_HREF}>{PHONE}</FooterLink>
         </div>
       </div>
-    </div>
+    </footer>
   )
 }
 
