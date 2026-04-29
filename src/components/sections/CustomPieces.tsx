@@ -67,6 +67,7 @@ import {
   useReducedMotion,
 } from '~/lib/motion'
 import { useLenis } from '~/lib/lenis'
+import { useSmoothScrollTo } from '~/lib/scroll-to'
 import { SplitText } from '~/components/motion/SplitText'
 import { Reveal } from '~/components/motion/Reveal'
 
@@ -457,6 +458,7 @@ function SectionHeader({ total }: { total: number }) {
 // ─── Piece card — the editorial unit ─────────────────────────────────
 
 function PieceCard({ piece, index }: { piece: Piece; index: number }) {
+  const onCTAClick = useSmoothScrollTo('visit')
   return (
     <motion.figure
       // The card animates between two states (rest / hover). Framer's
@@ -618,7 +620,8 @@ function PieceCard({ piece, index }: { piece: Piece; index: number }) {
               transition={{ duration: DURATION.hover * 1.4, ease: easeApple }}
             >
               <a
-                href="#contact"
+                href="#visit"
+                onClick={onCTAClick}
                 className="inline-flex items-center gap-2 font-mono text-[11px] uppercase"
                 style={{ color: CHAMPAGNE, letterSpacing: '0.22em' }}
               >
@@ -640,9 +643,11 @@ function PieceCard({ piece, index }: { piece: Piece; index: number }) {
 // ─── Commission card — the strip's terminal CTA ──────────────────────
 
 function CommissionCard() {
+  const onClick = useSmoothScrollTo('visit')
   return (
     <motion.a
-      href="#contact"
+      href="#visit"
+      onClick={onClick}
       initial="rest"
       whileHover="hover"
       whileFocus="hover"
@@ -1078,9 +1083,11 @@ function MobilePieceCard({ piece }: { piece: Piece }) {
 }
 
 function MobileCommissionCard() {
+  const onClick = useSmoothScrollTo('visit')
   return (
     <a
-      href="#contact"
+      href="#visit"
+      onClick={onClick}
       className="relative flex w-[80vw] max-w-[28rem] shrink-0 snap-center flex-col"
       style={{ height: '70svh' }}
     >

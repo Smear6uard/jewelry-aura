@@ -73,6 +73,7 @@ import {
   useReducedMotion,
 } from '~/lib/motion'
 import { useLenis } from '~/lib/lenis'
+import { useSmoothScrollTo } from '~/lib/scroll-to'
 
 const PHOTO_WIDE = '/hero-portrait-wide.png'
 const PHOTO_TALL = '/hero-portrait-tall.png'
@@ -657,9 +658,11 @@ function MobileHero() {
 // ────────────────────────────────────────────────────────────────────
 
 function PrimaryCTA() {
+  const onClick = useSmoothScrollTo('visit')
   return (
     <motion.a
-      href="#contact"
+      href="#visit"
+      onClick={onClick}
       initial="rest"
       animate="rest"
       whileHover="hover"

@@ -30,16 +30,22 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { DURATION, easeApple } from '~/lib/motion'
 import { useLenis } from '~/lib/lenis'
+import { useSmoothScrollTo } from '~/lib/scroll-to'
 
+// "Custom" routes to the Visit section (same as every other commission
+// CTA on the site) — there's no on-site customisation flow to land on,
+// and the consultation funnel lives at #visit. The label stays
+// aspirational; only the destination is consolidated.
 const NAV_LINKS = [
   { label: 'Services', href: '#services' },
-  { label: 'Custom', href: '#custom' },
+  { label: 'Custom', href: '#visit' },
   { label: 'Visit', href: '#visit' },
 ] as const
 
 export function Header() {
   const lenis = useLenis()
   const [scrolled, setScrolled] = useState(false)
+  const onVisitClick = useSmoothScrollTo('visit')
 
   useEffect(() => {
     if (!lenis) return
@@ -137,6 +143,7 @@ export function Header() {
               <a
                 key={link.label}
                 href={link.href}
+                onClick={link.href === '#visit' ? onVisitClick : undefined}
                 className="group relative font-sans text-[13px] text-cream-muted transition-colors duration-hover ease-apple hover:text-cream"
                 style={{ letterSpacing: '0.06em' }}
               >
@@ -165,9 +172,11 @@ export function Header() {
  * with easeApple.
  */
 function BookConsultationButton() {
+  const onClick = useSmoothScrollTo('visit')
   return (
     <motion.a
-      href="#contact"
+      href="#visit"
+      onClick={onClick}
       initial="rest"
       whileHover="hover"
       whileFocus="hover"
