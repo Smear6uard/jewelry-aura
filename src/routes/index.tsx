@@ -16,9 +16,9 @@ import {
 } from 'lucide-react'
 
 import { Hero } from '~/components/sections/Hero'
+import { CustomPieces } from '~/components/sections/CustomPieces'
 import { Header } from '~/components/layout/Header'
 import { MagneticButton } from '~/components/ui/MagneticButton'
-import { BentoGrid } from '../components/BentoGrid'
 
 // ═══════════════════════════════════════════
 // ROUTE CONFIG + SEO
@@ -490,7 +490,7 @@ function LandingPage() {
       <main className="bg-[#0A0A0A] text-white">
         <Header />
         <Hero />
-        <BentoGrid />
+        <CustomPieces />
         <Services />
         <TrustBanner />
         <Footer />
