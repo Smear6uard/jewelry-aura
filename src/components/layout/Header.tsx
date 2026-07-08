@@ -36,19 +36,33 @@ import { useSmoothScrollTo } from '~/lib/scroll-to'
 // CTA on the site) — there's no on-site customisation flow to land on,
 // and the consultation funnel lives at #visit. The label stays
 // aspirational; only the destination is consolidated.
+// Hrefs are root-anchored so the same header works off the homepage:
+// on `/` the browser treats `/#visit` as a same-document hash (the Lenis
+// smooth-scroll handler still intercepts it); on `/shop` and other routes
+// it becomes a real navigation back to the homepage section.
 const NAV_LINKS = [
-  { label: 'Services', href: '#services' },
-  { label: 'Custom', href: '#visit' },
-  { label: 'Visit', href: '#visit' },
+  { label: 'Shop', href: '/shop' },
+  { label: 'Services', href: '/#services' },
+  { label: 'Custom', href: '/#visit' },
+  { label: 'Visit', href: '/#visit' },
 ] as const
 
-export function Header() {
+interface HeaderProps {
+  /**
+   * Pages without the hero photograph (shop, collections, PDPs) render the
+   * header permanently in its scrolled/solid state — there is no
+   * `[data-hero-end]` sentinel to key off and no image to sit over.
+   */
+  solid?: boolean
+}
+
+export function Header({ solid = false }: HeaderProps) {
   const lenis = useLenis()
-  const [scrolled, setScrolled] = useState(false)
+  const [scrolled, setScrolled] = useState(solid)
   const onVisitClick = useSmoothScrollTo('visit')
 
   useEffect(() => {
-    if (!lenis) return
+    if (solid || !lenis) return
 
     // The hero renders different sentinels per breakpoint (one
     // inside the desktop pinned wrapper, one inside the mobile
@@ -98,7 +112,7 @@ export function Header() {
       lenis.off('scroll', onScroll)
       window.removeEventListener('scroll', onScroll)
     }
-  }, [lenis])
+  }, [lenis, solid])
 
   return (
     <header className="fixed inset-x-0 top-0 z-50">
@@ -128,7 +142,7 @@ export function Header() {
       >
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 md:px-12">
           <a
-            href="#"
+            href="/"
             className="font-serif text-[clamp(1.05rem,1.4vw,1.25rem)] tracking-[0.01em]"
             style={{ color: '#F0EBE0' }}
           >
@@ -143,7 +157,7 @@ export function Header() {
               <a
                 key={link.label}
                 href={link.href}
-                onClick={link.href === '#visit' ? onVisitClick : undefined}
+                onClick={link.href === '/#visit' ? onVisitClick : undefined}
                 className="group relative font-sans text-[13px] text-cream-muted transition-colors duration-hover ease-apple hover:text-cream"
                 style={{ letterSpacing: '0.06em' }}
               >

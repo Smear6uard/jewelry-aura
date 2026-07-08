@@ -7,9 +7,28 @@ export const SHOPIFY_API_VERSION = '2026-07'
 export interface ShopifyEnv {
   storeDomain: string
   privateAccessToken: string
+  /**
+   * Dev-only escape hatch: when set (e.g. https://mock.shop/api), every
+   * Storefront request is sent to this endpoint instead of the store's
+   * GraphQL URL, and the domain/token become optional. Never set this in
+   * Vercel — it exists so the storefront can be built and reviewed locally
+   * before real credentials arrive.
+   */
+  apiEndpoint?: string
 }
 
 export function getShopifyEnv(): ShopifyEnv {
+  const apiEndpoint = process.env.SHOPIFY_API_ENDPOINT
+  if (apiEndpoint) {
+    return {
+      storeDomain:
+        process.env.SHOPIFY_STORE_DOMAIN || 'mock-storefront.myshopify.com',
+      privateAccessToken:
+        process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN || 'mock-token',
+      apiEndpoint,
+    }
+  }
+
   const storeDomain = process.env.SHOPIFY_STORE_DOMAIN
   const privateAccessToken = process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN
 

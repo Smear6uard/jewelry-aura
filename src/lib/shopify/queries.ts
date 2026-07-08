@@ -9,3 +9,46 @@ export const SHOP_NAME_QUERY = `#graphql
     }
   }
 `
+
+/**
+ * Card-level product data shared by every listing surface (/shop,
+ * collections, featured collections). Image aliases feed the srcset the
+ * adapter assembles; Shopify serves the transform from its CDN.
+ */
+export const PRODUCT_CARD_FRAGMENT = `#graphql
+  fragment ProductCard on Product {
+    handle
+    title
+    availableForSale
+    featuredImage {
+      altText
+      width
+      height
+      w400: url(transform: { maxWidth: 400 })
+      w600: url(transform: { maxWidth: 600 })
+      w800: url(transform: { maxWidth: 800 })
+      w1200: url(transform: { maxWidth: 1200 })
+    }
+    priceRange {
+      minVariantPrice {
+        amount
+        currencyCode
+      }
+      maxVariantPrice {
+        amount
+        currencyCode
+      }
+    }
+  }
+`
+
+export const SHOP_PRODUCTS_QUERY = `#graphql
+  query ShopProducts($first: Int!) {
+    products(first: $first, sortKey: BEST_SELLING) {
+      nodes {
+        ...ProductCard
+      }
+    }
+  }
+  ${PRODUCT_CARD_FRAGMENT}
+`
