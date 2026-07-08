@@ -51,8 +51,8 @@ describe('generateSitemapXml', () => {
 
     const xml = await generateSitemapXml(request)
 
-    expect(xml).toContain('<loc>https://jewelry-aura.com/</loc>')
-    expect(xml).toContain('<loc>https://jewelry-aura.com/shop</loc>')
+    expect(xml).toContain('<loc>https://www.thejewelryaura.com/</loc>')
+    expect(xml).toContain('<loc>https://www.thejewelryaura.com/shop</loc>')
     expect(xml).toContain('/products/piece-0</loc>')
     expect(xml).toContain('/products/piece-250</loc>')
     expect(xml).toContain('/collections/col-0</loc>')
@@ -105,7 +105,7 @@ describe('buildSitemapXml', () => {
 describe('buildRobotsTxt', () => {
   it('contains the absolute Sitemap line and the /api/ disallow', () => {
     const robots = buildRobotsTxt()
-    expect(robots).toContain('Sitemap: https://jewelry-aura.com/sitemap.xml')
+    expect(robots).toContain('Sitemap: https://www.thejewelryaura.com/sitemap.xml')
     expect(robots).toContain('Disallow: /api/')
     expect(robots).toContain('Allow: /')
   })

@@ -373,7 +373,7 @@ describe('productJsonLd', () => {
       priceCurrency: 'USD',
       availability: 'https://schema.org/InStock',
     })
-    expect(jsonLd.url).toBe('https://jewelry-aura.com/products/cuban-link-chain')
+    expect(jsonLd.url).toBe('https://www.thejewelryaura.com/products/cuban-link-chain')
   })
 
   it('omits offers when no variant resolved', () => {
@@ -419,7 +419,7 @@ describe('breadcrumbJsonLd', () => {
       name: 'Home',
     })
     expect(jsonLd.itemListElement[1].item).toBe(
-      'https://jewelry-aura.com/collections/chains',
+      'https://www.thejewelryaura.com/collections/chains',
     )
   })
 })

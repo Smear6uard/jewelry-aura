@@ -1,4 +1,4 @@
-export const SITE_URL = 'https://jewelry-aura.com'
+export const SITE_URL = 'https://www.thejewelryaura.com'
 export const SITE_NAME = 'Jewelry Aura'
 
 export const HERO_SOCIAL_IMAGE = `${SITE_URL}/hero-portrait-wide.png`

@@ -23,7 +23,7 @@ Implemented:
 
 Manual owner steps:
 
-- Confirm the final production URL. The SEO constants currently use `https://jewelry-aura.com` (note: that domain does not currently point at this Vercel project); update `SITE_URL` in `src/lib/seo.ts` if the live domain differs — sitemap, robots, canonicals, and JSON-LD all derive from it.
+- Production URL is `https://www.thejewelryaura.com` (apex 307s to www; DNS on Cloudflare, records DNS-only). `SITE_URL` in `src/lib/seo.ts` carries it — sitemap, robots, canonicals, and JSON-LD all derive from it.
 - Claim and fully complete the Google Business Profile for Jewelry Aura at 4104 N Harlem Ave, Norridge, IL 60706.
 - Add the final domain to Google Search Console and submit `/sitemap.xml`.
 - Add the same website URL to Instagram and any other social profiles so `sameAs` signals match public profiles.

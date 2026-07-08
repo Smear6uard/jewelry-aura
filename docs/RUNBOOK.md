@@ -53,15 +53,6 @@ After the store transfers to the client, **and again after any domain change**:
 3. Confirm the Headless channel tokens survived the transfer; rotate per the
    steps above if not.
 
-## Temporary: cache-purge spike route
-
-`src/routes/api/cache-spike.ts` is a deliberate, temporary route proving that
-`Vercel-Cache-Tag` + `invalidateByTag` purge works on this project (plan U1 /
-KTD1). It is unauthenticated but only caches/purges its own self-contained
-`spike` tag — no storefront data is affected. Once the spike has been run
-against a publicly reachable production URL (see the deferred-verification
-list), **delete the file** and redeploy.
-
 ## Annual maintenance
 
 The Storefront API version is pinned (`SHOPIFY_API_VERSION` in
