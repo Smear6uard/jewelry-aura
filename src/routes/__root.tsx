@@ -8,7 +8,11 @@ import {
 } from '@tanstack/react-router'
 import '../app.css'
 import { LenisProvider } from '~/lib/lenis'
-import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from '~/lib/seo'
+import {
+  SITE_DESCRIPTION,
+  SITE_TITLE,
+  organizationSchema,
+} from '~/lib/seo'
 
 const GOOGLE_FONTS_URL =
   'https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Manrope:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap'
@@ -75,7 +79,15 @@ export const Route = createRootRoute({
       { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/favicon-16x16.png' },
       { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
       { rel: 'manifest', href: '/site.webmanifest' },
-    ]
+    ],
+    // Organization identity on every route (R18); pages add their own
+    // Product/BreadcrumbList/LocalBusiness data on top.
+    scripts: [
+      {
+        type: 'application/ld+json',
+        children: JSON.stringify(organizationSchema),
+      },
+    ],
   }),
   component: RootComponent,
 })

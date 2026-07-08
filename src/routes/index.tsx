@@ -12,7 +12,6 @@ import {
   SITE_TITLE,
   SITE_URL,
   localBusinessSchema,
-  organizationSchema,
 } from '~/lib/seo'
 
 // ═══════════════════════════════════════════
@@ -46,14 +45,12 @@ export const Route = createFileRoute('/')({
         href: SITE_URL,
       },
     ],
+    // Organization JSON-LD comes from the root route (site-wide, R18);
+    // only the LocalBusiness identity is homepage-specific.
     scripts: [
       {
         type: 'application/ld+json',
         children: JSON.stringify(localBusinessSchema),
-      },
-      {
-        type: 'application/ld+json',
-        children: JSON.stringify(organizationSchema),
       },
     ],
   }),

@@ -54,6 +54,40 @@ export const SHOP_PRODUCTS_QUERY = `#graphql
 `
 
 /**
+ * Sitemap enumeration: cursor loops over products and collections,
+ * requesting only handle + updatedAt (250/page).
+ */
+export const SITEMAP_PRODUCTS_QUERY = `#graphql
+  query SitemapProducts($first: Int!, $after: String) {
+    products(first: $first, after: $after) {
+      nodes {
+        handle
+        updatedAt
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+`
+
+export const SITEMAP_COLLECTIONS_QUERY = `#graphql
+  query SitemapCollections($first: Int!, $after: String) {
+    collections(first: $first, after: $after) {
+      nodes {
+        handle
+        updatedAt
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+`
+
+/**
  * One collection with up to 250 products in a single fetch (KTD8):
  * boutique-scale catalogs slice server-side for ?page=N. Swap to cursor
  * pagination here if a collection ever outgrows 250.
