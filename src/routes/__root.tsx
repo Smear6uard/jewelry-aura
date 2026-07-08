@@ -58,18 +58,8 @@ export const Route = createRootRoute({
         type: 'font/ttf',
         crossOrigin: 'anonymous',
       },
-      {
-        rel: 'preload',
-        href: '/hero-portrait-wide.avif',
-        as: 'image',
-        media: '(min-width: 1024px)',
-      },
-      {
-        rel: 'preload',
-        href: '/hero-portrait-tall.avif',
-        as: 'image',
-        media: '(max-width: 1023px)',
-      },
+      // Hero image preloads live on the homepage route — catalog pages
+      // preload their own LCP image (Shopify CDN) instead.
       {
         rel: 'stylesheet',
         href: GOOGLE_FONTS_URL,

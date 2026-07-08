@@ -88,6 +88,25 @@ export const SITEMAP_COLLECTIONS_QUERY = `#graphql
 `
 
 /**
+ * Homepage featured-collection tile: a light fetch — title plus the
+ * first few product cards.
+ */
+export const FEATURED_COLLECTION_QUERY = `#graphql
+  query FeaturedCollection($handle: String!, $first: Int!) {
+    collection(handle: $handle) {
+      handle
+      title
+      products(first: $first) {
+        nodes {
+          ...ProductCard
+        }
+      }
+    }
+  }
+  ${PRODUCT_CARD_FRAGMENT}
+`
+
+/**
  * One collection with up to 250 products in a single fetch (KTD8):
  * boutique-scale catalogs slice server-side for ?page=N. Swap to cursor
  * pagination here if a collection ever outgrows 250.
