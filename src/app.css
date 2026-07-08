@@ -51,6 +51,18 @@
   --duration-hero: 900ms;
   --duration-page: 1200ms;
 
+  /* Tailwind v4 generates the duration-{name} utility from the
+     --transition-duration-* namespace, not --duration-*. These mirror the
+     tokens above so `duration-hover` etc. resolve to the brand timings
+     (previously they silently fell back to the 150ms default). The
+     --duration-* copies stay for direct var() reads / motion.ts parity. */
+  --transition-duration-instant: 100ms;
+  --transition-duration-hover: 180ms;
+  --transition-duration-micro: 300ms;
+  --transition-duration-content: 600ms;
+  --transition-duration-hero: 900ms;
+  --transition-duration-page: 1200ms;
+
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-apple: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-sharp-out: cubic-bezier(0.4, 0, 0.2, 1);
