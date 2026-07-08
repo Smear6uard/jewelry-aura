@@ -66,6 +66,12 @@ The webhook receiver at `/api/webhooks/shopify` (see
 `src/routes/api/webhooks/shopify.ts` and `src/lib/shopify/webhook.ts`) only
 works once Shopify is told to deliver product webhooks to it.
 
+> **STATUS: DEFERRED (optional for launch).** Until the subscriptions are
+> registered, the site simply refreshes on its cache timers (homepage ~30 min,
+> collections/shop ~5 min, PDPs ~15 min) instead of within seconds of an admin
+> edit. Nothing breaks. Do this step when instant updates start mattering —
+> and keep the PDP `s-maxage` at 900 until it is done (plan KTD2).
+
 The webhook app is a **Dev Dashboard app** (org: Sameer Studios LLC), not a
 legacy admin custom app — there is no pasteable `shpat_` Admin token.
 Registration is **declarative**: the topics are declared in the app config
