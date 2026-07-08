@@ -58,6 +58,89 @@ export const SHOP_PRODUCTS_QUERY = `#graphql
  * boutique-scale catalogs slice server-side for ?page=N. Swap to cursor
  * pagination here if a collection ever outgrows 250.
  */
+export const VARIANT_FIELDS_FRAGMENT = `#graphql
+  fragment VariantFields on ProductVariant {
+    id
+    title
+    availableForSale
+    price {
+      amount
+      currencyCode
+    }
+    compareAtPrice {
+      amount
+      currencyCode
+    }
+    selectedOptions {
+      name
+      value
+    }
+  }
+`
+
+/**
+ * PDP query. Variant selection resolves server-side: the URL's option
+ * params go in as $selectedOptions; `selectedVariant` is the exact match
+ * (null when the combination doesn't exist) and `fallbackVariant` is
+ * Shopify's selected-or-first-available resolution — the adapter prefers
+ * the exact match. Unknown option names are ignored, matching is
+ * case-insensitive, so shared URLs are forgiving.
+ */
+export const PRODUCT_QUERY = `#graphql
+  query ProductByHandle($handle: String!, $selectedOptions: [SelectedOptionInput!]!) {
+    product(handle: $handle) {
+      handle
+      title
+      description
+      seo {
+        title
+        description
+      }
+      options(first: 5) {
+        name
+        optionValues {
+          name
+          swatch {
+            color
+          }
+        }
+      }
+      images(first: 10) {
+        nodes {
+          altText
+          width
+          height
+          thumb: url(transform: { maxWidth: 160, maxHeight: 160, crop: CENTER })
+          w600: url(transform: { maxWidth: 600 })
+          w900: url(transform: { maxWidth: 900 })
+          w1200: url(transform: { maxWidth: 1200 })
+          w1600: url(transform: { maxWidth: 1600 })
+        }
+      }
+      variants(first: 250) {
+        nodes {
+          ...VariantFields
+        }
+      }
+      selectedVariant: variantBySelectedOptions(
+        selectedOptions: $selectedOptions
+        caseInsensitiveMatch: true
+        ignoreUnknownOptions: true
+      ) {
+        ...VariantFields
+      }
+      fallbackVariant: selectedOrFirstAvailableVariant(
+        selectedOptions: $selectedOptions
+        caseInsensitiveMatch: true
+        ignoreUnknownOptions: true
+      ) {
+        ...VariantFields
+      }
+    }
+  }
+  ${VARIANT_FIELDS_FRAGMENT}
+`
+
 export const COLLECTION_QUERY = `#graphql
   query CollectionByHandle($handle: String!, $first: Int!) {
     collection(handle: $handle) {

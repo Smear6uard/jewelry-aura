@@ -164,3 +164,189 @@ export function mapProductCard(node: ProductCardNode): ProductCardModel {
     image: buildCardImage(node.featuredImage, node.title),
   }
 }
+
+// ─── Product detail (PDP) ────────────────────────────────────────────────
+
+export interface VariantNode {
+  id: string
+  title: string
+  availableForSale: boolean
+  price: MoneyNode
+  compareAtPrice: MoneyNode | null
+  selectedOptions: Array<{ name: string; value: string }>
+}
+
+export interface GalleryImageNode {
+  altText: string | null
+  width: number | null
+  height: number | null
+  thumb: string
+  w600: string
+  w900: string
+  w1200: string
+  w1600: string
+}
+
+export interface ProductDetailNode {
+  handle: string
+  title: string
+  description: string
+  seo: { title: string | null; description: string | null } | null
+  options: Array<{
+    name: string
+    optionValues: Array<{ name: string; swatch: { color: string | null } | null }>
+  }>
+  images: { nodes: GalleryImageNode[] }
+  variants: { nodes: VariantNode[] }
+  selectedVariant: VariantNode | null
+  fallbackVariant: VariantNode | null
+}
+
+export interface GalleryImage {
+  src: string
+  srcSet: string
+  thumb: string
+  alt: string
+  width: number | undefined
+  height: number | undefined
+}
+
+export interface OptionValueModel {
+  name: string
+  swatchColor: string | null
+  selected: boolean
+  /** False when no purchasable variant exists for this value given the
+   *  rest of the current selection — rendered disabled. */
+  available: boolean
+  /** Search params that select this value (current selection + override). */
+  search: Record<string, string>
+}
+
+export interface OptionModel {
+  name: string
+  isColor: boolean
+  values: OptionValueModel[]
+}
+
+export interface VariantModel {
+  id: string
+  title: string
+  price: string
+  compareAtPrice: string | null
+  availableForSale: boolean
+}
+
+export interface ProductDetailModel {
+  handle: string
+  title: string
+  description: string
+  seoTitle: string
+  seoDescription: string
+  images: GalleryImage[]
+  options: OptionModel[]
+  variant: VariantModel | null
+  /** Raw amount/currency of the displayed variant — feeds JSON-LD. */
+  offer: { price: string; currency: string; available: boolean } | null
+}
+
+const GALLERY_SRCSET_WIDTHS = [
+  ['w600', 600],
+  ['w900', 900],
+  ['w1200', 1200],
+  ['w1600', 1600],
+] as const
+
+export function buildGalleryImage(
+  node: GalleryImageNode,
+  fallbackAlt: string,
+): GalleryImage {
+  const srcSet = GALLERY_SRCSET_WIDTHS.filter(([key]) => node[key])
+    .map(([key, width]) => `${node[key]} ${width}w`)
+    .join(', ')
+  return {
+    src: node.w900 || node.w1200 || node.w600,
+    srcSet,
+    thumb: node.thumb,
+    alt: node.altText || fallbackAlt,
+    width: node.width ?? undefined,
+    height: node.height ?? undefined,
+  }
+}
+
+function selectionOf(variant: VariantNode): Record<string, string> {
+  return Object.fromEntries(
+    variant.selectedOptions.map((o) => [o.name, o.value]),
+  )
+}
+
+function variantMatching(
+  variants: VariantNode[],
+  selection: Record<string, string>,
+): VariantNode | undefined {
+  return variants.find((v) =>
+    v.selectedOptions.every((o) => selection[o.name] === o.value),
+  )
+}
+
+export function mapVariant(variant: VariantNode): VariantModel {
+  return {
+    id: variant.id,
+    title: variant.title,
+    price: formatMoney(variant.price),
+    compareAtPrice: variant.compareAtPrice
+      ? formatMoney(variant.compareAtPrice)
+      : null,
+    availableForSale: variant.availableForSale,
+  }
+}
+
+export function mapProductDetail(node: ProductDetailNode): ProductDetailModel {
+  const resolved =
+    node.selectedVariant ?? node.fallbackVariant ?? node.variants.nodes[0] ?? null
+  const selection = resolved ? selectionOf(resolved) : {}
+
+  // Shopify's placeholder option for single-variant products.
+  const realOptions = node.options.filter(
+    (o) =>
+      !(o.name === 'Title' && o.optionValues.length === 1) &&
+      o.optionValues.length > 0,
+  )
+
+  const options: OptionModel[] = realOptions.map((option) => ({
+    name: option.name,
+    isColor:
+      option.name.toLowerCase() === 'color' ||
+      option.optionValues.some((v) => v.swatch?.color),
+    values: option.optionValues.map((value) => {
+      const candidate = { ...selection, [option.name]: value.name }
+      const match = variantMatching(node.variants.nodes, candidate)
+      return {
+        name: value.name,
+        swatchColor: value.swatch?.color ?? null,
+        selected: selection[option.name] === value.name,
+        available: match?.availableForSale ?? false,
+        search: candidate,
+      }
+    }),
+  }))
+
+  return {
+    handle: node.handle,
+    title: node.title,
+    description: node.description,
+    seoTitle: node.seo?.title || node.title,
+    seoDescription: node.seo?.description || node.description,
+    images: node.images.nodes.map((image) =>
+      buildGalleryImage(image, node.title),
+    ),
+    options,
+    variant: resolved ? mapVariant(resolved) : null,
+    offer: resolved
+      ? {
+          price: resolved.price.amount,
+          currency: resolved.price.currencyCode,
+          available: resolved.availableForSale,
+        }
+      : null,
+  }
+}

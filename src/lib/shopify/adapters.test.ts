@@ -190,6 +190,187 @@ describe('mapCollection', () => {
   })
 })
 
+import {
+  mapProductDetail,
+  type ProductDetailNode,
+  type VariantNode,
+} from './adapters'
+import { productJsonLd } from '../seo'
+
+function variantNode(
+  options: Record<string, string>,
+  overrides: Partial<VariantNode> = {},
+): VariantNode {
+  return {
+    id: `gid://shopify/ProductVariant/${Object.values(options).join('-')}`,
+    title: Object.values(options).join(' / '),
+    availableForSale: true,
+    price: { amount: '1450.0', currencyCode: 'USD' },
+    compareAtPrice: null,
+    selectedOptions: Object.entries(options).map(([name, value]) => ({
+      name,
+      value,
+    })),
+    ...overrides,
+  }
+}
+
+function detailNode(
+  overrides: Partial<ProductDetailNode> = {},
+): ProductDetailNode {
+  const variants = [
+    variantNode({ Metal: 'Gold', Size: '18"' }),
+    variantNode({ Metal: 'Gold', Size: '20"' }, { availableForSale: false }),
+    variantNode({ Metal: 'Silver', Size: '18"' }),
+    variantNode({ Metal: 'Silver', Size: '20"' }),
+  ]
+  return {
+    handle: 'cuban-link-chain',
+    title: 'Cuban Link Chain',
+    description: 'Solid, hand-set links.',
+    seo: { title: null, description: null },
+    options: [
+      {
+        name: 'Metal',
+        optionValues: [
+          { name: 'Gold', swatch: { color: '#C4A875' } },
+          { name: 'Silver', swatch: { color: '#C0C0C0' } },
+        ],
+      },
+      {
+        name: 'Size',
+        optionValues: [
+          { name: '18"', swatch: null },
+          { name: '20"', swatch: null },
+        ],
+      },
+    ],
+    images: {
+      nodes: [
+        {
+          altText: null,
+          width: 1600,
+          height: 2000,
+          thumb: 'https://cdn.shopify.com/img?t',
+          w600: 'https://cdn.shopify.com/img?w=600',
+          w900: 'https://cdn.shopify.com/img?w=900',
+          w1200: 'https://cdn.shopify.com/img?w=1200',
+          w1600: 'https://cdn.shopify.com/img?w=1600',
+        },
+      ],
+    },
+    variants: { nodes: variants },
+    selectedVariant: variants[0],
+    fallbackVariant: variants[0],
+    ...overrides,
+  }
+}
+
+describe('mapProductDetail', () => {
+  it('prefers the exact selected variant and reports its price', () => {
+    const model = mapProductDetail(detailNode())
+    expect(model.variant?.price).toBe('$1,450')
+    expect(model.variant?.availableForSale).toBe(true)
+    expect(model.offer).toEqual({
+      price: '1450.0',
+      currency: 'USD',
+      available: true,
+    })
+  })
+
+  it('falls back when the exact combination does not exist', () => {
+    const node = detailNode()
+    node.selectedVariant = null
+    const model = mapProductDetail(node)
+    expect(model.variant?.id).toBe(node.fallbackVariant!.id)
+  })
+
+  it('disables sibling option values with no available variant', () => {
+    // Current selection Gold/18". Gold/20" is sold out → Size "20\"" disabled.
+    const model = mapProductDetail(detailNode())
+    const size = model.options.find((o) => o.name === 'Size')!
+    const twenty = size.values.find((v) => v.name === '20"')!
+    expect(twenty.available).toBe(false)
+    const eighteen = size.values.find((v) => v.name === '18"')!
+    expect(eighteen.available).toBe(true)
+    expect(eighteen.selected).toBe(true)
+  })
+
+  it('builds click-target search params from the current selection', () => {
+    const model = mapProductDetail(detailNode())
+    const metal = model.options.find((o) => o.name === 'Metal')!
+    const silver = metal.values.find((v) => v.name === 'Silver')!
+    expect(silver.search).toEqual({ Metal: 'Silver', Size: '18"' })
+  })
+
+  it('marks color-swatch options and carries the swatch color', () => {
+    const model = mapProductDetail(detailNode())
+    const metal = model.options.find((o) => o.name === 'Metal')!
+    expect(metal.isColor).toBe(true)
+    expect(metal.values[0].swatchColor).toBe('#C4A875')
+  })
+
+  it('suppresses the placeholder Title option of single-variant products', () => {
+    const only = variantNode({ Title: 'Default Title' })
+    const node = detailNode({
+      options: [
+        {
+          name: 'Title',
+          optionValues: [{ name: 'Default Title', swatch: null }],
+        },
+      ],
+      variants: { nodes: [only] },
+      selectedVariant: null,
+      fallbackVariant: only,
+    })
+    const model = mapProductDetail(node)
+    expect(model.options).toHaveLength(0)
+    expect(model.variant?.id).toBe(only.id)
+  })
+
+  it('yields a sold-out model when the resolved variant is unavailable', () => {
+    const gone = variantNode({ Metal: 'Gold' }, { availableForSale: false })
+    const node = detailNode({
+      variants: { nodes: [gone] },
+      selectedVariant: gone,
+      fallbackVariant: gone,
+    })
+    const model = mapProductDetail(node)
+    expect(model.variant?.availableForSale).toBe(false)
+    expect(model.offer?.available).toBe(false)
+  })
+})
+
+describe('productJsonLd', () => {
+  it('binds the offer to the displayed variant price and availability', () => {
+    const model = mapProductDetail(detailNode())
+    const jsonLd = productJsonLd({
+      title: model.title,
+      description: model.description,
+      path: `/products/${model.handle}`,
+      images: model.images.map((i) => i.src),
+      offer: model.offer,
+    })
+    expect(jsonLd.offers).toMatchObject({
+      price: '1450.0',
+      priceCurrency: 'USD',
+      availability: 'https://schema.org/InStock',
+    })
+    expect(jsonLd.url).toBe('https://jewelry-aura.com/products/cuban-link-chain')
+  })
+
+  it('omits offers when no variant resolved', () => {
+    const jsonLd = productJsonLd({
+      title: 'X',
+      description: '',
+      path: '/products/x',
+      images: [],
+      offer: null,
+    })
+    expect('offers' in jsonLd).toBe(false)
+  })
+})
+
 describe('breadcrumbJsonLd', () => {
   it('names Home then the collection with absolute urls', () => {
     const jsonLd = breadcrumbJsonLd([

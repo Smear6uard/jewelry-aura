@@ -67,6 +67,45 @@ export function breadcrumbJsonLd(items: ReadonlyArray<BreadcrumbItem>) {
   }
 }
 
+export interface ProductJsonLdInput {
+  title: string
+  description: string
+  /** Site-relative product path, e.g. "/products/cuban-link". */
+  path: string
+  images: ReadonlyArray<string>
+  offer: { price: string; currency: string; available: boolean } | null
+}
+
+/**
+ * Product structured data bound to the displayed variant's live price and
+ * availability (plan KTD10) — never a hardcoded snapshot.
+ */
+export function productJsonLd(input: ProductJsonLdInput) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: input.title,
+    description: input.description,
+    image: input.images,
+    url: `${SITE_URL}${input.path}`,
+    brand: { '@type': 'Brand', name: 'Jewelry Aura' },
+    ...(input.offer
+      ? {
+          offers: {
+            '@type': 'Offer',
+            url: `${SITE_URL}${input.path}`,
+            price: input.offer.price,
+            priceCurrency: input.offer.currency,
+            availability: input.offer.available
+              ? 'https://schema.org/InStock'
+              : 'https://schema.org/OutOfStock',
+            itemCondition: 'https://schema.org/NewCondition',
+          },
+        }
+      : {}),
+  }
+}
+
 export const organizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',

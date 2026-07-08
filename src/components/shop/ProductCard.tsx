@@ -7,6 +7,7 @@
  * no separate quick-add on listing surfaces.
  */
 
+import { Link } from '@tanstack/react-router'
 import type { ProductCardModel } from '~/lib/shopify/adapters'
 
 interface ProductCardProps {
@@ -25,10 +26,9 @@ export function ProductCard({
   sizes = '(min-width: 768px) 33vw, 100vw',
 }: ProductCardProps) {
   return (
-    // Plain anchor until the PDP route lands (U4), then swappable to a
-    // typed <Link to="/products/$handle">.
-    <a
-      href={`/products/${product.handle}`}
+    <Link
+      to="/products/$handle"
+      params={{ handle: product.handle }}
       className="group block outline-none focus-visible:ring-1 focus-visible:ring-champagne/60"
       aria-label={
         product.availableForSale
@@ -93,6 +93,6 @@ export function ProductCard({
           </p>
         )}
       </div>
-    </a>
+    </Link>
   )
 }
