@@ -10,11 +10,12 @@ import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 
 import { Header } from '~/components/layout/Header'
+import { CatalogFallback } from '~/components/shop/CatalogFallback'
 import { ProductGrid } from '~/components/shop/ProductGrid'
 import { ShopCta } from '~/components/shop/ShopCta'
 import { mapProductCard, type ProductCardNode } from '~/lib/shopify/adapters'
 import { SHOP_PRODUCTS_QUERY } from '~/lib/shopify/queries'
-import { SITE_URL } from '~/lib/seo'
+import { SITE_URL, pageMeta } from '~/lib/seo'
 
 const PAGE_TITLE = 'Shop All Pieces | Jewelry Aura'
 const PAGE_DESCRIPTION =
@@ -52,23 +53,24 @@ export const Route = createFileRoute('/shop')({
     'Vercel-Cache-Tag': 'products,collections',
   }),
   head: () => ({
-    meta: [
-      { title: PAGE_TITLE },
-      { name: 'description', content: PAGE_DESCRIPTION },
-      { name: 'robots', content: 'index, follow' },
-      { property: 'og:title', content: PAGE_TITLE },
-      { property: 'og:description', content: PAGE_DESCRIPTION },
-      { property: 'og:type', content: 'website' },
-      { property: 'og:url', content: `${SITE_URL}/shop` },
-      { property: 'og:site_name', content: 'Jewelry Aura' },
-    ],
+    meta: pageMeta({
+      title: PAGE_TITLE,
+      description: PAGE_DESCRIPTION,
+      url: `${SITE_URL}/shop`,
+    }),
     links: [
       { rel: 'canonical', href: `${SITE_URL}/shop` },
       { rel: 'preconnect', href: 'https://cdn.shopify.com' },
     ],
   }),
   component: ShopPage,
-  errorComponent: ShopError,
+  errorComponent: () => (
+    <CatalogFallback
+      eyebrow="The cases are closed for a moment"
+      headline="We couldn’t reach the collection. Give it a breath and try again."
+      ctaLabel="Reload the shop"
+    />
+  ),
 })
 
 function ShopPage() {
@@ -99,32 +101,6 @@ function ShopPage() {
         </section>
 
         <ShopCta />
-      </main>
-    </div>
-  )
-}
-
-function ShopError() {
-  return (
-    <div className="grain-overlay">
-      <Header solid />
-      <main className="flex min-h-[100dvh] items-center bg-forest text-cream">
-        <div className="mx-auto max-w-xl px-6 text-center">
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-cream-muted">
-            The cases are closed for a moment
-          </p>
-          <h1 className="mt-6 font-display text-3xl italic leading-snug text-cream md:text-4xl">
-            We couldn&rsquo;t reach the collection. Give it a breath and try
-            again.
-          </h1>
-          <a
-            href="/shop"
-            className="mt-10 inline-flex items-center rounded-full border border-champagne/60 px-6 py-3 font-sans text-[12px] font-medium uppercase tracking-[0.18em] text-cream transition-colors duration-hover ease-apple hover:bg-champagne hover:text-forest active:scale-[0.98]"
-            style={{ borderWidth: '0.5px' }}
-          >
-            Reload the shop
-          </a>
-        </div>
       </main>
     </div>
   )

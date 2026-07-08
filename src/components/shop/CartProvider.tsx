@@ -14,6 +14,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useReducer,
   useRef,
   useState,
@@ -222,21 +223,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [state.cart],
   )
 
-  return (
-    <CartContext.Provider
-      value={{
-        status: state.status,
-        cart: state.cart,
-        count: badgeCount(state),
-        isOpen,
-        openCart,
-        closeCart,
-        add,
-        updateLine,
-        removeLine,
-      }}
-    >
-      {children}
-    </CartContext.Provider>
+  // Memoized so consumers only re-render when cart data or drawer state
+  // actually change (mirrors the LenisProvider convention).
+  const value = useMemo(
+    () => ({
+      status: state.status,
+      cart: state.cart,
+      count: badgeCount(state),
+      isOpen,
+      openCart,
+      closeCart,
+      add,
+      updateLine,
+      removeLine,
+    }),
+    [state, isOpen, openCart, closeCart, add, updateLine, removeLine],
   )
+
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>
 }

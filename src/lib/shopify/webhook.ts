@@ -3,9 +3,9 @@ import { createHmac, timingSafeEqual } from 'node:crypto'
 // Shopify webhook verification + purge logic (plan U9). Pure/injectable so the
 // route handler stays a thin wrapper and the logic is unit-testable.
 
-/** Shopify handles are lowercase alphanumerics and hyphens. Anything else is
- * never interpolated into a cache tag. */
-const HANDLE_PATTERN = /^[a-z0-9-]+$/
+// Handle sanity (never interpolate an unvalidated string into a cache tag)
+// shares the adapters module's definition of a valid Shopify handle.
+import { isValidHandle } from './adapters'
 
 /**
  * Verify Shopify's X-Shopify-Hmac-Sha256 header against the RAW request body.
@@ -99,7 +99,7 @@ export async function handleShopifyWebhook(
   try {
     const payload = JSON.parse(input.rawBody) as { handle?: unknown } | null
     const candidate = payload?.handle
-    if (typeof candidate === 'string' && HANDLE_PATTERN.test(candidate)) {
+    if (typeof candidate === 'string' && isValidHandle(candidate)) {
       handle = candidate
     } else {
       warn(

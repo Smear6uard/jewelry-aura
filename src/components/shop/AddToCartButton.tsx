@@ -21,7 +21,8 @@ export function AddToCartButton({
   const [error, setError] = useState<string | null>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
 
-  const disabled = soldOut || !merchandiseId || pending
+  const unavailable = soldOut || !merchandiseId
+  const disabled = unavailable || pending
 
   const onClick = async () => {
     if (!merchandiseId || pending) return
@@ -44,13 +45,11 @@ export function AddToCartButton({
         disabled={disabled}
         onClick={onClick}
         className={`w-full rounded-full px-8 py-4 font-sans text-[13px] font-medium uppercase tracking-[0.18em] transition-colors duration-hover ease-apple ${
-          soldOut || !merchandiseId
+          unavailable
             ? 'cursor-not-allowed border border-cream-muted/20 text-cream-muted/50'
             : 'bg-champagne text-forest hover:bg-champagne/90 active:scale-[0.99] disabled:opacity-70'
         }`}
-        style={
-          soldOut || !merchandiseId ? { borderWidth: '0.5px' } : undefined
-        }
+        style={unavailable ? { borderWidth: '0.5px' } : undefined}
       >
         {soldOut ? 'Sold out' : pending ? 'Adding…' : 'Add to cart'}
       </button>

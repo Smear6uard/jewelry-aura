@@ -3,7 +3,7 @@ import {
   buildCardImage,
   formatMoney,
   isValidHandle,
-  mapCollection,
+  mapCollectionPage,
   mapProductCard,
   paginate,
   type CollectionNode,
@@ -167,7 +167,7 @@ describe('paginate', () => {
   })
 })
 
-describe('mapCollection', () => {
+describe('mapCollectionPage', () => {
   const collection: CollectionNode = {
     handle: 'chains',
     title: 'Chains',
@@ -177,16 +177,33 @@ describe('mapCollection', () => {
   }
 
   it('maps seo fields with fallbacks', () => {
-    const model = mapCollection(collection)
+    const model = mapCollectionPage(collection, 1, 24)
     expect(model.seoTitle).toBe('Chains — Solid Gold')
     expect(model.seoDescription).toBe('Hand-finished chains.')
     expect(model.products).toHaveLength(1)
+    expect(model.totalPages).toBe(1)
   })
 
   it('falls back to title/description when seo is null', () => {
-    const model = mapCollection({ ...collection, seo: null })
+    const model = mapCollectionPage({ ...collection, seo: null }, 1, 24)
     expect(model.seoTitle).toBe('Chains')
     expect(model.seoDescription).toBe('Hand-finished chains.')
+  })
+
+  it('maps only the requested page, never the whole fetch', () => {
+    const many: CollectionNode = {
+      ...collection,
+      products: {
+        nodes: Array.from({ length: 60 }, (_, i) =>
+          cardNode({ handle: `piece-${i}`, title: `Piece ${i}` }),
+        ),
+      },
+    }
+    const page2 = mapCollectionPage(many, 2, 24)
+    expect(page2.products).toHaveLength(24)
+    expect(page2.products[0].handle).toBe('piece-24')
+    expect(page2.total).toBe(60)
+    expect(page2.totalPages).toBe(3)
   })
 })
 

@@ -68,7 +68,6 @@ function rawCart(overrides: Partial<RawCart> = {}): RawCart {
     totalQuantity: 2,
     cost: {
       subtotalAmount: { amount: '2900.0', currencyCode: 'USD' },
-      totalAmount: { amount: '2900.0', currencyCode: 'USD' },
     },
     lines: { nodes: [rawLine()] },
     ...overrides,

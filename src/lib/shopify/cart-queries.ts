@@ -20,10 +20,6 @@ export const CART_FRAGMENT = `#graphql
         amount
         currencyCode
       }
-      totalAmount {
-        amount
-        currencyCode
-      }
     }
     lines(first: 100) {
       nodes {

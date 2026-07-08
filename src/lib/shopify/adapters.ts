@@ -46,6 +46,25 @@ export interface ProductCardModel {
   image: ProductCardImage | null
 }
 
+// Intl.NumberFormat construction is the expensive part of the API; cache
+// one formatter per currency/precision (called per card, per cart line).
+const moneyFormatters = new Map<string, Intl.NumberFormat>()
+
+function moneyFormatter(currencyCode: string, isWhole: boolean): Intl.NumberFormat {
+  const key = `${currencyCode}:${isWhole}`
+  let formatter = moneyFormatters.get(key)
+  if (!formatter) {
+    formatter = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currencyCode,
+      minimumFractionDigits: isWhole ? 0 : 2,
+      maximumFractionDigits: isWhole ? 0 : 2,
+    })
+    moneyFormatters.set(key, formatter)
+  }
+  return formatter
+}
+
 /**
  * Whole amounts drop the cents ("$1,450"), fractional amounts keep them
  * ("$89.50") — the luxury-retail convention.
@@ -53,13 +72,7 @@ export interface ProductCardModel {
 export function formatMoney(money: MoneyNode): string {
   const value = Number.parseFloat(money.amount)
   if (!Number.isFinite(value)) return ''
-  const isWhole = Number.isInteger(value)
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: money.currencyCode,
-    minimumFractionDigits: isWhole ? 0 : 2,
-    maximumFractionDigits: isWhole ? 0 : 2,
-  }).format(value)
+  return moneyFormatter(money.currencyCode, Number.isInteger(value)).format(value)
 }
 
 const CARD_SRCSET_WIDTHS = [
@@ -106,23 +119,39 @@ export interface CollectionNode {
   products: { nodes: ProductCardNode[] }
 }
 
-export interface CollectionModel {
+export interface CollectionPageModel {
   handle: string
   title: string
   description: string
   seoTitle: string
   seoDescription: string
+  /** Only the requested page's products, mapped — never the full fetch. */
   products: ProductCardModel[]
+  page: number
+  totalPages: number
+  total: number
 }
 
-export function mapCollection(node: CollectionNode): CollectionModel {
+/**
+ * Slices FIRST, then maps only the visible page — the 250-product fetch
+ * (KTD8) must not pay card-mapping cost for products it discards.
+ */
+export function mapCollectionPage(
+  node: CollectionNode,
+  page: number,
+  perPage: number,
+): CollectionPageModel {
+  const sliced = paginate(node.products.nodes, page, perPage)
   return {
     handle: node.handle,
     title: node.title,
     description: node.description,
     seoTitle: node.seo?.title || node.title,
     seoDescription: node.seo?.description || node.description,
-    products: node.products.nodes.map(mapProductCard),
+    products: sliced.items.map(mapProductCard),
+    page: sliced.page,
+    totalPages: sliced.totalPages,
+    total: sliced.total,
   }
 }
 

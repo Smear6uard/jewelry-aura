@@ -8,6 +8,7 @@
  * Collapses to a strict single column below md.
  */
 
+import { PillLink } from '~/components/shop/PillLink'
 import { ProductCard } from '~/components/shop/ProductCard'
 import type { ProductCardModel } from '~/lib/shopify/adapters'
 
@@ -86,13 +87,9 @@ function EmptyCatalog() {
       <p className="mx-auto mt-6 max-w-md font-display text-2xl italic leading-snug text-cream md:text-3xl">
         New pieces are on the bench. Come see what the workshop is finishing.
       </p>
-      <a
-        href="/#visit"
-        className="mt-10 inline-flex items-center gap-3 border border-champagne/60 px-6 py-3 font-sans text-[12px] font-medium uppercase tracking-[0.18em] text-cream transition-colors duration-hover ease-apple hover:bg-champagne hover:text-forest active:scale-[0.98]"
-        style={{ borderWidth: '0.5px', borderRadius: '9999px' }}
-      >
-        Book a consultation
-      </a>
+      <div className="mt-10">
+        <PillLink href="/#visit">Book a consultation</PillLink>
+      </div>
     </div>
   )
 }

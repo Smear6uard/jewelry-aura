@@ -106,11 +106,6 @@ export const FEATURED_COLLECTION_QUERY = `#graphql
   ${PRODUCT_CARD_FRAGMENT}
 `
 
-/**
- * One collection with up to 250 products in a single fetch (KTD8):
- * boutique-scale catalogs slice server-side for ?page=N. Swap to cursor
- * pagination here if a collection ever outgrows 250.
- */
 export const VARIANT_FIELDS_FRAGMENT = `#graphql
   fragment VariantFields on ProductVariant {
     id
@@ -194,6 +189,11 @@ export const PRODUCT_QUERY = `#graphql
   ${VARIANT_FIELDS_FRAGMENT}
 `
 
+/**
+ * One collection with up to 250 products in a single fetch (KTD8):
+ * boutique-scale catalogs slice server-side for ?page=N. Swap to cursor
+ * pagination here if a collection ever outgrows 250.
+ */
 export const COLLECTION_QUERY = `#graphql
   query CollectionByHandle($handle: String!, $first: Int!) {
     collection(handle: $handle) {

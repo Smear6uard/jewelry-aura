@@ -6,6 +6,8 @@
  * section on the homepage (the site's single conversion surface).
  */
 
+import { PillLink } from '~/components/shop/PillLink'
+
 export function ShopCta() {
   return (
     <section
@@ -20,13 +22,9 @@ export function ShopCta() {
           <h2 className="font-display text-3xl font-light italic leading-snug text-cream md:text-4xl">
             Don&rsquo;t see it in the case? It hasn&rsquo;t been made yet.
           </h2>
-          <a
-            href="/#visit"
-            className="mt-8 inline-flex items-center rounded-full border border-champagne/60 px-6 py-3 font-sans text-[12px] font-medium uppercase tracking-[0.18em] text-cream transition-colors duration-hover ease-apple hover:bg-champagne hover:text-forest active:scale-[0.98]"
-            style={{ borderWidth: '0.5px' }}
-          >
-            Book a consultation
-          </a>
+          <div className="mt-8">
+            <PillLink href="/#visit">Book a consultation</PillLink>
+          </div>
         </div>
       </div>
     </section>

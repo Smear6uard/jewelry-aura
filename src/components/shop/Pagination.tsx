@@ -14,7 +14,9 @@ interface PaginationProps {
   totalPages: number
 }
 
-function pageHref(basePath: string, page: number): string {
+/** Page 1 gets the clean URL (canonical hygiene); reused by the route's
+ * head() for canonical/prev/next links. */
+export function pageHref(basePath: string, page: number): string {
   return page <= 1 ? basePath : `${basePath}?page=${page}`
 }
 

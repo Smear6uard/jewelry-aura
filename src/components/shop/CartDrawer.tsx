@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { DURATION, easeApple, easeOutExpo } from '~/lib/motion'
 import { useCart } from '~/components/shop/CartProvider'
+import { PillLink } from '~/components/shop/PillLink'
 import type { CartLineModel } from '~/lib/shopify/cart'
 
 const FOCUSABLE =
@@ -197,14 +198,11 @@ function EmptyCart({ onClose }: { onClose: () => void }) {
       <p className="mt-5 max-w-[26ch] font-display text-2xl italic leading-snug text-cream">
         Your cart is waiting for its first piece.
       </p>
-      <a
-        href="/shop"
-        onClick={onClose}
-        className="mt-8 inline-flex items-center rounded-full border border-champagne/60 px-6 py-3 font-sans text-[12px] font-medium uppercase tracking-[0.18em] text-cream transition-colors duration-hover ease-apple hover:bg-champagne hover:text-forest active:scale-[0.98]"
-        style={{ borderWidth: '0.5px' }}
-      >
-        Shop all pieces
-      </a>
+      <div className="mt-8">
+        <PillLink href="/shop" onClick={onClose}>
+          Shop all pieces
+        </PillLink>
+      </div>
     </div>
   )
 }

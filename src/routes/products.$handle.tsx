@@ -12,6 +12,8 @@ import { createServerFn } from '@tanstack/react-start'
 
 import { Header } from '~/components/layout/Header'
 import { AddToCartButton } from '~/components/shop/AddToCartButton'
+import { Breadcrumbs } from '~/components/shop/Breadcrumbs'
+import { CatalogFallback } from '~/components/shop/CatalogFallback'
 import { Price } from '~/components/shop/Price'
 import { ProductGallery } from '~/components/shop/ProductGallery'
 import { ShopCta } from '~/components/shop/ShopCta'
@@ -22,7 +24,21 @@ import {
   type ProductDetailNode,
 } from '~/lib/shopify/adapters'
 import { PRODUCT_QUERY } from '~/lib/shopify/queries'
-import { SITE_URL, breadcrumbJsonLd, productJsonLd } from '~/lib/seo'
+import {
+  SITE_URL,
+  breadcrumbJsonLd,
+  pageMeta,
+  productJsonLd,
+  type BreadcrumbItem,
+} from '~/lib/seo'
+
+function productCrumbs(title: string, path: string): BreadcrumbItem[] {
+  return [
+    { name: 'Home', path: '/' },
+    { name: 'Shop', path: '/shop' },
+    { name: title, path },
+  ]
+}
 
 const MAX_OPTION_PARAMS = 5
 
@@ -112,19 +128,13 @@ export const Route = createFileRoute('/products/$handle')({
     const firstImage = loaderData.images[0]
 
     return {
-      meta: [
-        { title },
-        { name: 'description', content: description },
-        { name: 'robots', content: 'index, follow' },
-        { property: 'og:title', content: title },
-        { property: 'og:description', content: description },
-        { property: 'og:type', content: 'product' },
-        { property: 'og:url', content: canonical },
-        { property: 'og:site_name', content: 'Jewelry Aura' },
-        ...(firstImage
-          ? [{ property: 'og:image', content: firstImage.src }]
-          : []),
-      ],
+      meta: pageMeta({
+        title,
+        description,
+        url: canonical,
+        ogType: 'product',
+        image: firstImage?.src,
+      }),
       links: [
         { rel: 'canonical', href: canonical },
         { rel: 'preconnect', href: 'https://cdn.shopify.com' },
@@ -158,19 +168,25 @@ export const Route = createFileRoute('/products/$handle')({
         {
           type: 'application/ld+json',
           children: JSON.stringify(
-            breadcrumbJsonLd([
-              { name: 'Home', path: '/' },
-              { name: 'Shop', path: '/shop' },
-              { name: loaderData.title, path },
-            ]),
+            breadcrumbJsonLd(productCrumbs(loaderData.title, path)),
           ),
         },
       ],
     }
   },
   component: ProductPage,
-  notFoundComponent: ProductNotFound,
-  errorComponent: ProductError,
+  notFoundComponent: () => (
+    <CatalogFallback
+      eyebrow="Not in the case"
+      headline="That piece isn’t in the shop — it may have found its owner."
+    />
+  ),
+  errorComponent: () => (
+    <CatalogFallback
+      eyebrow="A momentary pause"
+      headline="We couldn’t open this piece. Give it a breath and try again."
+    />
+  ),
 })
 
 function ProductPage() {
@@ -188,33 +204,10 @@ function ProductPage() {
       <Header solid />
       <main className="bg-forest text-cream">
         <section className="mx-auto max-w-[1440px] px-6 pb-24 pt-32 md:px-12 md:pb-32 md:pt-44">
-          <nav aria-label="Breadcrumb" className="mb-10">
-            <ol className="flex flex-wrap items-center gap-3 font-mono text-[11px] uppercase tracking-[0.24em] text-cream-muted">
-              <li>
-                <a
-                  href="/"
-                  className="transition-colors duration-hover ease-apple hover:text-cream"
-                >
-                  Home
-                </a>
-              </li>
-              <li aria-hidden className="text-champagne/60">
-                /
-              </li>
-              <li>
-                <a
-                  href="/shop"
-                  className="transition-colors duration-hover ease-apple hover:text-cream"
-                >
-                  Shop
-                </a>
-              </li>
-              <li aria-hidden className="text-champagne/60">
-                /
-              </li>
-              <li className="text-champagne">{product.title}</li>
-            </ol>
-          </nav>
+          <Breadcrumbs
+            items={productCrumbs(product.title, `/products/${product.handle}`)}
+            className="mb-10"
+          />
 
           <div className="grid grid-cols-1 gap-12 md:grid-cols-12 md:gap-8">
             <div className="md:col-span-7">
@@ -281,56 +274,6 @@ function ProductPage() {
         </section>
 
         <ShopCta />
-      </main>
-    </div>
-  )
-}
-
-function ProductNotFound() {
-  return (
-    <div className="grain-overlay">
-      <Header solid />
-      <main className="flex min-h-[100dvh] items-center bg-forest text-cream">
-        <div className="mx-auto max-w-xl px-6 text-center">
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-cream-muted">
-            Not in the case
-          </p>
-          <h1 className="mt-6 font-display text-3xl italic leading-snug text-cream md:text-4xl">
-            That piece isn&rsquo;t in the shop — it may have found its owner.
-          </h1>
-          <a
-            href="/shop"
-            className="mt-10 inline-flex items-center rounded-full border border-champagne/60 px-6 py-3 font-sans text-[12px] font-medium uppercase tracking-[0.18em] text-cream transition-colors duration-hover ease-apple hover:bg-champagne hover:text-forest active:scale-[0.98]"
-            style={{ borderWidth: '0.5px' }}
-          >
-            Shop all pieces
-          </a>
-        </div>
-      </main>
-    </div>
-  )
-}
-
-function ProductError() {
-  return (
-    <div className="grain-overlay">
-      <Header solid />
-      <main className="flex min-h-[100dvh] items-center bg-forest text-cream">
-        <div className="mx-auto max-w-xl px-6 text-center">
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-cream-muted">
-            A momentary pause
-          </p>
-          <h1 className="mt-6 font-display text-3xl italic leading-snug text-cream md:text-4xl">
-            We couldn&rsquo;t open this piece. Give it a breath and try again.
-          </h1>
-          <a
-            href="/shop"
-            className="mt-10 inline-flex items-center rounded-full border border-champagne/60 px-6 py-3 font-sans text-[12px] font-medium uppercase tracking-[0.18em] text-cream transition-colors duration-hover ease-apple hover:bg-champagne hover:text-forest active:scale-[0.98]"
-            style={{ borderWidth: '0.5px' }}
-          >
-            Shop all pieces
-          </a>
-        </div>
       </main>
     </div>
   )

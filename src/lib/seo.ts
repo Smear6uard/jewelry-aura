@@ -1,4 +1,5 @@
 export const SITE_URL = 'https://jewelry-aura.com'
+export const SITE_NAME = 'Jewelry Aura'
 
 export const HERO_SOCIAL_IMAGE = `${SITE_URL}/hero-portrait-wide.png`
 export const SITE_TITLE = 'Jewelry Aura | Custom Jewelry Norridge IL'
@@ -48,6 +49,39 @@ export const localBusinessSchema = {
   sameAs,
 } as const
 
+export interface PageMetaInput {
+  title: string
+  description: string
+  /** Absolute canonical URL of the page. */
+  url: string
+  ogType?: string
+  image?: string
+}
+
+/**
+ * The shared meta boilerplate every storefront route emits — one place
+ * so a route can't silently drop og:site_name or robots.
+ */
+export function pageMeta({
+  title,
+  description,
+  url,
+  ogType = 'website',
+  image,
+}: PageMetaInput) {
+  return [
+    { title },
+    { name: 'description', content: description },
+    { name: 'robots', content: 'index, follow' },
+    { property: 'og:title', content: title },
+    { property: 'og:description', content: description },
+    { property: 'og:type', content: ogType },
+    { property: 'og:url', content: url },
+    { property: 'og:site_name', content: SITE_NAME },
+    ...(image ? [{ property: 'og:image', content: image }] : []),
+  ]
+}
+
 export interface BreadcrumbItem {
   name: string
   /** Site-relative path, e.g. "/collections/chains". */
@@ -88,7 +122,7 @@ export function productJsonLd(input: ProductJsonLdInput) {
     description: input.description,
     image: input.images,
     url: `${SITE_URL}${input.path}`,
-    brand: { '@type': 'Brand', name: 'Jewelry Aura' },
+    brand: { '@type': 'Brand', name: SITE_NAME },
     ...(input.offer
       ? {
           offers: {

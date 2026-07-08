@@ -11,8 +11,43 @@
  * broken section.
  */
 
+import { PillLink } from '~/components/shop/PillLink'
 import { ProductCard } from '~/components/shop/ProductCard'
 import type { FeaturedCollectionModel } from '~/lib/shopify/featured'
+
+/** Champagne underline-on-hover arrow link (used by the section header
+ * and each spread's view-all). */
+function ArrowLink({
+  href,
+  children,
+  className = '',
+}: {
+  href: string
+  children: string
+  className?: string
+}) {
+  return (
+    <a
+      href={href}
+      className={`group inline-flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.22em] text-champagne ${className}`}
+    >
+      <span className="relative">
+        {children}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 -bottom-1 origin-left scale-x-0 bg-champagne transition-transform duration-hover ease-apple group-hover:scale-x-100"
+          style={{ height: '0.5px' }}
+        />
+      </span>
+      <span
+        aria-hidden
+        className="transition-transform duration-hover ease-apple group-hover:translate-x-1"
+      >
+        &rarr;
+      </span>
+    </a>
+  )
+}
 
 interface FeaturedCollectionsProps {
   collections: FeaturedCollectionModel[]
@@ -37,25 +72,9 @@ export function FeaturedCollections({ collections }: FeaturedCollectionsProps) {
               <span className="italic"> always.</span>
             </h2>
           </div>
-          <a
-            href="/shop"
-            className="group mb-1 inline-flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.22em] text-champagne"
-          >
-            <span className="relative">
-              Shop everything
-              <span
-                aria-hidden
-                className="pointer-events-none absolute inset-x-0 -bottom-1 origin-left scale-x-0 bg-champagne transition-transform duration-hover ease-apple group-hover:scale-x-100"
-                style={{ height: '0.5px' }}
-              />
-            </span>
-            <span
-              aria-hidden
-              className="transition-transform duration-hover ease-apple group-hover:translate-x-1"
-            >
-              &rarr;
-            </span>
-          </a>
+          <ArrowLink href="/shop" className="mb-1">
+            Shop everything
+          </ArrowLink>
         </header>
 
         {collections.length === 0 ? (
@@ -103,25 +122,12 @@ function CollectionSpread({
         <h3 className="mt-3 font-display text-3xl font-light italic leading-tight text-cream md:text-4xl">
           {collection.title}
         </h3>
-        <a
+        <ArrowLink
           href={`/collections/${collection.handle}`}
-          className="group mt-6 inline-flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.22em] text-champagne"
+          className="mt-6"
         >
-          <span className="relative">
-            View all
-            <span
-              aria-hidden
-              className="pointer-events-none absolute inset-x-0 -bottom-1 origin-left scale-x-0 bg-champagne transition-transform duration-hover ease-apple group-hover:scale-x-100"
-              style={{ height: '0.5px' }}
-            />
-          </span>
-          <span
-            aria-hidden
-            className="transition-transform duration-hover ease-apple group-hover:translate-x-1"
-          >
-            &rarr;
-          </span>
-        </a>
+          View all
+        </ArrowLink>
       </div>
 
       {/* Anchor product */}
@@ -165,13 +171,9 @@ function EmptyFeatured() {
       <p className="max-w-md font-display text-2xl italic leading-snug text-cream md:text-3xl">
         The cases are being arranged. The full collection is already open.
       </p>
-      <a
-        href="/shop"
-        className="mt-8 inline-flex items-center rounded-full border border-champagne/60 px-6 py-3 font-sans text-[12px] font-medium uppercase tracking-[0.18em] text-cream transition-colors duration-hover ease-apple hover:bg-champagne hover:text-forest active:scale-[0.98]"
-        style={{ borderWidth: '0.5px' }}
-      >
-        Shop all pieces
-      </a>
+      <div className="mt-8">
+        <PillLink href="/shop">Shop all pieces</PillLink>
+      </div>
     </div>
   )
 }

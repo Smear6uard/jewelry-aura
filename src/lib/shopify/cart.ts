@@ -62,7 +62,6 @@ export interface RawCart {
   totalQuantity: number
   cost: {
     subtotalAmount: MoneyNode
-    totalAmount: MoneyNode
   }
   lines: {
     nodes: RawCartLine[]
