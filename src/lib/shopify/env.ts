@@ -20,11 +20,18 @@ export interface ShopifyEnv {
 export function getShopifyEnv(): ShopifyEnv {
   const apiEndpoint = process.env.SHOPIFY_API_ENDPOINT
   if (apiEndpoint) {
+    // Fail closed on Vercel: a stray override in a deployed environment
+    // would silently route the live store to an arbitrary host.
+    if (process.env.VERCEL) {
+      throw new Error(
+        'SHOPIFY_API_ENDPOINT is a local-dev-only override and must never be set on Vercel deployments.',
+      )
+    }
     return {
-      storeDomain:
-        process.env.SHOPIFY_STORE_DOMAIN || 'mock-storefront.myshopify.com',
-      privateAccessToken:
-        process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN || 'mock-token',
+      storeDomain: 'mock-storefront.myshopify.com',
+      // Never hand the real private token to an override host — the mock
+      // endpoint needs no auth, so a placeholder always goes out instead.
+      privateAccessToken: 'mock-token',
       apiEndpoint,
     }
   }

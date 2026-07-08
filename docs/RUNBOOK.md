@@ -41,6 +41,9 @@ builds have no commerce access by design.
 
 After the store transfers to the client, **and again after any domain change**:
 
+0. Update `SITE_URL` in `src/lib/seo.ts` if the domain changed — sitemap,
+   robots, canonicals, OG urls, and all JSON-LD derive from it (see
+   `SEO_NOTES.md` for the full SEO surface).
 1. Re-verify the custom app still exists and its API secret still matches
    `SHOPIFY_WEBHOOK_SECRET` (transfer can revoke custom apps).
 2. Re-run the Admin GraphQL `webhookSubscriptionCreate` mutations for
@@ -49,6 +52,15 @@ After the store transfers to the client, **and again after any domain change**:
    updated_at`).
 3. Confirm the Headless channel tokens survived the transfer; rotate per the
    steps above if not.
+
+## Temporary: cache-purge spike route
+
+`src/routes/api/cache-spike.ts` is a deliberate, temporary route proving that
+`Vercel-Cache-Tag` + `invalidateByTag` purge works on this project (plan U1 /
+KTD1). It is unauthenticated but only caches/purges its own self-contained
+`spike` tag — no storefront data is affected. Once the spike has been run
+against a publicly reachable production URL (see the deferred-verification
+list), **delete the file** and redeploy.
 
 ## Annual maintenance
 

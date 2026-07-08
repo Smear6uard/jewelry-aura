@@ -100,4 +100,35 @@ describe('storefrontRequest', () => {
 
     expect(data.shop.name).toBe('Jewelry Aura')
   })
+
+  describe('SHOPIFY_API_ENDPOINT dev override', () => {
+    it('routes requests to the override URL and never sends a real token', async () => {
+      vi.stubEnv('SHOPIFY_API_ENDPOINT', 'https://mock.shop/api')
+      // Even with a real token configured, the override must not receive it.
+      vi.stubEnv('SHOPIFY_STOREFRONT_PRIVATE_TOKEN', 'shppa_real_secret')
+      const fetchMock = fetchMockReturning({
+        data: { shop: { name: 'Mock Shop' } },
+      })
+      vi.stubGlobal('fetch', fetchMock)
+      const storefrontRequest = await loadStorefrontRequest()
+
+      await storefrontRequest(QUERY)
+
+      const [url, init] = fetchMock.mock.calls[0]
+      expect(url).toBe('https://mock.shop/api')
+      const token = new Headers(init?.headers).get(
+        'shopify-storefront-private-token',
+      )
+      expect(token).toBe('mock-token')
+      expect(token).not.toContain('shppa_real_secret')
+    })
+
+    it('fails closed when the override is set on a Vercel deployment', async () => {
+      vi.stubEnv('SHOPIFY_API_ENDPOINT', 'https://mock.shop/api')
+      vi.stubEnv('VERCEL', '1')
+      const storefrontRequest = await loadStorefrontRequest()
+
+      await expect(storefrontRequest(QUERY)).rejects.toThrow(/local-dev-only/)
+    })
+  })
 })

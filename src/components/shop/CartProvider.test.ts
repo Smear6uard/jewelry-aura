@@ -98,6 +98,24 @@ describe('cartReducer', () => {
     expect(state.cart?.totalQuantity).toBe(3)
   })
 
+  it('rollback after an interleaved commit keeps the cart (never nulls it)', () => {
+    // Race: optimistic(A) -> optimistic(B) -> commit(A) clears the shared
+    // snapshot -> rollback(B) must NOT wipe the cart to null.
+    let state: CartUiState = cartReducer(initialCartUiState, {
+      type: 'resolved',
+      cart: cart(),
+    })
+    state = cartReducer(state, {
+      type: 'optimistic',
+      cart: withLineQuantity(state.cart!, 'line-1', 5),
+    })
+    const serverCartA = cart({ totalQuantity: 6 })
+    state = cartReducer(state, { type: 'commit', cart: serverCartA })
+    state = cartReducer(state, { type: 'rollback' })
+    expect(state.cart).not.toBeNull()
+    expect(state.cart).toBe(serverCartA)
+  })
+
   it('commit replaces the cart and clears the snapshot', () => {
     let state: CartUiState = cartReducer(initialCartUiState, {
       type: 'resolved',

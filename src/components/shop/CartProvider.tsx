@@ -68,7 +68,14 @@ export function cartReducer(
     case 'commit':
       return { status: 'ready', cart: action.cart, snapshot: null }
     case 'rollback':
-      return { status: 'ready', cart: state.snapshot, snapshot: null }
+      // With overlapping mutations an interleaved 'commit' may have cleared
+      // the shared snapshot; never null the cart because of that race —
+      // keep the current cart and let the caller resync with the server.
+      return {
+        status: 'ready',
+        cart: state.snapshot ?? state.cart,
+        snapshot: null,
+      }
   }
 }
 
@@ -141,6 +148,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  // After a failed/rolled-back mutation the optimistic state may have
+  // diverged from Shopify's truth (e.g. an interleaved commit consumed the
+  // rollback snapshot) — quietly re-align with the server.
+  const resync = useCallback(() => {
+    getCart()
+      .then((cart) => dispatch({ type: 'commit', cart }))
+      .catch(() => {})
+  }, [])
+
   const openCart = useCallback((trigger?: HTMLElement | null) => {
     triggerRef.current = trigger ?? null
     setIsOpen(true)
@@ -181,19 +197,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const result = await updateCartLine({ data: { lineId, quantity } })
         if (!result.ok) {
           dispatch({ type: 'rollback' })
+          resync()
           return { ok: false, message: result.message }
         }
         dispatch({ type: 'commit', cart: result.cart })
         return { ok: true }
       } catch {
         dispatch({ type: 'rollback' })
+        resync()
         return {
           ok: false,
           message: 'That change didn’t save. Please try again.',
         }
       }
     },
-    [state.cart],
+    [state.cart, resync],
   )
 
   const removeLine = useCallback(
@@ -208,19 +226,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const result = await removeCartLine({ data: { lineId } })
         if (!result.ok) {
           dispatch({ type: 'rollback' })
+          resync()
           return { ok: false, message: result.message }
         }
         dispatch({ type: 'commit', cart: result.cart })
         return { ok: true }
       } catch {
         dispatch({ type: 'rollback' })
+        resync()
         return {
           ok: false,
           message: 'That change didn’t save. Please try again.',
         }
       }
     },
-    [state.cart],
+    [state.cart, resync],
   )
 
   // Memoized so consumers only re-render when cart data or drawer state

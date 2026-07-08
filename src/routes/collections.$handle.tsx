@@ -27,6 +27,7 @@ import { COLLECTION_QUERY } from '~/lib/shopify/queries'
 import {
   SITE_URL,
   breadcrumbJsonLd,
+  jsonLdScript,
   pageMeta,
   type BreadcrumbItem,
 } from '~/lib/seo'
@@ -128,7 +129,7 @@ export const Route = createFileRoute('/collections/$handle')({
       scripts: [
         {
           type: 'application/ld+json',
-          children: JSON.stringify(
+          children: jsonLdScript(
             breadcrumbJsonLd(collectionCrumbs(loaderData.title, basePath)),
           ),
         },

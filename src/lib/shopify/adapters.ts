@@ -196,13 +196,17 @@ export function mapProductCard(node: ProductCardNode): ProductCardModel {
 
 // ─── Product detail (PDP) ────────────────────────────────────────────────
 
-export interface VariantNode {
+/** Lean shape fetched for the bulk variant list (availability math only). */
+export interface VariantAvailabilityNode {
   id: string
-  title: string
   availableForSale: boolean
+  selectedOptions: Array<{ name: string; value: string }>
+}
+
+export interface VariantNode extends VariantAvailabilityNode {
+  title: string
   price: MoneyNode
   compareAtPrice: MoneyNode | null
-  selectedOptions: Array<{ name: string; value: string }>
 }
 
 export interface GalleryImageNode {
@@ -226,7 +230,7 @@ export interface ProductDetailNode {
     optionValues: Array<{ name: string; swatch: { color: string | null } | null }>
   }>
   images: { nodes: GalleryImageNode[] }
-  variants: { nodes: VariantNode[] }
+  variants: { nodes: VariantAvailabilityNode[] }
   selectedVariant: VariantNode | null
   fallbackVariant: VariantNode | null
 }
@@ -302,16 +306,16 @@ export function buildGalleryImage(
   }
 }
 
-function selectionOf(variant: VariantNode): Record<string, string> {
+function selectionOf(variant: VariantAvailabilityNode): Record<string, string> {
   return Object.fromEntries(
     variant.selectedOptions.map((o) => [o.name, o.value]),
   )
 }
 
 function variantMatching(
-  variants: VariantNode[],
+  variants: VariantAvailabilityNode[],
   selection: Record<string, string>,
-): VariantNode | undefined {
+): VariantAvailabilityNode | undefined {
   return variants.find((v) =>
     v.selectedOptions.every((o) => selection[o.name] === o.value),
   )
@@ -330,8 +334,9 @@ export function mapVariant(variant: VariantNode): VariantModel {
 }
 
 export function mapProductDetail(node: ProductDetailNode): ProductDetailModel {
-  const resolved =
-    node.selectedVariant ?? node.fallbackVariant ?? node.variants.nodes[0] ?? null
+  // Shopify's selectedOrFirstAvailableVariant resolves whenever any variant
+  // exists, so no further fallback into the (lean) bulk list is needed.
+  const resolved = node.selectedVariant ?? node.fallbackVariant ?? null
   const selection = resolved ? selectionOf(resolved) : {}
 
   // Shopify's placeholder option for single-variant products.

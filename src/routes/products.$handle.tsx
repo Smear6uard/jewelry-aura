@@ -27,6 +27,7 @@ import { PRODUCT_QUERY } from '~/lib/shopify/queries'
 import {
   SITE_URL,
   breadcrumbJsonLd,
+  jsonLdScript,
   pageMeta,
   productJsonLd,
   type BreadcrumbItem,
@@ -155,7 +156,7 @@ export const Route = createFileRoute('/products/$handle')({
       scripts: [
         {
           type: 'application/ld+json',
-          children: JSON.stringify(
+          children: jsonLdScript(
             productJsonLd({
               title: loaderData.title,
               description,
@@ -167,7 +168,7 @@ export const Route = createFileRoute('/products/$handle')({
         },
         {
           type: 'application/ld+json',
-          children: JSON.stringify(
+          children: jsonLdScript(
             breadcrumbJsonLd(productCrumbs(loaderData.title, path)),
           ),
         },

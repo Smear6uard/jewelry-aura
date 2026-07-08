@@ -21,10 +21,12 @@ export function CartDrawer() {
   const { isOpen, closeCart, cart, status } = useCart()
   const panelRef = useRef<HTMLDivElement>(null)
 
-  // Escape + focus trap while open.
+  // Escape + focus trap while open; focus moves INTO the dialog on open
+  // (the trigger keeps focus otherwise and keyboard users never enter).
   useEffect(() => {
     if (!isOpen) return
     const panel = panelRef.current
+    panel?.focus()
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault()
@@ -79,7 +81,8 @@ export function CartDrawer() {
             role="dialog"
             aria-modal="true"
             aria-label="Shopping cart"
-            className="absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-forest text-cream shadow-2xl"
+            tabIndex={-1}
+            className="absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-forest text-cream shadow-2xl outline-none"
             style={{
               borderLeft: '0.5px solid rgba(196, 168, 117, 0.25)',
             }}
@@ -103,7 +106,9 @@ export function CartDrawer() {
               <CloseButton onClick={closeCart} />
             </header>
 
-            <div className="flex-1 overflow-y-auto px-6">
+            {/* data-lenis-prevent: the app-wide smooth-wheel Lenis would
+                otherwise swallow wheel events over this nested scroller. */}
+            <div className="flex-1 overflow-y-auto px-6" data-lenis-prevent>
               {status === 'loading' && <CartSkeleton />}
               {isEmpty && <EmptyCart onClose={closeCart} />}
               {lines.length > 0 && (

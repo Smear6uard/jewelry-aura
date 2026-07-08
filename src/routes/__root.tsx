@@ -13,6 +13,7 @@ import { CartDrawer } from '~/components/shop/CartDrawer'
 import {
   SITE_DESCRIPTION,
   SITE_TITLE,
+  jsonLdScript,
   organizationSchema,
 } from '~/lib/seo'
 
@@ -77,7 +78,7 @@ export const Route = createRootRoute({
     scripts: [
       {
         type: 'application/ld+json',
-        children: JSON.stringify(organizationSchema),
+        children: jsonLdScript(organizationSchema),
       },
     ],
   }),

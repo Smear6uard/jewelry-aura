@@ -212,7 +212,7 @@ import {
   type ProductDetailNode,
   type VariantNode,
 } from './adapters'
-import { productJsonLd } from '../seo'
+import { jsonLdScript, productJsonLd } from '../seo'
 
 function variantNode(
   options: Record<string, string>,
@@ -385,6 +385,24 @@ describe('productJsonLd', () => {
       offer: null,
     })
     expect('offers' in jsonLd).toBe(false)
+  })
+})
+
+describe('jsonLdScript', () => {
+  it('neutralizes </script> breakout in merchant-editable strings', () => {
+    const serialized = jsonLdScript(
+      productJsonLd({
+        title: '</script><img src=x onerror=alert(1)>',
+        description: 'a < b',
+        path: '/products/x',
+        images: [],
+        offer: null,
+      }),
+    )
+    expect(serialized).not.toContain('<')
+    // Still valid JSON that round-trips to the original string.
+    const parsed = JSON.parse(serialized) as { name: string }
+    expect(parsed.name).toBe('</script><img src=x onerror=alert(1)>')
   })
 })
 

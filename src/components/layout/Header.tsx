@@ -118,7 +118,9 @@ export function Header({ solid = false }: HeaderProps) {
   return (
     <header className="fixed inset-x-0 top-0 z-50">
       <motion.div
-        initial="top"
+        // Solid-mode pages must render already-scrolled — an unconditional
+        // "top" initial would flash a transparent header on every mount.
+        initial={solid ? 'scrolled' : 'top'}
         animate={scrolled ? 'scrolled' : 'top'}
         variants={{
           top: {
@@ -244,7 +246,7 @@ function BookConsultationButton() {
   const onClick = useSmoothScrollTo('visit')
   return (
     <motion.a
-      href="#visit"
+      href="/#visit"
       onClick={onClick}
       initial="rest"
       whileHover="hover"

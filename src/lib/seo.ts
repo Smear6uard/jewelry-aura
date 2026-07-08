@@ -82,6 +82,16 @@ export function pageMeta({
   ]
 }
 
+/**
+ * Serialize data for an inline <script type="application/ld+json"> —
+ * TanStack renders script children via dangerouslySetInnerHTML, so a
+ * merchant-editable string containing "</script>" would otherwise break
+ * out of the block (stored XSS). < parses identically as JSON.
+ */
+export function jsonLdScript(data: unknown): string {
+  return JSON.stringify(data).replace(/</g, '\\u003c')
+}
+
 export interface BreadcrumbItem {
   name: string
   /** Site-relative path, e.g. "/collections/chains". */

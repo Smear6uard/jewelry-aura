@@ -14,6 +14,7 @@ import {
   SITE_DESCRIPTION,
   SITE_TITLE,
   SITE_URL,
+  jsonLdScript,
   localBusinessSchema,
 } from '~/lib/seo'
 
@@ -94,7 +95,7 @@ export const Route = createFileRoute('/')({
     scripts: [
       {
         type: 'application/ld+json',
-        children: JSON.stringify(localBusinessSchema),
+        children: jsonLdScript(localBusinessSchema),
       },
     ],
   }),

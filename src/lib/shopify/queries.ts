@@ -106,6 +106,22 @@ export const FEATURED_COLLECTION_QUERY = `#graphql
   ${PRODUCT_CARD_FRAGMENT}
 `
 
+/**
+ * Lean per-variant fields for the bulk variant list: the 250-node list
+ * exists only to compute sibling option availability, so it never needs
+ * price/title — those ride on the resolved selected/fallback variant.
+ */
+export const VARIANT_AVAILABILITY_FRAGMENT = `#graphql
+  fragment VariantAvailability on ProductVariant {
+    id
+    availableForSale
+    selectedOptions {
+      name
+      value
+    }
+  }
+`
+
 export const VARIANT_FIELDS_FRAGMENT = `#graphql
   fragment VariantFields on ProductVariant {
     id
@@ -167,7 +183,7 @@ export const PRODUCT_QUERY = `#graphql
       }
       variants(first: 250) {
         nodes {
-          ...VariantFields
+          ...VariantAvailability
         }
       }
       selectedVariant: variantBySelectedOptions(
@@ -187,6 +203,7 @@ export const PRODUCT_QUERY = `#graphql
     }
   }
   ${VARIANT_FIELDS_FRAGMENT}
+  ${VARIANT_AVAILABILITY_FRAGMENT}
 `
 
 /**
