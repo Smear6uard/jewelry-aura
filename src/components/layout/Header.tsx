@@ -26,29 +26,44 @@
  * one tap away. A full mobile drawer is intentionally out of scope.
  */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { DURATION, easeApple } from '~/lib/motion'
 import { useLenis } from '~/lib/lenis'
 import { useSmoothScrollTo } from '~/lib/scroll-to'
+import { useCart } from '~/components/shop/CartProvider'
 
 // "Custom" routes to the Visit section (same as every other commission
 // CTA on the site) — there's no on-site customisation flow to land on,
 // and the consultation funnel lives at #visit. The label stays
 // aspirational; only the destination is consolidated.
+// Hrefs are root-anchored so the same header works off the homepage:
+// on `/` the browser treats `/#visit` as a same-document hash (the Lenis
+// smooth-scroll handler still intercepts it); on `/shop` and other routes
+// it becomes a real navigation back to the homepage section.
 const NAV_LINKS = [
-  { label: 'Services', href: '#services' },
-  { label: 'Custom', href: '#visit' },
-  { label: 'Visit', href: '#visit' },
+  { label: 'Shop', href: '/shop' },
+  { label: 'Services', href: '/#services' },
+  { label: 'Custom', href: '/#visit' },
+  { label: 'Visit', href: '/#visit' },
 ] as const
 
-export function Header() {
+interface HeaderProps {
+  /**
+   * Pages without the hero photograph (shop, collections, PDPs) render the
+   * header permanently in its scrolled/solid state — there is no
+   * `[data-hero-end]` sentinel to key off and no image to sit over.
+   */
+  solid?: boolean
+}
+
+export function Header({ solid = false }: HeaderProps) {
   const lenis = useLenis()
-  const [scrolled, setScrolled] = useState(false)
+  const [scrolled, setScrolled] = useState(solid)
   const onVisitClick = useSmoothScrollTo('visit')
 
   useEffect(() => {
-    if (!lenis) return
+    if (solid || !lenis) return
 
     // The hero renders different sentinels per breakpoint (one
     // inside the desktop pinned wrapper, one inside the mobile
@@ -98,12 +113,14 @@ export function Header() {
       lenis.off('scroll', onScroll)
       window.removeEventListener('scroll', onScroll)
     }
-  }, [lenis])
+  }, [lenis, solid])
 
   return (
     <header className="fixed inset-x-0 top-0 z-50">
       <motion.div
-        initial="top"
+        // Solid-mode pages must render already-scrolled — an unconditional
+        // "top" initial would flash a transparent header on every mount.
+        initial={solid ? 'scrolled' : 'top'}
         animate={scrolled ? 'scrolled' : 'top'}
         variants={{
           top: {
@@ -128,7 +145,7 @@ export function Header() {
       >
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 md:px-12">
           <a
-            href="#"
+            href="/"
             className="font-serif text-[clamp(1.05rem,1.4vw,1.25rem)] tracking-[0.01em]"
             style={{ color: '#F0EBE0' }}
           >
@@ -143,7 +160,7 @@ export function Header() {
               <a
                 key={link.label}
                 href={link.href}
-                onClick={link.href === '#visit' ? onVisitClick : undefined}
+                onClick={link.href === '/#visit' ? onVisitClick : undefined}
                 className="group relative font-sans text-[13px] text-cream-muted transition-colors duration-hover ease-apple hover:text-cream"
                 style={{ letterSpacing: '0.06em' }}
               >
@@ -157,10 +174,64 @@ export function Header() {
             ))}
           </nav>
 
-          <BookConsultationButton />
+          <div className="flex items-center gap-3 sm:gap-5">
+            <BookConsultationButton />
+            <CartButton />
+          </div>
         </div>
       </motion.div>
     </header>
+  )
+}
+
+/**
+ * Cart trigger + badge. The badge shows a small pulsing skeleton until
+ * the post-paint getCart resolves (never a false 0), a count chip when
+ * the cart has items, and nothing when it's empty.
+ */
+function CartButton() {
+  const { count, openCart } = useCart()
+  const ref = useRef<HTMLButtonElement>(null)
+
+  return (
+    <button
+      ref={ref}
+      type="button"
+      onClick={() => openCart(ref.current)}
+      aria-label={
+        count === null
+          ? 'Open cart'
+          : `Open cart, ${count} ${count === 1 ? 'item' : 'items'}`
+      }
+      className="relative p-1 text-cream transition-colors duration-hover ease-apple hover:text-champagne"
+    >
+      <svg
+        aria-hidden
+        width="20"
+        height="20"
+        viewBox="0 0 20 20"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.2"
+      >
+        <path d="M4 6.5h12l-.9 10a1.5 1.5 0 0 1-1.5 1.35h-7.2a1.5 1.5 0 0 1-1.5-1.35L4 6.5Z" />
+        <path d="M7 6.5V5a3 3 0 0 1 6 0v1.5" />
+      </svg>
+      {count === null && (
+        <span
+          aria-hidden
+          className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 animate-pulse rounded-full bg-cream-muted/50"
+        />
+      )}
+      {count !== null && count > 0 && (
+        <span
+          aria-hidden
+          className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-champagne px-1 font-mono text-[9px] leading-none text-forest"
+        >
+          {count > 99 ? '99+' : count}
+        </span>
+      )}
+    </button>
   )
 }
 
@@ -175,7 +246,7 @@ function BookConsultationButton() {
   const onClick = useSmoothScrollTo('visit')
   return (
     <motion.a
-      href="#visit"
+      href="/#visit"
       onClick={onClick}
       initial="rest"
       whileHover="hover"

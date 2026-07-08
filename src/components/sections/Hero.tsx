@@ -671,11 +671,11 @@ function MobileHero() {
 // ────────────────────────────────────────────────────────────────────
 
 function PrimaryCTA() {
-  const onClick = useSmoothScrollTo('visit')
+  // Commerce-first re-skin (plan U7): the hero's primary action now lands
+  // on the storefront; the commission funnel moves to the secondary CTA.
   return (
     <motion.a
-      href="#visit"
-      onClick={onClick}
+      href="/shop"
       initial="rest"
       animate="rest"
       whileHover="hover"
@@ -699,7 +699,7 @@ function PrimaryCTA() {
       className="inline-flex items-center justify-center gap-3 rounded-full font-mono text-[11px] font-medium uppercase"
       style={{ letterSpacing: '0.22em', padding: '17px 30px' }}
     >
-      <span>Start a custom piece</span>
+      <span>Shop the collection</span>
       <span aria-hidden style={{ fontSize: 14, lineHeight: 1 }}>
         →
       </span>
@@ -708,14 +708,16 @@ function PrimaryCTA() {
 }
 
 function SecondaryCTA() {
+  const onClick = useSmoothScrollTo('visit')
   return (
     <a
-      href="#work"
+      href="#visit"
+      onClick={onClick}
       className="group inline-flex items-center gap-3 font-mono text-[11px] uppercase"
       style={{ color: CHAMPAGNE, letterSpacing: '0.22em' }}
     >
       <span className="relative">
-        See the work
+        Start a custom piece
         <span
           aria-hidden
           className="pointer-events-none absolute inset-x-0 -bottom-1 origin-left scale-x-0 transition-transform duration-hover ease-apple group-hover:scale-x-100"

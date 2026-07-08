@@ -17,6 +17,14 @@ function getClient(): StorefrontApiClient {
       storeDomain: env.storeDomain,
       apiVersion: SHOPIFY_API_VERSION,
       privateAccessToken: env.privateAccessToken,
+      // Dev-only endpoint override (see ShopifyEnv.apiEndpoint) — requests
+      // keep their headers/body but go to the override URL.
+      ...(env.apiEndpoint
+        ? {
+            customFetchApi: (_url, init) =>
+              fetch(env.apiEndpoint as string, init as RequestInit),
+          }
+        : {}),
     })
   }
   return client

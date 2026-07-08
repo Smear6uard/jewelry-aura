@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { createServerFn } from '@tanstack/react-start'
 
 import { Hero } from '~/components/sections/Hero'
 import { CustomPieces } from '~/components/sections/CustomPieces'
@@ -6,21 +7,51 @@ import { Services } from '~/components/sections/Services'
 import { Stats } from '~/components/sections/Stats'
 import { Visit } from '~/components/sections/Visit'
 import { Header } from '~/components/layout/Header'
+import { FeaturedCollections } from '~/components/shop/FeaturedCollections'
+import type { FeaturedCollectionModel } from '~/lib/shopify/featured'
 import {
   HERO_SOCIAL_IMAGE,
   SITE_DESCRIPTION,
   SITE_TITLE,
   SITE_URL,
+  jsonLdScript,
   localBusinessSchema,
-  organizationSchema,
 } from '~/lib/seo'
 
 // ═══════════════════════════════════════════
 // ROUTE CONFIG + SEO
 // ═══════════════════════════════════════════
 
+const getFeaturedCollections = createServerFn({ method: 'GET' }).handler(
+  async (): Promise<FeaturedCollectionModel[]> => {
+    // The homepage must never break on commerce trouble (missing env,
+    // API hiccup) — it degrades to an empty featured section instead.
+    try {
+      const [{ storefrontRequest }, { getFeaturedCollectionsLogic }] =
+        await Promise.all([
+          import('~/lib/shopify/client'),
+          import('~/lib/shopify/featured'),
+        ])
+      return await getFeaturedCollectionsLogic(storefrontRequest)
+    } catch (error) {
+      console.warn(`[featured] homepage degrading to empty: ${String(error)}`)
+      return []
+    }
+  },
+)
+
 export const Route = createFileRoute('/')({
   component: LandingPage,
+  loader: () => getFeaturedCollections(),
+  staleTime: 60_000,
+  gcTime: 5 * 60_000,
+  headers: () => ({
+    // Homepage cache policy (KTD2): short shared TTL, long SWR; purged via
+    // the `home` tag on product updates (U9).
+    'Cache-Control':
+      'public, max-age=0, s-maxage=1800, stale-while-revalidate=86400',
+    'Vercel-Cache-Tag': 'home,collections',
+  }),
   head: () => ({
     meta: [
       { title: SITE_TITLE },
@@ -45,15 +76,26 @@ export const Route = createFileRoute('/')({
         rel: 'canonical',
         href: SITE_URL,
       },
+      {
+        rel: 'preload',
+        href: '/hero-portrait-wide.avif',
+        as: 'image',
+        media: '(min-width: 1024px)',
+      },
+      {
+        rel: 'preload',
+        href: '/hero-portrait-tall.avif',
+        as: 'image',
+        media: '(max-width: 1023px)',
+      },
+      { rel: 'preconnect', href: 'https://cdn.shopify.com' },
     ],
+    // Organization JSON-LD comes from the root route (site-wide, R18);
+    // only the LocalBusiness identity is homepage-specific.
     scripts: [
       {
         type: 'application/ld+json',
-        children: JSON.stringify(localBusinessSchema),
-      },
-      {
-        type: 'application/ld+json',
-        children: JSON.stringify(organizationSchema),
+        children: jsonLdScript(localBusinessSchema),
       },
     ],
   }),
@@ -77,11 +119,16 @@ export const Route = createFileRoute('/')({
 // ═══════════════════════════════════════════
 
 function LandingPage() {
+  const featured = Route.useLoaderData()
+
   return (
     <div className="grain-overlay">
       <Header />
       <main style={{ backgroundColor: '#14261F' }} className="text-white">
         <Hero />
+        {/* The shop window sits directly under the hero (GLD/JAXXON
+            model); the editorial sections keep telling the story below. */}
+        <FeaturedCollections collections={featured} />
         <CustomPieces />
         <Services />
         <Stats />
