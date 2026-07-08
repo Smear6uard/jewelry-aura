@@ -4,3 +4,13 @@ dist
 .vinxi
 .tanstack
 src/routeTree.gen.ts
+
+# Shopify codegen artifacts (regenerate with npm run codegen)
+src/lib/shopify/generated/*.schema.json
+
+# Local env
+.env
+.env.local
+
+# macOS
+.DS_Store
