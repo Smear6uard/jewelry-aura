@@ -48,6 +48,25 @@ export const localBusinessSchema = {
   sameAs,
 } as const
 
+export interface BreadcrumbItem {
+  name: string
+  /** Site-relative path, e.g. "/collections/chains". */
+  path: string
+}
+
+export function breadcrumbJsonLd(items: ReadonlyArray<BreadcrumbItem>) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      item: `${SITE_URL}${item.path}`,
+    })),
+  }
+}
+
 export const organizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',

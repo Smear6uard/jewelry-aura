@@ -68,7 +68,8 @@ export const Route = createRootRoute({
         rel: 'stylesheet',
         href: GOOGLE_FONTS_URL,
       },
-      { rel: 'canonical', href: SITE_URL },
+      // Canonical is set per-route (each page owns its URL); a root-level
+      // canonical would duplicate on every catalog page.
       { rel: 'shortcut icon', href: '/favicon.ico' },
       { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' },
       { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/favicon-16x16.png' },

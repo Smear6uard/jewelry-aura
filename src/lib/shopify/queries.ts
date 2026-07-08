@@ -52,3 +52,28 @@ export const SHOP_PRODUCTS_QUERY = `#graphql
   }
   ${PRODUCT_CARD_FRAGMENT}
 `
+
+/**
+ * One collection with up to 250 products in a single fetch (KTD8):
+ * boutique-scale catalogs slice server-side for ?page=N. Swap to cursor
+ * pagination here if a collection ever outgrows 250.
+ */
+export const COLLECTION_QUERY = `#graphql
+  query CollectionByHandle($handle: String!, $first: Int!) {
+    collection(handle: $handle) {
+      handle
+      title
+      description
+      seo {
+        title
+        description
+      }
+      products(first: $first) {
+        nodes {
+          ...ProductCard
+        }
+      }
+    }
+  }
+  ${PRODUCT_CARD_FRAGMENT}
+`

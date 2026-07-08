@@ -87,6 +87,70 @@ export function buildCardImage(
   }
 }
 
+/**
+ * Shopify handles are lowercase alphanumerics and hyphens. Route params
+ * are validated against this BEFORE they reach a query or a
+ * `Vercel-Cache-Tag` header — anything else 404s without a fetch.
+ */
+const HANDLE_PATTERN = /^[a-z0-9-]+$/
+
+export function isValidHandle(handle: string): boolean {
+  return HANDLE_PATTERN.test(handle)
+}
+
+export interface CollectionNode {
+  handle: string
+  title: string
+  description: string
+  seo: { title: string | null; description: string | null } | null
+  products: { nodes: ProductCardNode[] }
+}
+
+export interface CollectionModel {
+  handle: string
+  title: string
+  description: string
+  seoTitle: string
+  seoDescription: string
+  products: ProductCardModel[]
+}
+
+export function mapCollection(node: CollectionNode): CollectionModel {
+  return {
+    handle: node.handle,
+    title: node.title,
+    description: node.description,
+    seoTitle: node.seo?.title || node.title,
+    seoDescription: node.seo?.description || node.description,
+    products: node.products.nodes.map(mapProductCard),
+  }
+}
+
+export interface Page<T> {
+  items: T[]
+  page: number
+  perPage: number
+  total: number
+  totalPages: number
+}
+
+/**
+ * Server-side slice for crawlable ?page=N pagination (KTD8). A page
+ * beyond range returns empty items — the route turns that into a 404.
+ */
+export function paginate<T>(items: T[], page: number, perPage: number): Page<T> {
+  const total = items.length
+  const totalPages = Math.max(1, Math.ceil(total / perPage))
+  const start = (page - 1) * perPage
+  return {
+    items: page >= 1 ? items.slice(start, start + perPage) : [],
+    page,
+    perPage,
+    total,
+    totalPages,
+  }
+}
+
 export function mapProductCard(node: ProductCardNode): ProductCardModel {
   const min = node.priceRange.minVariantPrice
   const max = node.priceRange.maxVariantPrice
