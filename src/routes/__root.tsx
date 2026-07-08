@@ -8,6 +8,8 @@ import {
 } from '@tanstack/react-router'
 import '../app.css'
 import { LenisProvider } from '~/lib/lenis'
+import { CartProvider } from '~/components/shop/CartProvider'
+import { CartDrawer } from '~/components/shop/CartDrawer'
 import {
   SITE_DESCRIPTION,
   SITE_TITLE,
@@ -100,7 +102,12 @@ function RootComponent() {
           Routes are NOT allowed to spin up their own Lenis instance —
           two instances fight each other on the wheel events. */}
       <LenisProvider>
-        <Outlet />
+        {/* Cart state lives above every route: the header badge and the
+            PDP add-to-cart both read it. Hydrates post-paint (KTD3). */}
+        <CartProvider>
+          <Outlet />
+          <CartDrawer />
+        </CartProvider>
       </LenisProvider>
     </RootDocument>
   )

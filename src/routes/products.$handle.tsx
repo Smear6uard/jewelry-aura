@@ -11,6 +11,7 @@ import { createFileRoute, notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 
 import { Header } from '~/components/layout/Header'
+import { AddToCartButton } from '~/components/shop/AddToCartButton'
 import { Price } from '~/components/shop/Price'
 import { ProductGallery } from '~/components/shop/ProductGallery'
 import { ShopCta } from '~/components/shop/ShopCta'
@@ -250,20 +251,10 @@ function ProductPage() {
                 </div>
 
                 <div className="mt-10">
-                  {/* Cart wiring lands with the drawer (plan U6); the button
-                      is the U4 entry point with its sold-out state. */}
-                  <button
-                    type="button"
-                    disabled={soldOut}
-                    className={`w-full rounded-full px-8 py-4 font-sans text-[13px] font-medium uppercase tracking-[0.18em] transition-colors duration-hover ease-apple ${
-                      soldOut
-                        ? 'cursor-not-allowed border border-cream-muted/20 text-cream-muted/50'
-                        : 'bg-champagne text-forest hover:bg-champagne/90 active:scale-[0.99]'
-                    }`}
-                    style={soldOut ? { borderWidth: '0.5px' } : undefined}
-                  >
-                    {soldOut ? 'Sold out' : 'Add to cart'}
-                  </button>
+                  <AddToCartButton
+                    merchandiseId={product.variant?.id ?? null}
+                    soldOut={soldOut}
+                  />
                   <p className="mt-4 text-center font-mono text-[10px] uppercase tracking-[0.2em] text-cream-muted/70">
                     Hand-finished in Norridge, IL
                   </p>
