@@ -12,9 +12,18 @@ Implemented:
 - Verified Lenis is importing the package's core entry only. The installed `lenis` package exposes `Lenis` as its default export and marks `sideEffects: false`; no React, Vue, Nuxt, or snap entrypoints are imported.
 - Framer Motion was left on the existing motion primitives because this task explicitly prohibited edits to `lib/motion.ts` or motion primitives. A LazyMotion migration should be a separate motion-system task.
 
+## Storefront SEO surface (headless Shopify build)
+
+- Every catalog route (`/shop`, `/collections/{handle}`, `/products/{handle}`) is fully server-rendered (buffered SSR) with route-level `head`: title, description, robots, Open Graph, and exactly one canonical per URL (variant params and `?page=N` never fragment canonicals; page 1 canonicalizes to the clean URL, deeper pages self-canonicalize with `rel=prev/next` hints).
+- JSON-LD: `Organization` site-wide from the root route; `JewelryStore` (LocalBusiness) on the homepage; `Product` with a live-price/availability offer on PDPs; `BreadcrumbList` on collection and product pages. All emitted via route `head.scripts`, bound to loader data.
+- `sitemap.xml` and `robots.txt` are now dynamic server routes — the static `public/` copies are gone. The sitemap cursor-walks all Shopify products and collections (250/page) with `lastmod`; robots disallows `/api/` and points at the absolute sitemap URL.
+- Collection pagination is crawlable numbered links (no infinite scroll). Unknown/malformed handles and beyond-range pages return real 404s.
+- Images: Shopify CDN with `srcset` + `sizes` + intrinsic dimensions; first cards/gallery image load eager with `fetchpriority=high` and a route-level LCP preload (`imagesrcset`); everything below the fold lazy-loads. `preconnect` to `cdn.shopify.com` on commerce routes.
+- Cache posture: HTML cached at the CDN with `s-maxage` + `stale-while-revalidate` and purged by tag via the Shopify webhook (`products/update`, `products/delete`); catalog HTML never sets cookies. Cart runs through uncached server functions (`private, no-store`).
+
 Manual owner steps:
 
-- Confirm the final production URL. The SEO constants and static files currently use `https://jewelry-aura.com`; update `src/lib/seo.ts`, `public/robots.txt`, and `public/sitemap.xml` if the live Vercel/custom domain differs.
+- Confirm the final production URL. The SEO constants currently use `https://jewelry-aura.com` (note: that domain does not currently point at this Vercel project); update `SITE_URL` in `src/lib/seo.ts` if the live domain differs — sitemap, robots, canonicals, and JSON-LD all derive from it.
 - Claim and fully complete the Google Business Profile for Jewelry Aura at 4104 N Harlem Ave, Norridge, IL 60706.
 - Add the final domain to Google Search Console and submit `/sitemap.xml`.
 - Add the same website URL to Instagram and any other social profiles so `sameAs` signals match public profiles.

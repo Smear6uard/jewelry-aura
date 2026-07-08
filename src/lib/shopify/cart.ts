@@ -15,6 +15,7 @@ import {
   getCookie,
   getRequestIP,
   setCookie,
+  setResponseHeader,
 } from '@tanstack/react-start/server'
 import { formatMoney, type MoneyNode } from './adapters'
 import {
@@ -229,6 +230,13 @@ const CART_GONE_MESSAGE =
   'Your cart is no longer available. Please add the item again.'
 
 export async function getCartLogic(): Promise<CartModel | null> {
+  // Personal data behind a GET — belt-and-braces against any shared cache
+  // (the HTD table pins cart responses to `private, no-store`).
+  try {
+    setResponseHeader('Cache-Control', 'private, no-store')
+  } catch {
+    // No request context (unit tests) — nothing to set.
+  }
   const cartId = readCartId()
   if (!cartId) return null
 
