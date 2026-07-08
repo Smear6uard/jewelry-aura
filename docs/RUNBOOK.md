@@ -64,74 +64,46 @@ annually.
 
 The webhook receiver at `/api/webhooks/shopify` (see
 `src/routes/api/webhooks/shopify.ts` and `src/lib/shopify/webhook.ts`) only
-works once Shopify is told to deliver product webhooks to it. This is a
-one-time manual setup:
+works once Shopify is told to deliver product webhooks to it.
 
-### 1. Create the custom app (source of the webhook secret)
+The webhook app is a **Dev Dashboard app** (org: Sameer Studios LLC), not a
+legacy admin custom app — there is no pasteable `shpat_` Admin token.
+Registration is **declarative**: the topics are declared in the app config
+and Shopify auto-registers them on install/config release.
 
-1. Shopify admin → **Settings → Apps and sales channels → Develop apps** →
-   **Create an app** (name it e.g. `storefront-webhooks`).
-2. **Configure Admin API scopes** → enable `read_products` → Save.
-3. **Install app**, then open **API credentials**:
-   - Copy the **Admin API access token** (needed to run the mutations below).
-   - Copy the **API secret key** — this is what Shopify signs webhook
-     deliveries with.
-4. Set the API secret key as `SHOPIFY_WEBHOOK_SECRET` in Vercel
-   (**Production scope only**) and redeploy production. The receiver fails
-   closed (401) while the secret is unset.
+### 1. Signing secret
 
-### 2. Create the two webhook subscriptions
+`SHOPIFY_WEBHOOK_SECRET` (Vercel, Production scope) must be the app's
+**Client secret** (Dev Dashboard -> app -> credentials). Deliveries are
+HMAC-signed with it; the receiver fails closed (401) on any mismatch.
 
-Run the Admin GraphQL `webhookSubscriptionCreate` mutation **twice** — once
-per topic (`PRODUCTS_UPDATE`, then `PRODUCTS_DELETE`) — against
-`https://<store>.myshopify.com/admin/api/<api-version>/graphql.json` with the
-custom app's Admin API access token in the `X-Shopify-Access-Token` header
-(the admin GraphiQL app works too).
+### 2. Declare the subscriptions in the app config
 
-```graphql
-mutation CreateWebhookSubscription(
-  $topic: WebhookSubscriptionTopic!
-  $webhookSubscription: WebhookSubscriptionInput!
-) {
-  webhookSubscriptionCreate(
-    topic: $topic
-    webhookSubscription: $webhookSubscription
-  ) {
-    webhookSubscription {
-      id
-      topic
-      endpoint {
-        ... on WebhookHttpEndpoint {
-          callbackUrl
-        }
-      }
-    }
-    userErrors {
-      field
-      message
-    }
-  }
-}
+Dev Dashboard -> the app -> configuration (or `shopify.app.toml`):
+
+```toml
+[webhooks]
+api_version = "2026-07"
+
+  [[webhooks.subscriptions]]
+  topics = [ "products/update", "products/delete" ]
+  uri = "https://www.thejewelryaura.com/api/webhooks/shopify"
+  include_fields = [ "id", "handle", "updated_at" ]
 ```
 
-Variables — first run:
+Release the config version and ensure the app is installed on the store —
+subscriptions activate per store on install/config update.
 
-```json
-{
-  "topic": "PRODUCTS_UPDATE",
-  "webhookSubscription": {
-    "callbackUrl": "https://<production-domain>/api/webhooks/shopify",
-    "format": "JSON",
-    "includeFields": ["id", "handle", "updated_at"]
-  }
-}
-```
+If Admin API calls are ever needed at runtime (they are not today), the app
+supports the client-credentials grant (Client ID + secret -> token endpoint,
+24h expiry) — do not hardcode tokens.
 
-Variables — second run: identical, but `"topic": "PRODUCTS_DELETE"`.
+### 3. Verify end-to-end
 
-Both runs must return an empty `userErrors` array. Verify end-to-end by
-editing a product in admin and confirming a successful delivery (admin
-webhook delivery metrics) and a refreshed PDP within seconds.
+Edit a product title in admin -> the delivery shows 200 in the app's webhook
+metrics -> the live PDP/`/shop` reflect the change within seconds (cache tags
+`product-{handle}`, `products`, `home` purged). Only after this passes may
+the PDP `s-maxage` be raised toward 86400 (plan KTD2).
 
 ### After store transfer / domain change
 
