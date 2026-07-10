@@ -5,7 +5,8 @@
  * five-card editorial spread on a 12-column grid — one anchor image,
  * then offset satellites with staggered top margins and deliberate
  * empty zones, echoing the site's asymmetric section language.
- * Collapses to a strict single column below md.
+ * Collapses to a strict two-up grid below md — a browsing density
+ * phones expect — with one uniform aspect so rows stay level.
  */
 
 import { PillLink } from '~/components/shop/PillLink'
@@ -20,31 +21,33 @@ interface SpreadSlot {
 
 // One editorial "spread" = five products. col-start values carve out
 // asymmetric whitespace; mt offsets break the baseline. All md+ only.
+// Below md every card is one cell of the two-up grid at a uniform 3:4
+// so paired rows stay level.
 const SPREAD: ReadonlyArray<SpreadSlot> = [
   {
     className: 'md:col-span-7 md:col-start-1',
-    aspect: 'aspect-[4/5]',
-    sizes: '(min-width: 768px) 56vw, 100vw',
+    aspect: 'aspect-[3/4] md:aspect-[4/5]',
+    sizes: '(min-width: 768px) 56vw, 50vw',
   },
   {
     className: 'md:col-span-4 md:col-start-9 md:mt-32',
     aspect: 'aspect-[3/4]',
-    sizes: '(min-width: 768px) 32vw, 100vw',
+    sizes: '(min-width: 768px) 32vw, 50vw',
   },
   {
     className: 'md:col-span-4 md:col-start-2 md:-mt-10',
     aspect: 'aspect-[3/4]',
-    sizes: '(min-width: 768px) 32vw, 100vw',
+    sizes: '(min-width: 768px) 32vw, 50vw',
   },
   {
     className: 'md:col-span-5 md:col-start-8 md:mt-16',
-    aspect: 'aspect-[4/5]',
-    sizes: '(min-width: 768px) 40vw, 100vw',
+    aspect: 'aspect-[3/4] md:aspect-[4/5]',
+    sizes: '(min-width: 768px) 40vw, 50vw',
   },
   {
     className: 'md:col-span-4 md:col-start-4 md:mt-8',
     aspect: 'aspect-[3/4]',
-    sizes: '(min-width: 768px) 32vw, 100vw',
+    sizes: '(min-width: 768px) 32vw, 50vw',
   },
 ]
 
@@ -60,7 +63,7 @@ export function ProductGrid({ products, eagerCount = 2 }: ProductGridProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-y-16 md:grid-cols-12 md:gap-x-6 md:gap-y-24">
+    <div className="grid grid-cols-2 gap-x-3 gap-y-12 md:grid-cols-12 md:gap-x-6 md:gap-y-24">
       {products.map((product, index) => {
         const slot = SPREAD[index % SPREAD.length]
         return (

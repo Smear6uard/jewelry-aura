@@ -23,7 +23,7 @@ export function ProductCard({
   product,
   aspect = 'aspect-[4/5]',
   eager = false,
-  sizes = '(min-width: 768px) 33vw, 100vw',
+  sizes = '(min-width: 768px) 33vw, 50vw',
 }: ProductCardProps) {
   return (
     <Link
@@ -74,8 +74,10 @@ export function ProductCard({
         )}
       </div>
 
-      <div className="mt-4 flex items-baseline justify-between gap-4">
-        <h3 className="font-serif text-[15px] leading-snug text-cream md:text-base">
+      {/* Two-up mobile cells are too narrow for a side-by-side
+          title/price row — stack them until md. */}
+      <div className="mt-3 flex flex-col gap-1 md:mt-4 md:flex-row md:items-baseline md:justify-between md:gap-4">
+        <h3 className="font-serif text-[13px] leading-snug text-cream md:text-base">
           <span className="bg-gradient-to-r from-champagne to-champagne bg-[length:0%_1px] bg-left-bottom bg-no-repeat pb-0.5 transition-[background-size] duration-micro ease-apple group-hover:bg-[length:100%_1px]">
             {product.title}
           </span>
