@@ -23,7 +23,8 @@
  *
  * Mobile: nav links collapse off-screen (md-and-up only). Logo and
  * the "Book consultation" CTA remain so the primary action is always
- * one tap away. A full mobile drawer is intentionally out of scope.
+ * one tap away. The burger in the corner (all breakpoints) opens the
+ * category drawer (MenuDrawer) — chains through women's.
  */
 
 import { useEffect, useRef, useState } from 'react'
@@ -32,6 +33,7 @@ import { DURATION, easeApple } from '~/lib/motion'
 import { useLenis } from '~/lib/lenis'
 import { useSmoothScrollTo } from '~/lib/scroll-to'
 import { useCart } from '~/components/shop/CartProvider'
+import { MenuDrawer } from '~/components/layout/MenuDrawer'
 
 // "Custom" routes to the Visit section (same as every other commission
 // CTA on the site) — there's no on-site customisation flow to land on,
@@ -60,7 +62,15 @@ interface HeaderProps {
 export function Header({ solid = false }: HeaderProps) {
   const lenis = useLenis()
   const [scrolled, setScrolled] = useState(solid)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const burgerRef = useRef<HTMLButtonElement>(null)
   const onVisitClick = useSmoothScrollTo('visit')
+
+  const closeMenu = () => {
+    setMenuOpen(false)
+    // Focus returns to the trigger so keyboard users don't drop to body.
+    burgerRef.current?.focus()
+  }
 
   useEffect(() => {
     if (solid || !lenis) return
@@ -144,13 +154,20 @@ export function Header({ solid = false }: HeaderProps) {
         style={{ borderBottomWidth: '0.5px', borderBottomStyle: 'solid' }}
       >
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 md:px-12">
-          <a
-            href="/"
-            className="font-serif text-[clamp(1.05rem,1.4vw,1.25rem)] tracking-[0.01em]"
-            style={{ color: '#F0EBE0' }}
-          >
-            Jewelry Aura
-          </a>
+          <div className="flex items-center gap-4 md:gap-5">
+            <BurgerButton
+              ref={burgerRef}
+              open={menuOpen}
+              onClick={() => setMenuOpen(true)}
+            />
+            <a
+              href="/"
+              className="font-serif text-[clamp(1.05rem,1.4vw,1.25rem)] tracking-[0.01em]"
+              style={{ color: '#F0EBE0' }}
+            >
+              Jewelry Aura
+            </a>
+          </div>
 
           <nav
             aria-label="Primary"
@@ -180,7 +197,47 @@ export function Header({ solid = false }: HeaderProps) {
           </div>
         </div>
       </motion.div>
+
+      {/* Rendered as a sibling of the animated bar: the bar's
+          backdrop-filter creates a containing block that would trap a
+          fixed-position drawer inside it. */}
+      <MenuDrawer open={menuOpen} onClose={closeMenu} />
     </header>
+  )
+}
+
+/**
+ * The three-line burger — the drawer's only trigger, visible at every
+ * breakpoint. Lines are 0.5px-adjacent hairlines in cream so the mark
+ * reads as typography, not an app icon.
+ */
+function BurgerButton({
+  ref,
+  open,
+  onClick,
+}: {
+  ref: React.Ref<HTMLButtonElement>
+  open: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      ref={ref}
+      type="button"
+      onClick={onClick}
+      aria-label="Open category menu"
+      aria-haspopup="dialog"
+      aria-expanded={open}
+      className="group -ml-1 flex h-8 w-8 flex-col items-center justify-center gap-[5px] p-1"
+    >
+      {[0, 1, 2].map((line) => (
+        <span
+          key={line}
+          aria-hidden
+          className="block h-px w-[18px] bg-cream transition-colors duration-hover ease-apple group-hover:bg-champagne"
+        />
+      ))}
+    </button>
   )
 }
 
