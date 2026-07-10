@@ -2,9 +2,10 @@
  * components/sections/Visit.tsx — closing section / consultation surface
  *
  * Final section of the page. Every "Start a custom piece" CTA across
- * the site smooth-scrolls here; the user lands with the phone CTA,
- * address, and hours all in view. The atelier has no on-site
- * customisation flow — this section IS the funnel.
+ * the site smooth-scrolls here; the user lands with the phone CTA and
+ * hours in view. The atelier has no on-site customisation flow — this
+ * section IS the funnel. The studio's street address is deliberately
+ * absent everywhere on the site; the phone call is the single next step.
  *
  * Brand grammar (mirrors Hero / CustomPieces / Services):
  *   • Forest #14261F canvas, continuous with adjacent sections.
@@ -13,15 +14,13 @@
  *   • Cream #F0EBE0 type, no italic-for-emphasis on any word.
  *   • Eyebrow rhythm: 26 × 0.5px champagne hairline + 11px mono caps,
  *     champagne, 0.22em tracking. Same as the Hero's eyebrow.
- *   • Info blocks (Location / Hours): no Lucide pictograms, no
- *     filled-circle badges. Each block opens with the same hairline
- *     rule used at the section eyebrow — small uppercase serif title
- *     beneath, sans body.
+ *   • Hours block: no Lucide pictograms, no filled-circle badges. It
+ *     opens with the same hairline rule used at the section eyebrow —
+ *     small uppercase serif title beneath, sans body.
  *   • Primary CTA: cream-fill pill matching the Hero's primary CTA.
  *     This is the ONLY CTA on the site that is wired to a tel: link —
  *     the user has reached the section, the dial action is the
  *     intentional next step.
- *   • Map: champagne 0.5px hairline frame, dark filter on the embed.
  *
  * The section's outer container carries `id="visit"` so the
  * scroll-to helper (`lib/scroll-to.ts`) can target it from every
@@ -46,8 +45,6 @@ const GRAIN_SVG =
 
 const PHONE = '630-965-6464'
 const PHONE_HREF = 'tel:6309656464'
-const MAP_SRC =
-  'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2966.86016187766!2d-87.809403823481!3d41.95992956030999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x880fcb1ab8f51ab1%3A0xe5a3c0a52df2ed3b!2s4104%20N%20Harlem%20Ave%2C%20Norridge%2C%20IL%2060706!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2sus'
 
 export function Visit() {
   const ref = useRef<HTMLElement>(null)
@@ -94,32 +91,25 @@ export function Visit() {
 
       <div className="relative z-10 mx-auto max-w-[1440px] px-6 pb-12 pt-24 md:px-12 md:pt-32 lg:pt-36">
         <div className="grid grid-cols-1 items-start gap-14 lg:grid-cols-2 lg:gap-20">
-          {/* ─── Left column — eyebrow / headline / info / CTA ───── */}
+          {/* ─── Left column — eyebrow / headline / body ───────────── */}
           <div>
             <Eyebrow inView={inView} />
             <Headline inView={inView} />
             <Body inView={inView} />
-
-            <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-10">
-              <InfoBlock
-                title="Our Location"
-                inView={inView}
-                delay={0.4}
-                lines={['4104 N Harlem Ave', 'Norridge, IL 60706']}
-              />
-              <InfoBlock
-                title="Store Hours"
-                inView={inView}
-                delay={0.5}
-                lines={['Mon–Sat · 10:00 AM – 6:00 PM', 'Sun · Closed']}
-              />
-            </div>
-
-            <PrimaryCallCTA inView={inView} />
           </div>
 
-          {/* ─── Right column — map ────────────────────────────────── */}
-          <MapPanel inView={inView} />
+          {/* ─── Right column — hours + call CTA ───────────────────
+              Offset below the headline cap so the panel hangs in the
+              asymmetric white space the map used to occupy. */}
+          <div className="lg:pt-28">
+            <InfoBlock
+              title="Store Hours"
+              inView={inView}
+              delay={0.35}
+              lines={['Mon–Sat · 10:00 AM – 6:00 PM', 'Sun · Closed']}
+            />
+            <PrimaryCallCTA inView={inView} />
+          </div>
         </div>
 
         {/* Editorial bottom rule + copyright */}
@@ -218,8 +208,8 @@ function Body({ inView }: { inView: boolean }) {
       className="mt-9 max-w-[32ch] font-sans text-[15px] leading-[1.7] md:text-[16px]"
       style={{ color: CREAM_MUTED }}
     >
-      Our boutique in Norridge is by walk-in or appointment. Bring a
-      sketch, a reference, or a name — we design the rest in person.
+      The studio is open by appointment. Bring a sketch, a reference,
+      or a name — we design the rest in person.
     </motion.p>
   )
 }
@@ -296,7 +286,7 @@ function PrimaryCallCTA({ inView }: { inView: boolean }) {
       transition={{
         duration: DURATION.content,
         ease: easeOutExpo,
-        delay: 0.62,
+        delay: 0.5,
       }}
       className="mt-12"
     >
@@ -330,90 +320,13 @@ function PrimaryCallCTA({ inView }: { inView: boolean }) {
           →
         </span>
       </motion.a>
-    </motion.div>
-  )
-}
-
-// ────────────────────────────────────────────────────────────────────
-// Map panel — champagne hairline frame
-// ────────────────────────────────────────────────────────────────────
-
-function MapPanel({ inView }: { inView: boolean }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.98 }}
-      animate={inView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.98 }}
-      transition={{
-        duration: DURATION.hero,
-        ease: easeOutExpo,
-        delay: 0.2,
-      }}
-      className="relative h-[360px] w-full overflow-hidden md:h-[460px] lg:h-[600px]"
-      style={{
-        boxShadow: 'inset 0 0 0 0.5px rgba(196,168,117,0.45)',
-      }}
-    >
-      <iframe
-        src={inView ? MAP_SRC : 'about:blank'}
-        width="100%"
-        height="100%"
-        style={{
-          border: 0,
-          // Same map-dark filter the previous Visit used — biases
-          // toward our forest world without losing legibility.
-          filter: 'grayscale(100%) invert(92%) contrast(83%)',
-        }}
-        allowFullScreen={false}
-        loading="lazy"
-        referrerPolicy="no-referrer-when-downgrade"
-        title="Jewelry Aura — 4104 N Harlem Ave, Norridge IL"
-      />
-      {/* Address card — small, cream on a translucent forest panel,
-          champagne hairline cap. Reads against the dark map without
-          fighting it. */}
-      <div
-        className="absolute left-5 top-5 max-w-[18rem] px-5 py-4"
-        style={{
-          backgroundColor: 'rgba(20,38,31,0.78)',
-          backdropFilter: 'blur(10px) saturate(140%)',
-          WebkitBackdropFilter: 'blur(10px) saturate(140%)',
-          boxShadow: 'inset 0 0 0 0.5px rgba(196,168,117,0.3)',
-        }}
+      <p
+        className="mt-5 max-w-[34ch] font-sans text-[12px] leading-[1.6]"
+        style={{ color: CREAM_MUTED }}
       >
-        <span
-          aria-hidden
-          className="mb-3 block"
-          style={{
-            width: 22,
-            height: '0.5px',
-            backgroundColor: 'rgba(196,168,117,0.85)',
-          }}
-        />
-        <p
-          className="font-mono text-[10px] uppercase"
-          style={{ color: CHAMPAGNE, letterSpacing: '0.32em' }}
-        >
-          The studio
-        </p>
-        <p
-          className="mt-2 font-display"
-          style={{
-            color: CREAM,
-            fontSize: '1rem',
-            fontWeight: 400,
-            letterSpacing: '-0.005em',
-            fontVariationSettings: '"opsz" 72',
-          }}
-        >
-          4104 N Harlem Ave
-        </p>
-        <p
-          className="mt-1 font-sans text-[12px]"
-          style={{ color: CREAM_MUTED }}
-        >
-          Norridge, IL 60706
-        </p>
-      </div>
+        One call books your consultation — we share directions when we
+        confirm your time.
+      </p>
     </motion.div>
   )
 }
@@ -430,7 +343,7 @@ function FooterRule() {
           className="font-mono text-[10px] uppercase"
           style={{ color: SAGE, letterSpacing: '0.28em' }}
         >
-          © {new Date().getFullYear()} · Jewelry Aura · Norridge, IL
+          © {new Date().getFullYear()} · Jewelry Aura
         </p>
         <div className="flex items-center gap-7">
           <FooterLink href="https://instagram.com/Jewelryaura01">

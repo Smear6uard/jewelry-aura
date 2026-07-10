@@ -2,18 +2,9 @@ export const SITE_URL = 'https://www.thejewelryaura.com'
 export const SITE_NAME = 'Jewelry Aura'
 
 export const HERO_SOCIAL_IMAGE = `${SITE_URL}/hero-portrait-wide.png`
-export const SITE_TITLE = 'Jewelry Aura | Custom Jewelry Norridge IL'
+export const SITE_TITLE = 'Jewelry Aura | Custom Jewelry & Repair'
 export const SITE_DESCRIPTION =
-  'Custom chains, pendants, bridal pieces, and expert jewelry repair — hand-crafted in Norridge serving the Chicago area. Book a consultation.'
-
-const address = {
-  '@type': 'PostalAddress',
-  streetAddress: '4104 N Harlem Ave',
-  addressLocality: 'Norridge',
-  addressRegion: 'IL',
-  postalCode: '60706',
-  addressCountry: 'US',
-} as const
+  'Custom chains, pendants, bridal pieces, and expert jewelry repair — every piece hand-crafted to order. Book a consultation.'
 
 const sameAs = ['https://instagram.com/Jewelryaura01'] as const
 
@@ -22,7 +13,6 @@ export const localBusinessSchema = {
   '@type': 'JewelryStore',
   name: 'Jewelry Aura',
   image: HERO_SOCIAL_IMAGE,
-  address,
   telephone: '+1-630-965-6464',
   url: SITE_URL,
   openingHoursSpecification: [
@@ -41,11 +31,6 @@ export const localBusinessSchema = {
     },
   ],
   priceRange: '$$$',
-  geo: {
-    '@type': 'GeoCoordinates',
-    latitude: 41.954117,
-    longitude: -87.808319,
-  },
   sameAs,
 } as const
 
@@ -158,6 +143,5 @@ export const organizationSchema = {
   logo: `${SITE_URL}/icon-512-maskable.png`,
   image: HERO_SOCIAL_IMAGE,
   telephone: '+1-630-965-6464',
-  address,
   sameAs,
 } as const

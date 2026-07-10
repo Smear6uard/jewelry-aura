@@ -19,7 +19,7 @@ import { SITE_URL, pageMeta } from '~/lib/seo'
 
 const PAGE_TITLE = 'Shop All Pieces | Jewelry Aura'
 const PAGE_DESCRIPTION =
-  'Chains, pendants, rings, and one-of-one pieces from the Jewelry Aura workshop in Norridge, IL. Every piece ships from the bench, not a warehouse.'
+  'Chains, pendants, rings, and one-of-one pieces from the Jewelry Aura workshop. Every piece ships from the bench, not a warehouse.'
 
 interface ShopProductsData {
   products: {

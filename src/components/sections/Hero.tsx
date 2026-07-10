@@ -443,7 +443,7 @@ function DesktopBody({
       style={{ opacity, y, color: CREAM_MUTED }}
       className="mt-14 max-w-[34ch] font-sans text-[15px] leading-[1.65] md:text-[16px]"
     >
-      A small atelier in Norridge. We design, set, and finish every chain,
+      A small private atelier. We design, set, and finish every chain,
       pendant, and bridal piece by hand — no two ever the same.
     </motion.p>
   )
@@ -623,7 +623,7 @@ function MobileHero() {
           className="mt-10 max-w-[34ch] font-sans text-[15px] leading-[1.65]"
           style={{ color: CREAM_MUTED }}
         >
-          A small atelier in Norridge. We design, set, and finish every chain,
+          A small private atelier. We design, set, and finish every chain,
           pendant, and bridal piece by hand — no two ever the same.
         </motion.p>
 
@@ -829,7 +829,7 @@ function StaticHero() {
               className="mt-12 max-w-[34ch] font-sans text-[15px] leading-[1.65] md:text-[16px]"
               style={{ color: CREAM_MUTED }}
             >
-              A small atelier in Norridge. We design, set, and finish every
+              A small private atelier. We design, set, and finish every
               chain, pendant, and bridal piece by hand — no two ever the same.
             </p>
 

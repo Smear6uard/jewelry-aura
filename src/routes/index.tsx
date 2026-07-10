@@ -110,7 +110,7 @@ export const Route = createFileRoute('/')({
 //   CustomPieces — pinned editorial strip
 //   Services   — typographic capability list
 //   Stats      — three numbers, mono caps
-//   Visit      — phone CTA + map (the only conversion surface)
+//   Visit      — phone CTA + hours (the only conversion surface)
 //
 // Lenis is provided once at the root (~/lib/lenis.LenisProvider). Every
 // commission/CTA on the site routes here via lib/scroll-to so the

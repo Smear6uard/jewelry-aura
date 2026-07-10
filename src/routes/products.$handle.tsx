@@ -125,7 +125,7 @@ export const Route = createFileRoute('/products/$handle')({
     const title = `${loaderData.seoTitle} | Jewelry Aura`
     const description =
       loaderData.seoDescription ||
-      `${loaderData.title} — hand-finished at the Jewelry Aura workshop in Norridge, IL.`
+      `${loaderData.title} — hand-finished at the Jewelry Aura workshop.`
     const firstImage = loaderData.images[0]
 
     return {
@@ -250,7 +250,7 @@ function ProductPage() {
                     soldOut={soldOut}
                   />
                   <p className="mt-4 text-center font-mono text-[10px] uppercase tracking-[0.2em] text-cream-muted/70">
-                    Hand-finished in Norridge, IL
+                    Hand-finished in our workshop
                   </p>
                 </div>
 

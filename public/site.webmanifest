@@ -1,7 +1,7 @@
 {
   "name": "Jewelry Aura",
   "short_name": "Jewelry Aura",
-  "description": "Custom jewelry and repair in Norridge, IL.",
+  "description": "Custom jewelry and repair, hand-crafted to order.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

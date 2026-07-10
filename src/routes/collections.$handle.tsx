@@ -104,7 +104,7 @@ export const Route = createFileRoute('/collections/$handle')({
     const title = `${loaderData.seoTitle} | Jewelry Aura`
     const description =
       loaderData.seoDescription ||
-      `Shop the ${loaderData.title} collection from the Jewelry Aura workshop in Norridge, IL.`
+      `Shop the ${loaderData.title} collection from the Jewelry Aura workshop.`
 
     const links = [
       { rel: 'canonical', href: canonical },

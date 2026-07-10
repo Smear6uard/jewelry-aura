@@ -398,7 +398,7 @@ function SectionHeader({ total }: { total: number }) {
         delay={0.05}
         className="font-display"
       >
-        Custom pieces, hand-set in Norridge.
+        Custom pieces, hand-set in-house.
       </SplitText>
 
       <style>{`
@@ -820,7 +820,7 @@ function CommissionCard() {
             className="font-mono text-[11px]"
             style={{ color: CREAM_MUTED, letterSpacing: '0.06em' }}
           >
-            By consultation · Norridge studio
+            By consultation · Private studio
           </span>
         </div>
       </div>
@@ -912,7 +912,7 @@ function MobileCarousel() {
           delay={0.05}
           className="font-display"
         >
-          Custom pieces, hand-set in Norridge.
+          Custom pieces, hand-set in-house.
         </SplitText>
 
         <Reveal delay={0.18}>
@@ -1225,7 +1225,7 @@ function MobileCommissionCard() {
           className="mt-1 block font-mono text-[11px]"
           style={{ color: CREAM_MUTED, letterSpacing: '0.06em' }}
         >
-          By consultation · Norridge studio
+          By consultation · Private studio
         </span>
       </div>
     </a>
@@ -1270,7 +1270,7 @@ function StaticDesktop() {
               maxWidth: '14ch',
             }}
           >
-            Custom pieces, hand-set in Norridge.
+            Custom pieces, hand-set in-house.
           </h2>
           <p
             className="mt-9 max-w-[36ch] font-sans text-[15px] leading-[1.65]"
