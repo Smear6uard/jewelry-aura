@@ -4,18 +4,19 @@ import { createServerFn } from '@tanstack/react-start'
 import { Hero } from '~/components/sections/Hero'
 import { CustomPieces } from '~/components/sections/CustomPieces'
 import { Services } from '~/components/sections/Services'
-import { Stats } from '~/components/sections/Stats'
 import { Visit } from '~/components/sections/Visit'
 import { Header } from '~/components/layout/Header'
 import { BestSellers } from '~/components/shop/BestSellers'
 import type { ProductCardModel } from '~/lib/shopify/adapters'
 import {
   HERO_SOCIAL_IMAGE,
+  HERO_SOCIAL_IMAGE_ALT,
   SITE_DESCRIPTION,
   SITE_TITLE,
   SITE_URL,
+  itemListJsonLd,
   jsonLdScript,
-  localBusinessSchema,
+  pageMeta,
 } from '~/lib/seo'
 
 // ═══════════════════════════════════════════
@@ -54,53 +55,56 @@ export const Route = createFileRoute('/')({
       'public, max-age=0, s-maxage=1800, stale-while-revalidate=86400',
     'Vercel-Cache-Tag': 'home,products',
   }),
-  head: () => ({
-    meta: [
-      { title: SITE_TITLE },
-      {
-        name: 'description',
-        content: SITE_DESCRIPTION,
-      },
-      { name: 'robots', content: 'index, follow' },
-      { property: 'og:title', content: SITE_TITLE },
-      { property: 'og:description', content: SITE_DESCRIPTION },
-      { property: 'og:image', content: HERO_SOCIAL_IMAGE },
-      { property: 'og:type', content: 'website' },
-      { property: 'og:url', content: SITE_URL },
-      { property: 'og:site_name', content: 'Jewelry Aura' },
-      { name: 'twitter:card', content: 'summary_large_image' },
-      { name: 'twitter:title', content: SITE_TITLE },
-      { name: 'twitter:description', content: SITE_DESCRIPTION },
-      { name: 'twitter:image', content: HERO_SOCIAL_IMAGE },
-    ],
-    links: [
-      {
-        rel: 'canonical',
-        href: SITE_URL,
-      },
-      {
-        rel: 'preload',
-        href: '/hero-portrait-wide.avif',
-        as: 'image',
-        media: '(min-width: 1024px)',
-      },
-      {
-        rel: 'preload',
-        href: '/hero-portrait-tall.avif',
-        as: 'image',
-        media: '(max-width: 1023px)',
-      },
-      { rel: 'preconnect', href: 'https://cdn.shopify.com' },
-    ],
-    // Organization JSON-LD comes from the root route (site-wide, R18);
-    // only the LocalBusiness identity is homepage-specific.
-    scripts: [
-      {
-        type: 'application/ld+json',
-        children: jsonLdScript(localBusinessSchema),
-      },
-    ],
-  }),
+  head: ({ loaderData }) => {
+    const bestSellers = loaderData ?? []
+    return {
+      meta: [
+        ...pageMeta({
+          title: SITE_TITLE,
+          description: SITE_DESCRIPTION,
+          url: SITE_URL,
+          image: HERO_SOCIAL_IMAGE,
+          imageAlt: HERO_SOCIAL_IMAGE_ALT,
+        }),
+        { property: 'og:image:width', content: '1536' },
+        { property: 'og:image:height', content: '1024' },
+      ],
+      links: [
+        {
+          rel: 'canonical',
+          href: SITE_URL,
+        },
+        {
+          rel: 'preload',
+          href: '/hero-portrait-wide.avif',
+          as: 'image',
+          media: '(min-width: 1024px)',
+        },
+        {
+          rel: 'preload',
+          href: '/hero-portrait-tall.avif',
+          as: 'image',
+          media: '(max-width: 1023px)',
+        },
+        { rel: 'preconnect', href: 'https://cdn.shopify.com' },
+      ],
+      // Business identity + WebSite JSON-LD come from the root route
+      // (site-wide, R18). The homepage adds an ItemList of the live best
+      // sellers so the shop window is eligible for a product carousel.
+      scripts: bestSellers.length
+        ? [
+            {
+              type: 'application/ld+json',
+              children: jsonLdScript(
+                itemListJsonLd(
+                  bestSellers.map((product) => `/products/${product.handle}`),
+                ),
+              ),
+            },
+          ]
+        : [],
+    }
+  },
 })
 
 // ═══════════════════════════════════════════
@@ -108,11 +112,11 @@ export const Route = createFileRoute('/')({
 // ═══════════════════════════════════════════
 //
 // Section order is the user's narrative:
-//   Hero       — wordless photograph + cascade
+//   Hero        — wordless photograph + cascade
+//   BestSellers — the live shop window (four ranked pieces)
 //   CustomPieces — pinned editorial strip
-//   Services   — typographic capability list
-//   Stats      — three numbers, mono caps
-//   Visit      — phone CTA + hours (the only conversion surface)
+//   Services    — typographic capability list
+//   Visit       — phone CTA + hours (the only conversion surface)
 //
 // Lenis is provided once at the root (~/lib/lenis.LenisProvider). Every
 // commission/CTA on the site routes here via lib/scroll-to so the
@@ -134,7 +138,6 @@ function LandingPage() {
         <BestSellers products={bestSellers} />
         <CustomPieces />
         <Services />
-        <Stats />
         <Visit />
       </main>
     </div>

@@ -14,7 +14,8 @@ import {
   SITE_DESCRIPTION,
   SITE_TITLE,
   jsonLdScript,
-  organizationSchema,
+  jewelryStoreSchema,
+  webSiteSchema,
 } from '~/lib/seo'
 
 const GOOGLE_FONTS_URL =
@@ -46,7 +47,8 @@ export const Route = createRootRoute({
       },
       {
         name: 'robots',
-        content: 'index, follow',
+        content:
+          'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
       },
     ],
     links: [
@@ -73,12 +75,17 @@ export const Route = createRootRoute({
       { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
       { rel: 'manifest', href: '/site.webmanifest' },
     ],
-    // Organization identity on every route (R18); pages add their own
-    // Product/BreadcrumbList/LocalBusiness data on top.
+    // One canonical business identity + the WebSite node on every route
+    // (R18); pages add their own Product/BreadcrumbList/ItemList data on
+    // top, all referencing #organization by @id.
     scripts: [
       {
         type: 'application/ld+json',
-        children: jsonLdScript(organizationSchema),
+        children: jsonLdScript(jewelryStoreSchema),
+      },
+      {
+        type: 'application/ld+json',
+        children: jsonLdScript(webSiteSchema),
       },
     ],
   }),

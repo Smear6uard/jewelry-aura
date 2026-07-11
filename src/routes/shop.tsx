@@ -15,11 +15,19 @@ import { ProductGrid } from '~/components/shop/ProductGrid'
 import { ShopCta } from '~/components/shop/ShopCta'
 import { mapProductCard, type ProductCardNode } from '~/lib/shopify/adapters'
 import { SHOP_PRODUCTS_QUERY } from '~/lib/shopify/queries'
-import { SITE_URL, pageMeta } from '~/lib/seo'
+import {
+  HERO_SOCIAL_IMAGE,
+  HERO_SOCIAL_IMAGE_ALT,
+  SITE_URL,
+  itemListJsonLd,
+  jsonLdScript,
+  pageMeta,
+} from '~/lib/seo'
 
-const PAGE_TITLE = 'Shop All Pieces | Jewelry Aura'
+const PAGE_TITLE =
+  "Shop Men's Gold Chains, Moissanite & Pendants | Jewelry Aura"
 const PAGE_DESCRIPTION =
-  'Chains, pendants, rings, and one-of-one pieces from the Jewelry Aura workshop. Every piece ships from the bench, not a warehouse.'
+  'Shop every piece from the Jewelry Aura workshop — custom gold chains, moissanite, pendants, rings & bracelets, hand-finished to order. Repairs welcome.'
 
 interface ShopProductsData {
   products: {
@@ -52,17 +60,36 @@ export const Route = createFileRoute('/shop')({
       'public, max-age=0, s-maxage=300, stale-while-revalidate=86400',
     'Vercel-Cache-Tag': 'products,collections',
   }),
-  head: () => ({
-    meta: pageMeta({
-      title: PAGE_TITLE,
-      description: PAGE_DESCRIPTION,
-      url: `${SITE_URL}/shop`,
-    }),
-    links: [
-      { rel: 'canonical', href: `${SITE_URL}/shop` },
-      { rel: 'preconnect', href: 'https://cdn.shopify.com' },
-    ],
-  }),
+  head: ({ loaderData }) => {
+    const products = loaderData ?? []
+    return {
+      meta: pageMeta({
+        title: PAGE_TITLE,
+        description: PAGE_DESCRIPTION,
+        url: `${SITE_URL}/shop`,
+        image: HERO_SOCIAL_IMAGE,
+        imageAlt: HERO_SOCIAL_IMAGE_ALT,
+      }),
+      links: [
+        { rel: 'canonical', href: `${SITE_URL}/shop` },
+        { rel: 'preconnect', href: 'https://cdn.shopify.com' },
+      ],
+      // ItemList of the listed pieces — the storefront's catalog page is
+      // eligible for a product carousel; competitors ship no such markup.
+      scripts: products.length
+        ? [
+            {
+              type: 'application/ld+json',
+              children: jsonLdScript(
+                itemListJsonLd(
+                  products.map((product) => `/products/${product.handle}`),
+                ),
+              ),
+            },
+          ]
+        : [],
+    }
+  },
   component: ShopPage,
   errorComponent: () => (
     <CatalogFallback

@@ -125,7 +125,9 @@ export function Hero() {
       className="relative w-full"
       style={{ backgroundColor: FOREST }}
     >
-      <h1 className="sr-only">Iced. Custom. Yours.</h1>
+      <h1 className="sr-only">
+        Custom Men&rsquo;s Gold Chains, Moissanite &amp; Fine Jewelry
+      </h1>
       <div className="hidden lg:block">
         <PinnedDesktopHero />
       </div>
@@ -748,7 +750,9 @@ function StaticHero() {
       className="relative h-[100svh] w-full overflow-hidden"
       style={{ backgroundColor: FOREST }}
     >
-      <h1 className="sr-only">Iced. Custom. Yours.</h1>
+      <h1 className="sr-only">
+        Custom Men&rsquo;s Gold Chains, Moissanite &amp; Fine Jewelry
+      </h1>
       {/* Photograph */}
       <picture className="absolute inset-0 block">
         <source media="(min-width: 1024px)" type="image/avif" srcSet={PHOTO_WIDE_AVIF} />

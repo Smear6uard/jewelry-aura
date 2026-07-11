@@ -136,9 +136,9 @@ export function Services(): ReactElement {
         }}
       />
 
-      <div className="relative z-10 mx-auto max-w-[1280px] px-6 py-32 md:px-12 md:py-40 lg:px-16 lg:py-48">
+      <div className="relative z-10 mx-auto max-w-[1280px] px-6 py-24 md:px-12 md:py-40 lg:px-16 lg:py-48">
         {/* ─── Header ──────────────────────────────────────────────── */}
-        <header className="mx-auto mb-24 max-w-[44rem] text-center md:mb-28 lg:mb-32">
+        <header className="mx-auto mb-14 max-w-[44rem] text-center md:mb-28 lg:mb-32">
           <Reveal>
             <span
               className="inline-block font-sans uppercase"
@@ -173,8 +173,22 @@ export function Services(): ReactElement {
           </Reveal>
         </header>
 
-        {/* ─── Four-column grid ────────────────────────────────────── */}
-        <div className="grid grid-cols-1 gap-y-16 sm:grid-cols-2 sm:gap-x-10 sm:gap-y-20 lg:grid-cols-4 lg:gap-x-12 xl:gap-x-16">
+        {/* ─── Mobile / tablet — compact list ──────────────────────
+            The desktop's oversized 01–04 numerals collapse into one tall,
+            repetitive scroll on a phone. Here each service is a single
+            tight row — a quiet champagne index, the name, one line — so
+            the section keeps its numbering idiom at a fraction of the
+            scroll length. */}
+        <div className="lg:hidden">
+          {SERVICES.map((service, i) => (
+            <MobileServiceRow key={service.id} service={service} index={i} />
+          ))}
+        </div>
+
+        {/* ─── Desktop — editorial four-column layout ──────────────
+            The large numerals earn their space side by side, so there's
+            no excess scroll to pay for them. */}
+        <div className="hidden lg:grid lg:grid-cols-4 lg:gap-x-12 xl:gap-x-16">
           {SERVICES.map((service, i) => (
             <ServiceColumn key={service.id} service={service} index={i} />
           ))}
@@ -291,5 +305,61 @@ function ServiceColumn({
         </p>
       </Reveal>
     </motion.div>
+  )
+}
+
+// ─── Mobile row — quiet index + name + one line, hairline-separated ───
+//
+// The phone layout drops the oversized numeral (it reads as noise when
+// stacked) and keeps the numbering as a small mono index, matching the
+// drawer's row-index idiom. Rows are hairline-separated and reveal on a
+// tight stagger as the list scrolls into view.
+
+function MobileServiceRow({
+  service,
+  index,
+}: {
+  service: Service
+  index: number
+}): ReactElement {
+  return (
+    <Reveal delay={BASE_DELAY + index * STAGGER.tight}>
+      <div
+        className="flex gap-5 border-t py-7 sm:gap-6"
+        style={{
+          borderTopWidth: '0.5px',
+          borderTopColor: 'rgba(196,168,117,0.18)',
+        }}
+      >
+        <span
+          aria-hidden
+          className="shrink-0 pt-1.5 font-mono text-[11px] tracking-[0.2em]"
+          style={{ color: CHAMPAGNE }}
+        >
+          {service.id}
+        </span>
+        <div className="min-w-0">
+          <h3
+            className="font-display"
+            style={{
+              color: CREAM,
+              fontWeight: 400,
+              fontSize: '1.5rem',
+              letterSpacing: '-0.015em',
+              lineHeight: 1.15,
+              fontVariationSettings: '"opsz" 72',
+            }}
+          >
+            {service.name}
+          </h3>
+          <p
+            className="mt-2 font-sans text-[14px] leading-[1.6]"
+            style={{ color: CREAM_MUTED }}
+          >
+            {service.desc}
+          </p>
+        </div>
+      </div>
+    </Reveal>
   )
 }

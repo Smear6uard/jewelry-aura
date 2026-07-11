@@ -25,8 +25,10 @@ import {
 } from '~/lib/shopify/adapters'
 import { COLLECTION_QUERY } from '~/lib/shopify/queries'
 import {
+  HERO_SOCIAL_IMAGE,
   SITE_URL,
   breadcrumbJsonLd,
+  itemListJsonLd,
   jsonLdScript,
   pageMeta,
   type BreadcrumbItem,
@@ -104,7 +106,10 @@ export const Route = createFileRoute('/collections/$handle')({
     const title = `${loaderData.seoTitle} | Jewelry Aura`
     const description =
       loaderData.seoDescription ||
-      `Shop the ${loaderData.title} collection from the Jewelry Aura workshop.`
+      `Shop ${loaderData.title} at Jewelry Aura — hand-finished gold, moissanite, and custom pieces, made to order.`
+    // Lead the share card with the first piece in the case; fall back to
+    // the brand image on an empty collection.
+    const shareImage = loaderData.products[0]?.image?.src ?? HERO_SOCIAL_IMAGE
 
     const links = [
       { rel: 'canonical', href: canonical },
@@ -124,7 +129,13 @@ export const Route = createFileRoute('/collections/$handle')({
     }
 
     return {
-      meta: pageMeta({ title, description, url: canonical }),
+      meta: pageMeta({
+        title,
+        description,
+        url: canonical,
+        image: shareImage,
+        imageAlt: loaderData.title,
+      }),
       links,
       scripts: [
         {
@@ -133,6 +144,23 @@ export const Route = createFileRoute('/collections/$handle')({
             breadcrumbJsonLd(collectionCrumbs(loaderData.title, basePath)),
           ),
         },
+        // ItemList of this page's products, numbered continuously across
+        // the collection so page 2 begins where page 1 ended.
+        ...(loaderData.products.length
+          ? [
+              {
+                type: 'application/ld+json',
+                children: jsonLdScript(
+                  itemListJsonLd(
+                    loaderData.products.map(
+                      (product) => `/products/${product.handle}`,
+                    ),
+                    (loaderData.page - 1) * PER_PAGE + 1,
+                  ),
+                ),
+              },
+            ]
+          : []),
       ],
     }
   },

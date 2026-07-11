@@ -125,17 +125,35 @@ export const Route = createFileRoute('/products/$handle')({
     const title = `${loaderData.seoTitle} | Jewelry Aura`
     const description =
       loaderData.seoDescription ||
-      `${loaderData.title} — hand-finished at the Jewelry Aura workshop.`
+      `${loaderData.title} — hand-finished to order at the Jewelry Aura workshop. Real gold and certified stones.`
     const firstImage = loaderData.images[0]
+    const offer = loaderData.offer
 
     return {
-      meta: pageMeta({
-        title,
-        description,
-        url: canonical,
-        ogType: 'product',
-        image: firstImage?.src,
-      }),
+      meta: [
+        ...pageMeta({
+          title,
+          description,
+          url: canonical,
+          ogType: 'product',
+          image: firstImage?.src,
+          imageAlt: firstImage?.alt ?? loaderData.title,
+        }),
+        // Open Graph product namespace — lets rich unfurls and Shopping
+        // surfaces read the live price/availability off the share.
+        ...(offer
+          ? [
+              { property: 'product:price:amount', content: offer.price },
+              { property: 'product:price:currency', content: offer.currency },
+              {
+                property: 'product:availability',
+                content: offer.available ? 'in stock' : 'out of stock',
+              },
+              { property: 'product:condition', content: 'new' },
+              { property: 'product:brand', content: 'Jewelry Aura' },
+            ]
+          : []),
+      ],
       links: [
         { rel: 'canonical', href: canonical },
         { rel: 'preconnect', href: 'https://cdn.shopify.com' },

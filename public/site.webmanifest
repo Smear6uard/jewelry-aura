@@ -1,7 +1,10 @@
 {
+  "id": "/",
+  "lang": "en-US",
   "name": "Jewelry Aura",
   "short_name": "Jewelry Aura",
-  "description": "Custom jewelry and repair, hand-crafted to order.",
+  "description": "Custom men's gold chains, moissanite & fine jewelry, hand-finished to order.",
+  "categories": ["shopping", "lifestyle"],
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

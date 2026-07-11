@@ -948,10 +948,14 @@ function MobileCarousel() {
           gutter. */}
       <div
         ref={scrollerRef}
-        className="-mx-6 flex snap-x snap-mandatory gap-5 overflow-x-auto overflow-y-hidden px-6 pb-4"
+        className="-mx-6 flex snap-x snap-mandatory gap-5 overflow-x-auto overflow-y-hidden overscroll-x-contain px-6 pb-4"
         style={{
           scrollbarWidth: 'none',
           WebkitOverflowScrolling: 'touch',
+          // A vertical swipe that lands on the strip scrolls the page
+          // rather than getting trapped by the horizontal carousel;
+          // horizontal over-scroll won't fire browser back-navigation.
+          touchAction: 'pan-x',
         }}
       >
         <style>{`
