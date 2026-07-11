@@ -1,55 +1,14 @@
 /**
- * components/shop/ProductGrid.tsx — editorial product listing.
+ * components/shop/ProductGrid.tsx — uniform catalog grid.
  *
- * Not a uniform template grid: products flow through a repeating
- * five-card editorial spread on a 12-column grid — one anchor image,
- * then offset satellites with staggered top margins and deliberate
- * empty zones, echoing the site's asymmetric section language.
- * Collapses to a strict two-up grid below md — a browsing density
- * phones expect — with one uniform aspect so rows stay level.
+ * A standard shelf grid: two columns on phones, three from md up.
+ * Every card shares the same 3:4 frame so rows stay level and the
+ * catalog reads as a clean case of pieces, not an editorial spread.
  */
 
 import { PillLink } from '~/components/shop/PillLink'
 import { ProductCard } from '~/components/shop/ProductCard'
 import type { ProductCardModel } from '~/lib/shopify/adapters'
-
-interface SpreadSlot {
-  className: string
-  aspect: string
-  sizes: string
-}
-
-// One editorial "spread" = five products. col-start values carve out
-// asymmetric whitespace; mt offsets break the baseline. All md+ only.
-// Below md every card is one cell of the two-up grid at a uniform 3:4
-// so paired rows stay level.
-const SPREAD: ReadonlyArray<SpreadSlot> = [
-  {
-    className: 'md:col-span-7 md:col-start-1',
-    aspect: 'aspect-[3/4] md:aspect-[4/5]',
-    sizes: '(min-width: 768px) 56vw, 50vw',
-  },
-  {
-    className: 'md:col-span-4 md:col-start-9 md:mt-32',
-    aspect: 'aspect-[3/4]',
-    sizes: '(min-width: 768px) 32vw, 50vw',
-  },
-  {
-    className: 'md:col-span-4 md:col-start-2 md:-mt-10',
-    aspect: 'aspect-[3/4]',
-    sizes: '(min-width: 768px) 32vw, 50vw',
-  },
-  {
-    className: 'md:col-span-5 md:col-start-8 md:mt-16',
-    aspect: 'aspect-[3/4] md:aspect-[4/5]',
-    sizes: '(min-width: 768px) 40vw, 50vw',
-  },
-  {
-    className: 'md:col-span-4 md:col-start-4 md:mt-8',
-    aspect: 'aspect-[3/4]',
-    sizes: '(min-width: 768px) 32vw, 50vw',
-  },
-]
 
 interface ProductGridProps {
   products: ReadonlyArray<ProductCardModel>
@@ -57,26 +16,22 @@ interface ProductGridProps {
   eagerCount?: number
 }
 
-export function ProductGrid({ products, eagerCount = 2 }: ProductGridProps) {
+export function ProductGrid({ products, eagerCount = 3 }: ProductGridProps) {
   if (products.length === 0) {
     return <EmptyCatalog />
   }
 
   return (
-    <div className="grid grid-cols-2 gap-x-3 gap-y-12 md:grid-cols-12 md:gap-x-6 md:gap-y-24">
-      {products.map((product, index) => {
-        const slot = SPREAD[index % SPREAD.length]
-        return (
-          <div key={product.handle} className={slot.className}>
-            <ProductCard
-              product={product}
-              aspect={slot.aspect}
-              sizes={slot.sizes}
-              eager={index < eagerCount}
-            />
-          </div>
-        )
-      })}
+    <div className="grid grid-cols-2 gap-x-3 gap-y-12 md:grid-cols-3 md:gap-x-6 md:gap-y-20">
+      {products.map((product, index) => (
+        <ProductCard
+          key={product.handle}
+          product={product}
+          aspect="aspect-[3/4]"
+          sizes="(min-width: 768px) 33vw, 50vw"
+          eager={index < eagerCount}
+        />
+      ))}
     </div>
   )
 }
