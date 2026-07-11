@@ -12,7 +12,7 @@ export const SHOP_NAME_QUERY = `#graphql
 
 /**
  * Card-level product data shared by every listing surface (/shop,
- * collections, featured collections). Image aliases feed the srcset the
+ * collections, homepage best sellers). Image aliases feed the srcset the
  * adapter assembles; Shopify serves the transform from its CDN.
  */
 export const PRODUCT_CARD_FRAGMENT = `#graphql
@@ -85,25 +85,6 @@ export const SITEMAP_COLLECTIONS_QUERY = `#graphql
       }
     }
   }
-`
-
-/**
- * Homepage featured-collection tile: a light fetch — title plus the
- * first few product cards.
- */
-export const FEATURED_COLLECTION_QUERY = `#graphql
-  query FeaturedCollection($handle: String!, $first: Int!) {
-    collection(handle: $handle) {
-      handle
-      title
-      products(first: $first) {
-        nodes {
-          ...ProductCard
-        }
-      }
-    }
-  }
-  ${PRODUCT_CARD_FRAGMENT}
 `
 
 /**

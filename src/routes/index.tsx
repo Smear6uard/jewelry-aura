@@ -7,8 +7,8 @@ import { Services } from '~/components/sections/Services'
 import { Stats } from '~/components/sections/Stats'
 import { Visit } from '~/components/sections/Visit'
 import { Header } from '~/components/layout/Header'
-import { FeaturedCollections } from '~/components/shop/FeaturedCollections'
-import type { FeaturedCollectionModel } from '~/lib/shopify/featured'
+import { BestSellers } from '~/components/shop/BestSellers'
+import type { ProductCardModel } from '~/lib/shopify/adapters'
 import {
   HERO_SOCIAL_IMAGE,
   SITE_DESCRIPTION,
@@ -22,19 +22,21 @@ import {
 // ROUTE CONFIG + SEO
 // ═══════════════════════════════════════════
 
-const getFeaturedCollections = createServerFn({ method: 'GET' }).handler(
-  async (): Promise<FeaturedCollectionModel[]> => {
+const getBestSellers = createServerFn({ method: 'GET' }).handler(
+  async (): Promise<ProductCardModel[]> => {
     // The homepage must never break on commerce trouble (missing env,
-    // API hiccup) — it degrades to an empty featured section instead.
+    // API hiccup) — it degrades to an empty best-sellers section instead.
     try {
-      const [{ storefrontRequest }, { getFeaturedCollectionsLogic }] =
+      const [{ storefrontRequest }, { getBestSellersLogic }] =
         await Promise.all([
           import('~/lib/shopify/client'),
-          import('~/lib/shopify/featured'),
+          import('~/lib/shopify/best-sellers'),
         ])
-      return await getFeaturedCollectionsLogic(storefrontRequest)
+      return await getBestSellersLogic(storefrontRequest)
     } catch (error) {
-      console.warn(`[featured] homepage degrading to empty: ${String(error)}`)
+      console.warn(
+        `[best-sellers] homepage degrading to empty: ${String(error)}`,
+      )
       return []
     }
   },
@@ -42,7 +44,7 @@ const getFeaturedCollections = createServerFn({ method: 'GET' }).handler(
 
 export const Route = createFileRoute('/')({
   component: LandingPage,
-  loader: () => getFeaturedCollections(),
+  loader: () => getBestSellers(),
   staleTime: 60_000,
   gcTime: 5 * 60_000,
   headers: () => ({
@@ -50,7 +52,7 @@ export const Route = createFileRoute('/')({
     // the `home` tag on product updates (U9).
     'Cache-Control':
       'public, max-age=0, s-maxage=1800, stale-while-revalidate=86400',
-    'Vercel-Cache-Tag': 'home,collections',
+    'Vercel-Cache-Tag': 'home,products',
   }),
   head: () => ({
     meta: [
@@ -119,7 +121,7 @@ export const Route = createFileRoute('/')({
 // ═══════════════════════════════════════════
 
 function LandingPage() {
-  const featured = Route.useLoaderData()
+  const bestSellers = Route.useLoaderData()
 
   return (
     <div className="grain-overlay">
@@ -127,8 +129,9 @@ function LandingPage() {
       <main style={{ backgroundColor: '#14261F' }} className="text-white">
         <Hero />
         {/* The shop window sits directly under the hero (GLD/JAXXON
-            model); the editorial sections keep telling the story below. */}
-        <FeaturedCollections collections={featured} />
+            model): the four best sellers, never the whole catalog — the
+            editorial sections keep telling the story below. */}
+        <BestSellers products={bestSellers} />
         <CustomPieces />
         <Services />
         <Stats />
