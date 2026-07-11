@@ -2,12 +2,13 @@
  * components/shop/BestSellers.tsx — the homepage's shop window.
  *
  * Four pieces ranked by live sales (Shopify BEST_SELLING), not the
- * catalog. The №1 piece anchors the spread at double scale; 02–04 step
- * down beside it with a deliberate void cell. Each card carries a mono
- * rank numeral + hairline — the same indexing language the category
- * drawer speaks, and here the number encodes something true: sales
- * order. When the fetch degrades to empty, a quiet shop-all invitation
- * renders instead of a broken section.
+ * catalog. One level row of equal cards — the owner reads staggered
+ * offsets and asymmetric voids as broken (same correction the catalog
+ * grid went through), so listing surfaces stay uniform. Each card
+ * carries a mono rank numeral + hairline — the indexing language the
+ * category drawer speaks, and here the number encodes something true:
+ * sales order. When the fetch degrades to empty, a quiet shop-all
+ * invitation renders instead of a broken section.
  */
 
 import { PillLink } from '~/components/shop/PillLink'
@@ -78,47 +79,28 @@ export function BestSellers({ products }: BestSellersProps) {
         {products.length === 0 ? (
           <EmptyBestSellers />
         ) : (
-          <RankedSpread products={products} />
+          <RankedRow products={products} />
         )}
       </div>
     </section>
   )
 }
 
-function RankedSpread({ products }: { products: ProductCardModel[] }) {
-  const [anchor, ...rest] = products
-  const trio = rest.slice(0, 3)
-
+/** The ranked shelf: four equal cards, one level row (2×2 on phones).
+ * Same grid rhythm as the catalog. */
+function RankedRow({ products }: { products: ProductCardModel[] }) {
   return (
-    <div className="grid grid-cols-1 gap-12 md:grid-cols-12 md:gap-6">
-      {/* №1 — the anchor, the only large thing in the section. */}
-      <div className="md:col-span-6">
+    <div className="grid grid-cols-2 gap-x-3 gap-y-12 md:grid-cols-4 md:gap-x-6">
+      {products.slice(0, 4).map((product, index) => (
         <RankedCard
-          product={anchor}
-          rank={1}
-          aspect="aspect-[4/5]"
-          sizes="(min-width: 768px) 48vw, 100vw"
-          eager
+          key={product.handle}
+          product={product}
+          rank={index + 1}
+          aspect="aspect-[3/4]"
+          sizes="(min-width: 768px) 24vw, 50vw"
+          eager={index === 0}
         />
-      </div>
-
-      {/* 02–04 step down beside it; the fourth cell stays empty on
-          purpose — the void is the same stepped asymmetry the old
-          editorial spreads used. */}
-      {trio.length > 0 && (
-        <div className="grid grid-cols-2 content-start gap-x-3 gap-y-10 md:col-span-6 md:gap-x-6 md:gap-y-12">
-          {trio.map((product, index) => (
-            <RankedCard
-              key={product.handle}
-              product={product}
-              rank={index + 2}
-              aspect="aspect-[3/4]"
-              sizes="(min-width: 768px) 24vw, 50vw"
-              className={index === 1 ? 'md:mt-24' : ''}
-            />
-          ))}
-        </div>
-      )}
+      ))}
     </div>
   )
 }
@@ -131,17 +113,15 @@ function RankedCard({
   aspect,
   sizes,
   eager = false,
-  className = '',
 }: {
   product: ProductCardModel
   rank: number
   aspect: string
   sizes: string
   eager?: boolean
-  className?: string
 }) {
   return (
-    <div className={className}>
+    <div>
       <p
         aria-hidden
         className="mb-3 flex items-center gap-3 font-mono text-[10px] tracking-[0.18em] text-champagne"
