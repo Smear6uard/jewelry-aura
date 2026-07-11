@@ -2,8 +2,8 @@
  * components/layout/MenuDrawer.tsx — the category menu behind the
  * header's burger trigger.
  *
- * Left-slide drawer listing the shop's six categories. "Women's" is a
- * disclosure row: it expands in place to reveal the same five
+ * Left-slide drawer listing the shop's seven categories. "Women's" is a
+ * disclosure row: it expands in place to reveal the same six
  * categories again, routed to their women's collections
  * (`/collections/womens-<handle>`).
  *
@@ -24,7 +24,7 @@ import { DURATION, easeApple, easeOutExpo } from '~/lib/motion'
 const FOCUSABLE =
   'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])'
 
-// The five base categories. "Women's" reuses this list for its
+// The six base categories. "Women's" reuses this list for its
 // submenu — the handles gain a `womens-` prefix. Collections are
 // curated in the Shopify admin under these exact handles.
 const CATEGORIES = [
@@ -33,6 +33,7 @@ const CATEGORIES = [
   { label: 'Earrings', handle: 'earrings' },
   { label: 'Rings', handle: 'rings' },
   { label: 'Bracelets', handle: 'bracelets' },
+  { label: 'Moissanite', handle: 'moissanite' },
 ] as const
 
 interface MenuDrawerProps {
@@ -81,7 +82,7 @@ export function MenuDrawer({ open, onClose }: MenuDrawerProps) {
   }, [open, onClose])
 
   // The women's disclosure resets whenever the drawer closes so every
-  // open starts from the same six-row state.
+  // open starts from the same seven-row state.
   useEffect(() => {
     if (!open) setWomensOpen(false)
   }, [open])
@@ -174,7 +175,7 @@ export function MenuDrawer({ open, onClose }: MenuDrawerProps) {
                   </CategoryRow>
                 ))}
 
-                {/* Women's — expands the same five categories in place. */}
+                {/* Women's — expands the same six categories in place. */}
                 <CategoryRow index={CATEGORIES.length}>
                   <button
                     type="button"
