@@ -9,9 +9,17 @@ const ORG_ID = `${SITE_URL}/#organization`
 const WEBSITE_ID = `${SITE_URL}/#website`
 
 export const HERO_SOCIAL_IMAGE = `${SITE_URL}/hero-portrait-wide.png`
-/** Descriptive alt for the homepage share image (og:image:alt). */
+/**
+ * Descriptive alt for the homepage share image (og:image:alt).
+ *
+ * The share image is the ungraded campaign file, so this describes the
+ * photograph as it actually is. The homepage grades the same asset
+ * toward the brand palette in CSS (see components/sections/Hero.tsx);
+ * a share card cannot inherit that, and describing a colour the file
+ * does not have would be worse than a plain description.
+ */
 export const HERO_SOCIAL_IMAGE_ALT =
-  'A man in a heavy gold rope chain against forest-green velvet — a Jewelry Aura custom piece.'
+  'A man in a heavy gold rope chain against dark velvet — a Jewelry Aura custom piece.'
 
 // Titles front-load the money keywords and close with the brand (Google
 // rewrites brand-first titles that bury the search terms). ≤ ~60 chars.

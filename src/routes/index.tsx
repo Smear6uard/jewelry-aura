@@ -2,12 +2,14 @@ import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 
 import { Hero } from '~/components/sections/Hero'
-import { CustomPieces } from '~/components/sections/CustomPieces'
-import { Services } from '~/components/sections/Services'
+import { CategoryTiles } from '~/components/sections/CategoryTiles'
+import { TrustBar } from '~/components/sections/TrustBar'
+import { CustomWork } from '~/components/sections/CustomWork'
+import { ShopByPrice } from '~/components/sections/ShopByPrice'
+import { Reviews } from '~/components/sections/Reviews'
 import { Visit } from '~/components/sections/Visit'
-import { Header } from '~/components/layout/Header'
-import { BestSellers } from '~/components/shop/BestSellers'
-import type { ProductCardModel } from '~/lib/shopify/adapters'
+import { ProductRail } from '~/components/commerce/ProductRail'
+import { mapProductCard, type ProductCardModel, type ProductCardNode } from '~/lib/shopify/adapters'
 import {
   HERO_SOCIAL_IMAGE,
   HERO_SOCIAL_IMAGE_ALT,
@@ -20,43 +22,70 @@ import {
 } from '~/lib/seo'
 
 // ═══════════════════════════════════════════
-// ROUTE CONFIG + SEO
+// DATA
 // ═══════════════════════════════════════════
 
-const getBestSellers = createServerFn({ method: 'GET' }).handler(
-  async (): Promise<ProductCardModel[]> => {
-    // The homepage must never break on commerce trouble (missing env,
-    // API hiccup) — it degrades to an empty best-sellers section instead.
+interface HomeShelves {
+  bestSellers: ProductCardModel[]
+  newArrivals: ProductCardModel[]
+}
+
+interface ShopProductsData {
+  products: { nodes: ProductCardNode[] }
+}
+
+/**
+ * Both homepage shelves in one round trip pair. The homepage must never
+ * break on commerce trouble (missing env, API hiccup) — it degrades to
+ * empty shelves, and ProductRail renders nothing rather than a titled
+ * blank space.
+ */
+const getHomeShelves = createServerFn({ method: 'GET' }).handler(
+  async (): Promise<HomeShelves> => {
     try {
-      const [{ storefrontRequest }, { getBestSellersLogic }] =
+      const [{ storefrontRequest }, { getBestSellersLogic }, { SHOP_PRODUCTS_QUERY }] =
         await Promise.all([
           import('~/lib/shopify/client'),
           import('~/lib/shopify/best-sellers'),
+          import('~/lib/shopify/queries'),
         ])
-      return await getBestSellersLogic(storefrontRequest)
+
+      const [bestSellers, newest] = await Promise.all([
+        getBestSellersLogic(storefrontRequest, 8),
+        storefrontRequest<ShopProductsData>(SHOP_PRODUCTS_QUERY, {
+          variables: { first: 8, sortKey: 'CREATED_AT' },
+        }),
+      ])
+
+      return {
+        bestSellers,
+        newArrivals: newest.products.nodes.map(mapProductCard),
+      }
     } catch (error) {
-      console.warn(
-        `[best-sellers] homepage degrading to empty: ${String(error)}`,
-      )
-      return []
+      console.warn(`[home] shelves degrading to empty: ${String(error)}`)
+      return { bestSellers: [], newArrivals: [] }
     }
   },
 )
 
+// ═══════════════════════════════════════════
+// ROUTE CONFIG + SEO
+// ═══════════════════════════════════════════
+
 export const Route = createFileRoute('/')({
-  component: LandingPage,
-  loader: () => getBestSellers(),
+  component: HomePage,
+  loader: () => getHomeShelves(),
   staleTime: 60_000,
   gcTime: 5 * 60_000,
   headers: () => ({
-    // Homepage cache policy (KTD2): short shared TTL, long SWR; purged via
-    // the `home` tag on product updates (U9).
+    // Homepage cache policy (KTD2): short shared TTL, long SWR; purged
+    // via the `home` tag on product updates (U9).
     'Cache-Control':
       'public, max-age=0, s-maxage=1800, stale-while-revalidate=86400',
     'Vercel-Cache-Tag': 'home,products',
   }),
   head: ({ loaderData }) => {
-    const bestSellers = loaderData ?? []
+    const bestSellers = loaderData?.bestSellers ?? []
     return {
       meta: [
         ...pageMeta({
@@ -70,21 +99,18 @@ export const Route = createFileRoute('/')({
         { property: 'og:image:height', content: '1024' },
       ],
       links: [
-        {
-          rel: 'canonical',
-          href: SITE_URL,
-        },
+        { rel: 'canonical', href: SITE_URL },
         {
           rel: 'preload',
           href: '/hero-portrait-wide.avif',
           as: 'image',
-          media: '(min-width: 1024px)',
+          media: '(min-width: 768px)',
         },
         {
           rel: 'preload',
           href: '/hero-portrait-tall.avif',
           as: 'image',
-          media: '(max-width: 1023px)',
+          media: '(max-width: 767px)',
         },
         { rel: 'preconnect', href: 'https://cdn.shopify.com' },
       ],
@@ -108,38 +134,51 @@ export const Route = createFileRoute('/')({
 })
 
 // ═══════════════════════════════════════════
-// LANDING PAGE — MAIN COMPOSITION
+// COMPOSITION
 // ═══════════════════════════════════════════
 //
-// Section order is the user's narrative:
-//   Hero        — wordless photograph + cascade
-//   BestSellers — the live shop window (four ranked pieces)
-//   CustomPieces — pinned editorial strip
-//   Services    — typographic capability list
-//   Visit       — phone CTA + hours (the only conversion surface)
-//
-// Lenis is provided once at the root (~/lib/lenis.LenisProvider). Every
-// commission/CTA on the site routes here via lib/scroll-to so the
-// smooth-scroll motion stays in lockstep with the wheel-scrolled
-// choreography of the sections above.
+// The order is a shopping funnel, not a narrative:
+//   Hero          one frame, two category CTAs, 70svh
+//   CategoryTiles the "I can shop here" moment, above the fold
+//   Best sellers  what other people bought
+//   Trust bar     the terms, before the second shelf
+//   New arrivals  what just landed
+//   Custom work   the workshop's differentiator, one shelf among many
+//   Shop by price for the visitor who knows the budget, not the piece
+//   Reviews       social proof
+//   Visit         the local close
 // ═══════════════════════════════════════════
 
-function LandingPage() {
-  const bestSellers = Route.useLoaderData()
+function HomePage() {
+  const { bestSellers, newArrivals } = Route.useLoaderData()
 
   return (
-    <div className="grain-overlay">
-      <Header />
-      <main style={{ backgroundColor: '#14261F' }} className="text-white">
-        <Hero />
-        {/* The shop window sits directly under the hero (GLD/JAXXON
-            model): the four best sellers, never the whole catalog — the
-            editorial sections keep telling the story below. */}
-        <BestSellers products={bestSellers} />
-        <CustomPieces />
-        <Services />
-        <Visit />
-      </main>
-    </div>
+    <main>
+      <Hero />
+      <CategoryTiles />
+
+      <ProductRail
+        id="best-sellers"
+        title="Best sellers"
+        eyebrow="Most bought"
+        products={bestSellers}
+        link={{ href: '/shop', label: 'View all' }}
+        eager
+      />
+
+      <TrustBar />
+
+      <ProductRail
+        title="New arrivals"
+        eyebrow="Just finished"
+        products={newArrivals}
+        link={{ href: '/shop?sort=featured', label: 'View all' }}
+      />
+
+      <CustomWork />
+      <ShopByPrice />
+      <Reviews />
+      <Visit />
+    </main>
   )
 }

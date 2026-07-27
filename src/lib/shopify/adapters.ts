@@ -25,6 +25,14 @@ export interface ProductCardNode {
     minVariantPrice: MoneyNode
     maxVariantPrice: MoneyNode
   }
+  /**
+   * Card enrichments. Optional because not every caller's fixture (or a
+   * future leaner query) supplies them, and every one degrades to a
+   * quieter card rather than an error — see ProductCardModel.
+   */
+  images?: { nodes: ProductCardImageNode[] }
+  variants?: { nodes: Array<{ id: string; availableForSale: boolean }> }
+  compareAtPriceRange?: { minVariantPrice: MoneyNode }
 }
 
 export interface ProductCardImage {
@@ -33,6 +41,15 @@ export interface ProductCardImage {
   alt: string
   width: number | undefined
   height: number | undefined
+}
+
+/** Small uppercase flag in a card's top-left corner. */
+export type ProductBadge = 'new' | 'sale' | 'one-of-one'
+
+export interface ProductRating {
+  /** 0–5, one decimal. */
+  value: number
+  count: number
 }
 
 export interface ProductCardModel {
@@ -44,6 +61,31 @@ export interface ProductCardModel {
   priceFrom: boolean
   availableForSale: boolean
   image: ProductCardImage | null
+  /**
+   * Optional card enrichments. `mapProductCard` leaves every one of
+   * these undefined — the Storefront card query does not fetch them
+   * yet — and ProductCard degrades cleanly in each case: no second
+   * image means the hover falls back to a slow scale, no rating means
+   * no stars, no variantId means Quick add becomes "Choose options"
+   * and routes to the product page instead of the cart.
+   *
+   * Populating them is a query change, not a component change:
+   *   hoverImage    images(first: 2)
+   *   compareAtPrice / variantId / optionCount
+   *                 variants(first: 1) + options
+   *   rating        a reviews app's product metafield
+   */
+  /** Second photograph, crossfaded in on hover. */
+  hoverImage?: ProductCardImage | null
+  /** Formatted was-price; presence flags the card as on sale. */
+  compareAtPrice?: string | null
+  /** Explicit badge; a compareAtPrice implies "sale" without one. */
+  badge?: ProductBadge
+  rating?: ProductRating
+  /** Merchandise id for one-click add. Absent → link to the PDP. */
+  variantId?: string | null
+  /** >1 means the piece needs a size/length choice before it can be added. */
+  optionCount?: number
 }
 
 // Intl.NumberFormat construction is the expensive part of the API; cache
@@ -73,6 +115,42 @@ export function formatMoney(money: MoneyNode): string {
   const value = Number.parseFloat(money.amount)
   if (!Number.isFinite(value)) return ''
   return moneyFormatter(money.currencyCode, Number.isInteger(value)).format(value)
+}
+
+/** Shown wherever a piece carries no real price in Shopify. */
+export const PRICE_ON_REQUEST = 'Price on request'
+
+/**
+ * Display price for a listing or product surface.
+ *
+ * A zero amount means the piece has not been priced in the admin yet,
+ * not that it is free. Rendering "$0" next to a gold chain reads as a
+ * broken store, so unpriced pieces say so and send the shopper to ask.
+ * (The underlying Shopify variant is still $0 — that is a catalog fix,
+ * not a display one, and this only stops the storefront advertising it.)
+ */
+export function displayPrice(money: MoneyNode): string {
+  const value = Number.parseFloat(money.amount)
+  if (!Number.isFinite(value) || value <= 0) return PRICE_ON_REQUEST
+  return formatMoney(money)
+}
+
+/** True when the amount is missing or zero. */
+export function isUnpriced(money: MoneyNode): boolean {
+  const value = Number.parseFloat(money.amount)
+  return !Number.isFinite(value) || value <= 0
+}
+
+/**
+ * Reads a formatted money string back to a number ("$2,900" → 2900,
+ * "$89.50" → 89.5). The cart model carries formatted strings only; the
+ * free-shipping meter needs an amount to measure against a threshold.
+ * Returns 0 when the string holds no digits.
+ */
+export function parseFormattedMoney(formatted: string): number {
+  const digits = formatted.replace(/[^0-9.]/g, '')
+  const value = Number.parseFloat(digits)
+  return Number.isFinite(value) ? value : 0
 }
 
 const CARD_SRCSET_WIDTHS = [
@@ -183,14 +261,42 @@ export function paginate<T>(items: T[], page: number, perPage: number): Page<T> 
 export function mapProductCard(node: ProductCardNode): ProductCardModel {
   const min = node.priceRange.minVariantPrice
   const max = node.priceRange.maxVariantPrice
+
+  // The second photograph, when there is one. `images` includes the
+  // featured image at index 0, so the hover frame is index 1.
+  const gallery = node.images?.nodes ?? []
+  const hoverImage =
+    gallery.length > 1 ? buildCardImage(gallery[1], node.title) : null
+
+  const variants = node.variants?.nodes ?? []
+
+  // Shopify's compareAtPriceRange is zero (not null) when nothing is on
+  // sale, and a compare-at below the sale price is not a discount.
+  const compareAt = node.compareAtPriceRange?.minVariantPrice
+  const compareAtAmount = compareAt ? Number.parseFloat(compareAt.amount) : 0
+  const onSale =
+    Number.isFinite(compareAtAmount) &&
+    compareAtAmount > Number.parseFloat(min.amount)
+
+  const unpriced = isUnpriced(min)
+
   return {
     handle: node.handle,
     title: node.title,
-    price: formatMoney(min),
+    price: displayPrice(min),
+    // "From Price on request" is nonsense — a range only reads as a
+    // range when there is a number to open it.
     priceFrom:
-      min.amount !== max.amount || min.currencyCode !== max.currencyCode,
+      !unpriced &&
+      (min.amount !== max.amount || min.currencyCode !== max.currencyCode),
     availableForSale: node.availableForSale,
     image: buildCardImage(node.featuredImage, node.title),
+    hoverImage,
+    compareAtPrice: onSale && compareAt ? formatMoney(compareAt) : null,
+    // One variant node back from `variants(first: 2)` means there is
+    // exactly one — safe to add straight to the cart.
+    variantId: variants.length === 1 ? variants[0].id : null,
+    optionCount: variants.length > 1 ? 2 : 1,
   }
 }
 
@@ -325,10 +431,12 @@ export function mapVariant(variant: VariantNode): VariantModel {
   return {
     id: variant.id,
     title: variant.title,
-    price: formatMoney(variant.price),
-    compareAtPrice: variant.compareAtPrice
-      ? formatMoney(variant.compareAtPrice)
-      : null,
+    price: displayPrice(variant.price),
+    // A compare-at only means something beside a real price.
+    compareAtPrice:
+      variant.compareAtPrice && !isUnpriced(variant.price)
+        ? formatMoney(variant.compareAtPrice)
+        : null,
     availableForSale: variant.availableForSale,
   }
 }

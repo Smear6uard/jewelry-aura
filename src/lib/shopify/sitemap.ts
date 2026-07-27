@@ -6,6 +6,7 @@ import {
   SITEMAP_PRODUCTS_QUERY,
 } from './queries'
 import { SITE_URL } from '../seo'
+import { PAGE_HANDLES } from '../pages-content'
 
 const PAGE_SIZE = 250
 
@@ -86,6 +87,11 @@ export async function generateSitemapXml(
   const entries: SitemapEntry[] = [
     { path: '/' },
     { path: '/shop' },
+    { path: '/custom' },
+    // Static content pages. /search and /cart are deliberately absent —
+    // both are noindex, and listing them would ask crawlers to spend
+    // budget on pages we have told them not to keep.
+    ...PAGE_HANDLES.map((handle) => ({ path: `/pages/${handle}` })),
     ...collections.map((c) => ({
       path: `/collections/${c.handle}`,
       lastmod: c.updatedAt,

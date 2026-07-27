@@ -1,7 +1,7 @@
 /**
- * components/shop/Breadcrumbs.tsx — visible breadcrumb trail, fed by the
- * same `BreadcrumbItem[]` shape the routes pass to `breadcrumbJsonLd`,
- * so the DOM and the structured data can't drift apart.
+ * components/commerce/Breadcrumbs.tsx — visible breadcrumb trail, fed by
+ * the same `BreadcrumbItem[]` shape the routes pass to
+ * `breadcrumbJsonLd`, so the DOM and the structured data cannot drift.
  */
 
 import type { BreadcrumbItem } from '~/lib/seo'
@@ -12,20 +12,16 @@ interface BreadcrumbsProps {
   className?: string
 }
 
-export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
+export function Breadcrumbs({ items, className = '' }: BreadcrumbsProps) {
   const last = items.length - 1
   return (
     <nav aria-label="Breadcrumb" className={className}>
-      <ol className="flex flex-wrap items-center gap-3 font-mono text-[11px] uppercase tracking-[0.24em] text-cream-muted">
+      <ol className="flex flex-wrap items-center gap-2 text-[11px] text-cream-subtle">
         {items.map((item, index) => (
-          <li key={item.path} className="flex items-center gap-3">
-            {index > 0 && (
-              <span aria-hidden className="text-champagne/60">
-                /
-              </span>
-            )}
+          <li key={item.path} className="flex items-center gap-2">
+            {index > 0 && <span aria-hidden>/</span>}
             {index === last ? (
-              <span className="text-champagne">{item.name}</span>
+              <span className="text-cream-muted">{item.name}</span>
             ) : (
               <a
                 href={item.path}

@@ -1,250 +1,236 @@
 /**
- * components/layout/Header.tsx — global persistent site header
+ * components/layout/Header.tsx — persistent store chrome.
  *
- * Two visual states keyed off the hero section's exit:
- *   • At rest (hero still on screen): fully transparent, sits over the
- *     photograph. No background, no blur, no border.
- *   • Scrolled (hero has fully exited the viewport top): forest-green
- *     @ 92% with backdrop blur, 0.5px champagne hairline along the
- *     bottom, and tighter vertical padding so the surface feels
- *     lower-profile once it's no longer over the photograph.
+ * Always solid, never transparent. A header that dissolves over a hero
+ * photograph is a brand-site device; a store's header is furniture, and
+ * furniture does not fade. It sticks to the top of the viewport on every
+ * route so search, categories and the cart are one movement away from
+ * anywhere on the site.
  *
- * Trigger mechanism:
- *   The hero renders a 1px sentinel at its bottom edge with the
- *   attribute `[data-hero-end]`. On every Lenis scroll tick we read
- *   that element's bounding rect — when its top crosses ≤ 0 the
- *   header flips to scrolled state. This is the "after the hero
- *   releases" trigger; it adapts cleanly when the hero's height
- *   changes (e.g. from a 150svh pinned section to the static
- *   reduced-motion fallback) without needing a hard-coded pixel
- *   threshold. We subscribe to Lenis directly rather than to
- *   `window.scroll` so the read happens in lockstep with the same
- *   smoothed source the rest of the page reads from.
+ * Desktop: wordmark left, category nav centre, search / orders / cart
+ * right. Chains, Pendants, Bracelets and Rings open a mega-menu panel.
  *
- * Mobile: nav links collapse off-screen (md-and-up only). Logo and
- * the "Book consultation" CTA remain so the primary action is always
- * one tap away. The burger in the corner (all breakpoints) opens the
- * category drawer (MenuDrawer) — chains through women's.
+ * Phones: burger left, wordmark centre, cart right, plus a persistent
+ * search field pinned under the bar — on a phone, search is the primary
+ * way people navigate a catalog, and burying it behind an icon costs
+ * more than the 44px it saves.
+ *
+ * Hover intent: the panel opens after a short delay and closes after a
+ * longer one, so dragging the pointer across the nav row does not fire
+ * four panels, and moving diagonally from a nav item down into the
+ * panel does not close it mid-travel.
  */
 
 import { useEffect, useRef, useState } from 'react'
-import { motion } from 'framer-motion'
-import { DURATION, easeApple } from '~/lib/motion'
-import { useLenis } from '~/lib/lenis'
-import { useSmoothScrollTo } from '~/lib/scroll-to'
-import { useCart } from '~/components/shop/CartProvider'
-import { MenuDrawer } from '~/components/layout/MenuDrawer'
+import { AnimatePresence } from 'framer-motion'
+import { Menu, Search, ShoppingBag, User } from 'lucide-react'
+import { NAV_LINKS } from '~/lib/catalog'
+import { useCart } from '~/components/commerce/CartProvider'
+import { MegaMenu } from '~/components/layout/MegaMenu'
+import { MobileNav } from '~/components/layout/MobileNav'
+import { SearchOverlay } from '~/components/layout/SearchOverlay'
 
-// "Custom" routes to the Visit section (same as every other commission
-// CTA on the site) — there's no on-site customisation flow to land on,
-// and the consultation funnel lives at #visit. The label stays
-// aspirational; only the destination is consolidated.
-// Hrefs are root-anchored so the same header works off the homepage:
-// on `/` the browser treats `/#visit` as a same-document hash (the Lenis
-// smooth-scroll handler still intercepts it); on `/shop` and other routes
-// it becomes a real navigation back to the homepage section.
-const NAV_LINKS = [
-  { label: 'Shop', href: '/shop' },
-  { label: 'Services', href: '/#services' },
-  { label: 'Custom', href: '/#visit' },
-  { label: 'Visit', href: '/#visit' },
-] as const
+const OPEN_DELAY_MS = 90
+const CLOSE_DELAY_MS = 160
 
-interface HeaderProps {
-  /**
-   * Pages without the hero photograph (shop, collections, PDPs) render the
-   * header permanently in its scrolled/solid state — there is no
-   * `[data-hero-end]` sentinel to key off and no image to sit over.
-   */
-  solid?: boolean
-}
-
-export function Header({ solid = false }: HeaderProps) {
-  const lenis = useLenis()
-  const [scrolled, setScrolled] = useState(solid)
+export function Header() {
+  const [openHandle, setOpenHandle] = useState<string | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
   const burgerRef = useRef<HTMLButtonElement>(null)
-  const onVisitClick = useSmoothScrollTo('visit')
+  const searchTriggerRef = useRef<HTMLButtonElement>(null)
+  const timerRef = useRef<number | null>(null)
 
-  const closeMenu = () => {
-    setMenuOpen(false)
-    // Focus returns to the trigger so keyboard users don't drop to body.
-    burgerRef.current?.focus()
+  const clearTimer = () => {
+    if (timerRef.current !== null) {
+      window.clearTimeout(timerRef.current)
+      timerRef.current = null
+    }
   }
 
+  const scheduleOpen = (handle: string) => {
+    clearTimer()
+    timerRef.current = window.setTimeout(
+      () => setOpenHandle(handle),
+      OPEN_DELAY_MS,
+    )
+  }
+
+  const scheduleClose = () => {
+    clearTimer()
+    timerRef.current = window.setTimeout(
+      () => setOpenHandle(null),
+      CLOSE_DELAY_MS,
+    )
+  }
+
+  const closeNow = () => {
+    clearTimer()
+    setOpenHandle(null)
+  }
+
+  useEffect(() => clearTimer, [])
+
+  // Escape closes the panel wherever focus happens to be.
   useEffect(() => {
-    if (solid || !lenis) return
-
-    // The hero renders different sentinels per breakpoint (one
-    // inside the desktop pinned wrapper, one inside the mobile
-    // photograph). Both share the `[data-hero-end]` attribute and
-    // both exist in the DOM at all times — the inactive one is
-    // hidden via `display:none` on its branch. We pick the one
-    // that has a non-zero bounding box (i.e., the rendered branch).
-    //
-    // We re-query each tick rather than caching, so a hero that
-    // mounts after the header (or remounts on hot-reload, or swaps
-    // branches on a viewport resize) is picked up on the next
-    // scroll event. Querying an attribute selector is cheap.
-    const check = () => {
-      const sentinels = document.querySelectorAll<HTMLElement>('[data-hero-end]')
-      let active: HTMLElement | null = null
-      for (const el of sentinels) {
-        // offsetParent is null when the element (or any ancestor)
-        // is `display:none`. Faster than reading getBoundingClientRect
-        // and discriminates the rendered branch reliably.
-        if (el.offsetParent !== null) {
-          active = el
-          break
-        }
-      }
-      if (!active) {
-        setScrolled(false)
-        return
-      }
-      // rect.top is viewport-relative. Sentinel ≤ 0 means the hero's
-      // bottom edge has crossed the viewport top — user has passed
-      // the photograph. getBoundingClientRect on a 1px, never-animated
-      // element doesn't trigger layout.
-      const passed = active.getBoundingClientRect().top <= 0
-      setScrolled((prev) => (prev === passed ? prev : passed))
+    if (!openHandle) return
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') closeNow()
     }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [openHandle])
 
-    // Seed once on mount (deep links / refreshes mid-page).
-    check()
-
-    const onScroll = () => check()
-    lenis.on('scroll', onScroll)
-    // Backstop for any scroll that bypasses Lenis (programmatic
-    // window.scrollTo, anchor navigation, devtools).
-    window.addEventListener('scroll', onScroll, { passive: true })
-
-    return () => {
-      lenis.off('scroll', onScroll)
-      window.removeEventListener('scroll', onScroll)
-    }
-  }, [lenis, solid])
+  const active = NAV_LINKS.find(
+    (link) => link.category && link.category.handle === openHandle,
+  )?.category
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50">
-      <motion.div
-        // Solid-mode pages must render already-scrolled — an unconditional
-        // "top" initial would flash a transparent header on every mount.
-        initial={solid ? 'scrolled' : 'top'}
-        animate={scrolled ? 'scrolled' : 'top'}
-        variants={{
-          top: {
-            backgroundColor: 'rgba(20, 38, 31, 0)',
-            backdropFilter: 'blur(0px) saturate(100%)',
-            borderColor: 'rgba(196, 168, 117, 0)',
-            paddingTop: 24,
-            paddingBottom: 24,
-          },
-          scrolled: {
-            backgroundColor: 'rgba(20, 38, 31, 0.92)',
-            backdropFilter: 'blur(16px) saturate(140%)',
-            borderColor: 'rgba(196, 168, 117, 0.2)',
-            paddingTop: 12,
-            paddingBottom: 12,
-          },
-        }}
-        transition={{ duration: DURATION.micro, ease: easeApple }}
-        // Sub-pixel hairline so the divider reads as precision, not
-        // weight. Color animates in/out via variants.
-        style={{ borderBottomWidth: '0.5px', borderBottomStyle: 'solid' }}
-      >
-        <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 md:px-12">
-          <div className="flex items-center gap-4 md:gap-5">
-            <BurgerButton
-              ref={burgerRef}
-              open={menuOpen}
-              onClick={() => setMenuOpen(true)}
-            />
-            <a
-              href="/"
-              className="font-serif text-[clamp(1.05rem,1.4vw,1.25rem)] tracking-[0.01em]"
-              style={{ color: '#F0EBE0' }}
-            >
-              Jewelry Aura
-            </a>
-          </div>
+    <>
+      <header className="sticky top-0 z-50 border-b border-hairline bg-base">
+        <div className="relative mx-auto flex h-14 max-w-[1440px] items-center gap-4 px-4 md:h-16 md:px-8">
+          {/* Burger — phones only; the desktop nav is the menu. */}
+          <button
+            ref={burgerRef}
+            type="button"
+            onClick={() => setMenuOpen(true)}
+            aria-label="Open menu"
+            aria-haspopup="dialog"
+            aria-expanded={menuOpen}
+            className="-ml-1.5 p-1.5 text-cream transition-colors duration-hover ease-apple hover:text-champagne md:hidden"
+          >
+            <Menu aria-hidden size={20} strokeWidth={1.4} />
+          </button>
 
+          <a
+            href="/"
+            // Centred between the burger and the cart on phones — the
+            // standard mobile store header — and back on the left rail
+            // from md up, where the nav owns the centre.
+            className="absolute left-1/2 -translate-x-1/2 font-display text-[17px] leading-none tracking-tight text-cream md:static md:translate-x-0 md:text-[19px]"
+          >
+            Jewelry Aura
+          </a>
+
+          {/* Centre nav — the store's spine. */}
           <nav
             aria-label="Primary"
-            className="hidden items-center gap-6 md:flex"
+            className="mx-auto hidden items-center gap-6 md:flex lg:gap-7"
+            onPointerLeave={scheduleClose}
           >
-            {NAV_LINKS.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                onClick={link.href === '/#visit' ? onVisitClick : undefined}
-                className="group relative font-sans text-[13px] text-cream-muted transition-colors duration-hover ease-apple hover:text-cream"
-                style={{ letterSpacing: '0.06em' }}
-              >
-                {link.label}
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute -bottom-1 left-0 right-0 origin-left scale-x-0 transition-transform duration-hover ease-apple group-hover:scale-x-100"
-                  style={{ height: '0.5px', backgroundColor: '#C4A875' }}
-                />
-              </a>
-            ))}
+            {NAV_LINKS.map((link) => {
+              const isOpen = link.category?.handle === openHandle
+              return (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  onPointerEnter={() =>
+                    link.category ? scheduleOpen(link.category.handle) : closeNow()
+                  }
+                  onFocus={() =>
+                    link.category ? setOpenHandle(link.category.handle) : closeNow()
+                  }
+                  aria-expanded={link.category ? isOpen : undefined}
+                  className={`relative py-5 text-[11px] label transition-colors duration-hover ease-apple lg:text-[12px] ${
+                    link.accent
+                      ? 'text-champagne hover:text-cream'
+                      : 'text-cream-muted hover:text-cream'
+                  }`}
+                >
+                  {link.label}
+                  {/* Active-panel underline — the one place maroon
+                      marks navigation state. */}
+                  <span
+                    aria-hidden
+                    className={`pointer-events-none absolute inset-x-0 bottom-0 h-[2px] origin-center bg-brand-hover transition-transform duration-hover ease-apple ${
+                      isOpen ? 'scale-x-100' : 'scale-x-0'
+                    }`}
+                  />
+                </a>
+              )
+            })}
           </nav>
 
-          <div className="flex items-center gap-3 sm:gap-5">
-            <BookConsultationButton />
+          <div className="ml-auto flex items-center gap-0.5 md:ml-0 md:gap-1">
+            <button
+              ref={searchTriggerRef}
+              type="button"
+              onClick={() => setSearchOpen(true)}
+              aria-label="Search"
+              className="hidden p-2 text-cream transition-colors duration-hover ease-apple hover:text-champagne md:block"
+            >
+              <Search aria-hidden size={18} strokeWidth={1.4} />
+            </button>
+
+            <a
+              href="/pages/orders"
+              aria-label="Orders and account"
+              className="hidden p-2 text-cream transition-colors duration-hover ease-apple hover:text-champagne md:block"
+            >
+              <User aria-hidden size={18} strokeWidth={1.4} />
+            </a>
+
             <CartButton />
           </div>
         </div>
-      </motion.div>
 
-      {/* Rendered as a sibling of the animated bar: the bar's
-          backdrop-filter creates a containing block that would trap a
-          fixed-position drawer inside it. */}
-      <MenuDrawer open={menuOpen} onClose={closeMenu} />
-    </header>
+        {/* Phones: persistent search field under the bar. */}
+        <form
+          action="/search"
+          method="get"
+          className="flex items-center gap-2 border-t border-hairline px-4 py-2 md:hidden"
+        >
+          <Search
+            aria-hidden
+            size={15}
+            strokeWidth={1.4}
+            className="shrink-0 text-cream-subtle"
+          />
+          <input
+            type="search"
+            name="q"
+            placeholder="Search chains, pendants, moissanite…"
+            aria-label="Search products"
+            autoComplete="off"
+            className="w-full bg-transparent text-[13px] text-cream placeholder:text-cream-subtle focus:outline-none"
+          />
+        </form>
+
+        <AnimatePresence>
+          {active && (
+            <MegaMenu
+              key={active.handle}
+              category={active}
+              onPointerEnter={clearTimer}
+              onPointerLeave={scheduleClose}
+              onNavigate={closeNow}
+            />
+          )}
+        </AnimatePresence>
+      </header>
+
+      <MobileNav
+        open={menuOpen}
+        onClose={() => {
+          setMenuOpen(false)
+          burgerRef.current?.focus()
+        }}
+      />
+      <SearchOverlay
+        open={searchOpen}
+        onClose={() => {
+          setSearchOpen(false)
+          searchTriggerRef.current?.focus()
+        }}
+      />
+    </>
   )
 }
 
 /**
- * The three-line burger — the drawer's only trigger, visible at every
- * breakpoint. Lines are 0.5px-adjacent hairlines in cream so the mark
- * reads as typography, not an app icon.
- */
-function BurgerButton({
-  ref,
-  open,
-  onClick,
-}: {
-  ref: React.Ref<HTMLButtonElement>
-  open: boolean
-  onClick: () => void
-}) {
-  return (
-    <button
-      ref={ref}
-      type="button"
-      onClick={onClick}
-      aria-label="Open category menu"
-      aria-haspopup="dialog"
-      aria-expanded={open}
-      className="group -ml-1 flex h-8 w-8 flex-col items-center justify-center gap-[5px] p-1"
-    >
-      {[0, 1, 2].map((line) => (
-        <span
-          key={line}
-          aria-hidden
-          className="block h-px w-[18px] bg-cream transition-colors duration-hover ease-apple group-hover:bg-champagne"
-        />
-      ))}
-    </button>
-  )
-}
-
-/**
- * Cart trigger + badge. The badge shows a small pulsing skeleton until
- * the post-paint getCart resolves (never a false 0), a count chip when
- * the cart has items, and nothing when it's empty.
+ * Cart trigger. The badge shows a small pulse until the post-paint
+ * getCart resolves (never a false 0), a maroon count bubble when the
+ * cart has items, and nothing when it is empty.
  */
 function CartButton() {
   const { count, openCart } = useCart()
@@ -260,75 +246,23 @@ function CartButton() {
           ? 'Open cart'
           : `Open cart, ${count} ${count === 1 ? 'item' : 'items'}`
       }
-      className="relative p-1 text-cream transition-colors duration-hover ease-apple hover:text-champagne"
+      className="relative p-2 text-cream transition-colors duration-hover ease-apple hover:text-champagne"
     >
-      <svg
-        aria-hidden
-        width="20"
-        height="20"
-        viewBox="0 0 20 20"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.2"
-      >
-        <path d="M4 6.5h12l-.9 10a1.5 1.5 0 0 1-1.5 1.35h-7.2a1.5 1.5 0 0 1-1.5-1.35L4 6.5Z" />
-        <path d="M7 6.5V5a3 3 0 0 1 6 0v1.5" />
-      </svg>
+      <ShoppingBag aria-hidden size={18} strokeWidth={1.4} />
       {count === null && (
         <span
           aria-hidden
-          className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 animate-pulse rounded-full bg-cream-muted/50"
+          className="absolute right-1 top-1 h-2 w-2 animate-pulse rounded-full bg-cream-subtle"
         />
       )}
       {count !== null && count > 0 && (
         <span
           aria-hidden
-          className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-champagne px-1 font-mono text-[9px] leading-none text-forest"
+          className="absolute right-0 top-0 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-brand px-1 text-[10px] font-medium leading-none text-cream"
         >
           {count > 99 ? '99+' : count}
         </span>
       )}
     </button>
-  )
-}
-
-/**
- * Pill button with a champagne hairline. On hover the fill flushes
- * to champagne and the label inverts to forest-green. Framer drives
- * the color tween so the timing stays in lockstep with the rest of
- * the site — every hover tween in the system runs at duration-hover
- * with easeApple.
- */
-function BookConsultationButton() {
-  const onClick = useSmoothScrollTo('visit')
-  return (
-    <motion.a
-      href="/#visit"
-      onClick={onClick}
-      initial="rest"
-      whileHover="hover"
-      whileFocus="hover"
-      variants={{
-        rest: {
-          backgroundColor: 'rgba(196, 168, 117, 0)',
-          color: '#F0EBE0',
-          borderColor: 'rgba(196, 168, 117, 0.6)',
-        },
-        hover: {
-          backgroundColor: 'rgba(196, 168, 117, 1)',
-          color: '#14261F',
-          borderColor: 'rgba(196, 168, 117, 1)',
-        },
-      }}
-      transition={{ duration: DURATION.hover, ease: easeApple }}
-      className="hidden rounded-full font-sans text-[12px] font-medium uppercase tracking-[0.18em] sm:inline-flex"
-      style={{
-        borderWidth: '0.5px',
-        borderStyle: 'solid',
-        padding: '10px 22px',
-      }}
-    >
-      Book consultation
-    </motion.a>
   )
 }

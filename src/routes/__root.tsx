@@ -8,8 +8,11 @@ import {
 } from '@tanstack/react-router'
 import '../app.css'
 import { LenisProvider } from '~/lib/lenis'
-import { CartProvider } from '~/components/shop/CartProvider'
-import { CartDrawer } from '~/components/shop/CartDrawer'
+import { CartProvider } from '~/components/commerce/CartProvider'
+import { CartDrawer } from '~/components/commerce/CartDrawer'
+import { AnnouncementBar } from '~/components/layout/AnnouncementBar'
+import { Header } from '~/components/layout/Header'
+import { Footer } from '~/components/layout/Footer'
 import {
   SITE_DESCRIPTION,
   SITE_TITLE,
@@ -18,33 +21,31 @@ import {
   webSiteSchema,
 } from '~/lib/seo'
 
+// Fraunces carries the display serif (wordmark, section headers, PDP
+// names); Manrope carries everything else. Playfair Display and
+// JetBrains Mono were dropped with the storefront rebuild — the serif
+// consolidated onto Fraunces and the mono micro-caps idiom was retired
+// in favour of sans uppercase, so both were pure payload.
 const GOOGLE_FONTS_URL =
-  'https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Manrope:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap'
+  'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..700&family=Manrope:wght@400;500;600&display=swap'
 
 const FRAUNCES_NORMAL_400_FONT =
   'https://fonts.gstatic.com/s/fraunces/v38/6NUh8FyLNQOQZAnv9bYEvDiIdE9Ea92uemAk_WBq8U_9v0c2Wa0K7iN7hzFUPJH58nib1603gg7S2nfgRYIctxujDg.ttf'
 
+// Runs before first paint: a visitor who dismissed the announcement bar
+// earlier in the session never sees it render and then disappear, and
+// the header never jumps 36px up the page. Paired with the CSS rule
+// below and the button in components/layout/AnnouncementBar.
+const PROMO_DISMISS_SCRIPT = `try{if(sessionStorage.getItem('ja-promo-dismissed')==='1')document.documentElement.classList.add('promo-dismissed')}catch(e){}`
+
 export const Route = createRootRoute({
   head: () => ({
     meta: [
-      {
-        charSet: 'utf-8',
-      },
-      {
-        name: 'viewport',
-        content: 'width=device-width, initial-scale=1',
-      },
-      {
-        title: SITE_TITLE,
-      },
-      {
-        name: 'description',
-        content: SITE_DESCRIPTION,
-      },
-      {
-        name: 'theme-color',
-        content: '#14261F',
-      },
+      { charSet: 'utf-8' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { title: SITE_TITLE },
+      { name: 'description', content: SITE_DESCRIPTION },
+      { name: 'theme-color', content: '#0A0908' },
       {
         name: 'robots',
         content:
@@ -61,12 +62,7 @@ export const Route = createRootRoute({
         type: 'font/ttf',
         crossOrigin: 'anonymous',
       },
-      // Hero image preloads live on the homepage route — catalog pages
-      // preload their own LCP image (Shopify CDN) instead.
-      {
-        rel: 'stylesheet',
-        href: GOOGLE_FONTS_URL,
-      },
+      { rel: 'stylesheet', href: GOOGLE_FONTS_URL },
       // Canonical is set per-route (each page owns its URL); a root-level
       // canonical would duplicate on every catalog page.
       { rel: 'shortcut icon', href: '/favicon.ico' },
@@ -79,6 +75,7 @@ export const Route = createRootRoute({
     // (R18); pages add their own Product/BreadcrumbList/ItemList data on
     // top, all referencing #organization by @id.
     scripts: [
+      { children: PROMO_DISMISS_SCRIPT },
       {
         type: 'application/ld+json',
         children: jsonLdScript(jewelryStoreSchema),
@@ -103,7 +100,13 @@ function RootComponent() {
         {/* Cart state lives above every route: the header badge and the
             PDP add-to-cart both read it. Hydrates post-paint (KTD3). */}
         <CartProvider>
+          {/* Store chrome is rendered once, here, so no route can ship
+              without an announcement bar, a header or a footer. Routes
+              own their <main> and nothing else. */}
+          <AnnouncementBar />
+          <Header />
           <Outlet />
+          <Footer />
           <CartDrawer />
         </CartProvider>
       </LenisProvider>
@@ -116,6 +119,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
     <html lang="en">
       <head>
         <HeadContent />
+        <style>{`.promo-dismissed [data-announcement]{display:none}`}</style>
       </head>
       <body>
         {children}

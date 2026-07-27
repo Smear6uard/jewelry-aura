@@ -1,28 +1,26 @@
 /**
- * routes/collections.$handle.tsx — collection page with crawlable
- * numbered pagination (plan U3).
+ * routes/collections.$handle.tsx — collection PLP with facets and
+ * crawlable numbered pagination (plan U3).
  *
- * One 250-product fetch, sliced server-side per ?page=N (KTD8) — the
- * slice happens before card mapping, so unrendered products cost
- * nothing. The handle is validated before it reaches the query or the
- * cache-tag header. Fully SSR'd and CDN-cached on the collection policy
- * (KTD2).
+ * One 250-product fetch, then filter → sort → slice, all server-side
+ * (KTD8). Filtering before the slice is what makes `?style=cuban&page=2`
+ * mean what it says. The handle is validated before it reaches the
+ * query or the cache-tag header. Fully SSR'd and CDN-cached on the
+ * collection policy (KTD2).
  */
 
 import { createFileRoute, notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 
-import { Header } from '~/components/layout/Header'
-import { Breadcrumbs } from '~/components/shop/Breadcrumbs'
-import { CatalogFallback } from '~/components/shop/CatalogFallback'
-import { Pagination, pageHref } from '~/components/shop/Pagination'
-import { ProductGrid } from '~/components/shop/ProductGrid'
-import { ShopCta } from '~/components/shop/ShopCta'
+import { ListingLayout } from '~/components/commerce/ListingLayout'
+import { findCategory } from '~/lib/catalog'
 import {
   isValidHandle,
-  mapCollectionPage,
   type CollectionNode,
+  type ProductCardNode,
 } from '~/lib/shopify/adapters'
+import { listingHref, parseFacets, type Facets } from '~/lib/shopify/facets'
+import { buildListing } from '~/lib/shopify/listing'
 import { COLLECTION_QUERY } from '~/lib/shopify/queries'
 import {
   HERO_SOCIAL_IMAGE,
@@ -40,53 +38,90 @@ interface CollectionData {
   collection: CollectionNode | null
 }
 
+interface CollectionShell {
+  handle: string
+  title: string
+  description: string
+  seoTitle: string
+  seoDescription: string
+  nodes: ProductCardNode[]
+}
+
 function collectionCrumbs(title: string, basePath: string): BreadcrumbItem[] {
   return [
     { name: 'Home', path: '/' },
+    { name: 'Shop', path: '/shop' },
     { name: title, path: basePath },
   ]
 }
 
-const getCollectionPage = createServerFn({ method: 'GET' })
-  .inputValidator((input: { handle: string; page: number }) => {
+const getCollection = createServerFn({ method: 'GET' })
+  .inputValidator((input: { handle: string }) => {
     if (!input || typeof input.handle !== 'string' || !isValidHandle(input.handle)) {
       throw new Error('Invalid collection handle')
     }
-    const page =
-      Number.isInteger(input.page) && input.page >= 1 ? input.page : 1
-    return { handle: input.handle, page }
+    return { handle: input.handle }
   })
-  .handler(async ({ data }) => {
+  .handler(async ({ data }): Promise<CollectionShell | null> => {
     const { storefrontRequest } = await import('~/lib/shopify/client')
     const result = await storefrontRequest<CollectionData>(COLLECTION_QUERY, {
       variables: { handle: data.handle, first: 250 },
     })
-    return result.collection
-      ? mapCollectionPage(result.collection, data.page, PER_PAGE)
-      : null
+    const collection = result.collection
+    if (!collection) return null
+    return {
+      handle: collection.handle,
+      title: collection.title,
+      description: collection.description,
+      seoTitle: collection.seo?.title || collection.title,
+      seoDescription: collection.seo?.description || collection.description,
+      nodes: collection.products.nodes,
+    }
   })
 
 export const Route = createFileRoute('/collections/$handle')({
-  validateSearch: (search: Record<string, unknown>): { page?: number } => {
+  validateSearch: (search: Record<string, unknown>) => {
     const raw = Number(search.page)
-    // Anything non-numeric or < 2 normalizes to the clean URL state.
-    if (!Number.isInteger(raw) || raw < 2) return {}
-    return { page: raw }
+    const page = Number.isInteger(raw) && raw >= 2 ? raw : undefined
+    return { ...parseFacets(search), page }
   },
-  loaderDeps: ({ search }) => ({ page: search.page ?? 1 }),
+  loaderDeps: ({ search }) => search,
   loader: async ({ params, deps }) => {
     // 404 before any fetch or cache-tag for malformed handles.
     if (!isValidHandle(params.handle)) throw notFound()
 
-    const collection = await getCollectionPage({
-      data: { handle: params.handle, page: deps.page },
-    })
+    const collection = await getCollection({ data: { handle: params.handle } })
     if (!collection) throw notFound()
-    // Beyond-range pages are 404s, but an empty collection still renders
-    // its (branded empty) page 1.
-    if (deps.page > collection.totalPages) throw notFound()
 
-    return collection
+    const facets: Facets = {
+      metal: deps.metal,
+      style: deps.style,
+      price: deps.price,
+      avail: deps.avail,
+      sort: deps.sort,
+    }
+    const listing = buildListing(
+      collection.nodes,
+      facets,
+      deps.page ?? 1,
+      PER_PAGE,
+    )
+
+    // Beyond-range pages are 404s, but an empty result still renders its
+    // (branded empty) page 1 with the filters intact.
+    if ((deps.page ?? 1) > listing.totalPages && listing.total > 0) {
+      throw notFound()
+    }
+
+    return {
+      handle: collection.handle,
+      title: collection.title,
+      description: collection.description,
+      seoTitle: collection.seoTitle,
+      seoDescription: collection.seoDescription,
+      facets,
+      ...listing,
+    }
   },
   staleTime: 30_000,
   gcTime: 5 * 60_000,
@@ -102,7 +137,11 @@ export const Route = createFileRoute('/collections/$handle')({
       return { meta: [{ title: 'Collection not found | Jewelry Aura' }] }
     }
     const basePath = `/collections/${params.handle}`
-    const canonical = `${SITE_URL}${pageHref(basePath, loaderData.page)}`
+    const facets = loaderData.facets
+    const filtered = Boolean(
+      facets.metal || facets.style || facets.price || facets.avail,
+    )
+    const canonical = `${SITE_URL}${listingHref(basePath, facets, loaderData.page)}`
     const title = `${loaderData.seoTitle} | Jewelry Aura`
     const description =
       loaderData.seoDescription ||
@@ -111,31 +150,36 @@ export const Route = createFileRoute('/collections/$handle')({
     // the brand image on an empty collection.
     const shareImage = loaderData.products[0]?.image?.src ?? HERO_SOCIAL_IMAGE
 
-    const links = [
+    const links: Array<Record<string, string>> = [
       { rel: 'canonical', href: canonical },
       { rel: 'preconnect', href: 'https://cdn.shopify.com' },
     ]
     if (loaderData.page > 1) {
       links.push({
         rel: 'prev',
-        href: `${SITE_URL}${pageHref(basePath, loaderData.page - 1)}`,
+        href: `${SITE_URL}${listingHref(basePath, facets, loaderData.page - 1)}`,
       })
     }
     if (loaderData.page < loaderData.totalPages) {
       links.push({
         rel: 'next',
-        href: `${SITE_URL}${pageHref(basePath, loaderData.page + 1)}`,
+        href: `${SITE_URL}${listingHref(basePath, facets, loaderData.page + 1)}`,
       })
     }
 
     return {
-      meta: pageMeta({
-        title,
-        description,
-        url: canonical,
-        image: shareImage,
-        imageAlt: loaderData.title,
-      }),
+      meta: [
+        ...pageMeta({
+          title,
+          description,
+          url: canonical,
+          image: shareImage,
+          imageAlt: loaderData.title,
+        }),
+        // Facet permutations are thin, near-duplicate pages. The
+        // unfiltered collection is what deserves the index slot.
+        ...(filtered ? [{ name: 'robots', content: 'noindex, follow' }] : []),
+      ],
       links,
       scripts: [
         {
@@ -166,15 +210,15 @@ export const Route = createFileRoute('/collections/$handle')({
   },
   component: CollectionPage,
   notFoundComponent: () => (
-    <CatalogFallback
-      eyebrow="Nothing in this case"
-      headline="That collection isn’t in the shop. The full catalog is one step away."
+    <CollectionFallback
+      title="That collection isn’t in the shop"
+      body="It may have been renamed or retired. The full catalog is one step away."
     />
   ),
   errorComponent: () => (
-    <CatalogFallback
-      eyebrow="A momentary pause"
-      headline="We couldn’t open this collection. Give it a breath and try again."
+    <CollectionFallback
+      title="We couldn’t open this collection"
+      body="Give it a moment and try again, or call 630-965-6464 and we’ll tell you what’s in the case."
     />
   ),
 })
@@ -182,42 +226,48 @@ export const Route = createFileRoute('/collections/$handle')({
 function CollectionPage() {
   const data = Route.useLoaderData()
   const basePath = `/collections/${data.handle}`
+  const category = findCategory(data.handle)
+
+  const hrefForFacets = (patch: Partial<Facets>) =>
+    listingHref(basePath, { ...data.facets, ...patch }, 1)
+  const hrefForPage = (page: number) =>
+    listingHref(basePath, data.facets, page)
 
   return (
-    <div className="grain-overlay">
-      <Header solid />
-      <main className="bg-forest text-cream">
-        <section className="mx-auto max-w-[1440px] px-6 pb-24 pt-36 md:px-12 md:pb-40 md:pt-48">
-          <header className="mb-16 md:mb-28">
-            <Breadcrumbs items={collectionCrumbs(data.title, basePath)} />
-            <div className="mt-6 flex flex-wrap items-end justify-between gap-x-12 gap-y-6 md:mt-8">
-              <h1 className="max-w-3xl font-display text-5xl font-light leading-[0.95] tracking-tight text-cream md:text-7xl">
-                {data.title}
-              </h1>
-              <p className="mb-1 shrink-0 font-mono text-[11px] uppercase tracking-[0.18em] text-cream-muted">
-                {data.total} {data.total === 1 ? 'piece' : 'pieces'}
-                {data.totalPages > 1 &&
-                  ` · page ${data.page} of ${data.totalPages}`}
-              </p>
-            </div>
-            {data.description && (
-              <p className="mt-8 max-w-xl font-sans text-[15px] font-light leading-relaxed text-cream-muted">
-                {data.description}
-              </p>
-            )}
-          </header>
+    <ListingLayout
+      title={data.title}
+      description={data.description}
+      breadcrumbs={collectionCrumbs(data.title, basePath)}
+      products={data.products}
+      total={data.total}
+      page={data.page}
+      totalPages={data.totalPages}
+      facets={data.facets}
+      counts={data.counts}
+      styles={category?.styles ?? []}
+      activeCategory={data.handle}
+      hrefForFacets={hrefForFacets}
+      hrefForPage={hrefForPage}
+      clearHref={basePath}
+    />
+  )
+}
 
-          <ProductGrid products={data.products} />
-
-          <Pagination
-            basePath={basePath}
-            page={data.page}
-            totalPages={data.totalPages}
-          />
-        </section>
-
-        <ShopCta />
-      </main>
-    </div>
+function CollectionFallback({ title, body }: { title: string; body: string }) {
+  return (
+    <main className="mx-auto max-w-[1440px] px-4 py-20 md:px-8 md:py-28">
+      <h1 className="font-display text-[28px] tracking-tight text-cream md:text-[38px]">
+        {title}
+      </h1>
+      <p className="mt-3 max-w-[52ch] text-[14px] leading-relaxed text-cream-muted">
+        {body}
+      </p>
+      <a
+        href="/shop"
+        className="mt-6 inline-flex items-center bg-brand px-6 py-3 text-[11px] label text-cream transition-colors duration-hover ease-apple hover:bg-brand-hover"
+      >
+        Shop all pieces
+      </a>
+    </main>
   )
 }

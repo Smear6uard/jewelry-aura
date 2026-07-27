@@ -1,49 +1,65 @@
 @import "tailwindcss";
 
+/* ═══════════════════════════════════════════════════════════════════
+   JEWELRY AURA — STOREFRONT DESIGN TOKENS
+   ═══════════════════════════════════════════════════════════════════
+
+   Color budget (the whole discipline of this palette in three lines):
+     ~85% of pixels  near-black canvas   base / raised / sunken
+     ~10% of pixels  cream type          primary / muted / subtle
+     ~ 5% of pixels  maroon              button fills, badges, 2 bands
+     ~ 2% of pixels  champagne           hairlines, metal accents
+
+   Maroon is an ACCENT, never a page background. The announcement bar
+   and the trust band are the only two full-maroon surfaces on the site.
+   If a section wants to feel branded, the answer is near-black with a
+   maroon accent inside it.
+   ═══════════════════════════════════════════════════════════════════ */
+
 @theme {
-  /* Legacy obsidian/gold palette — used by older sections (BentoGrid,
-     Services, Footer). The hero and rebuilt header use the forest-green
-     palette below. Both coexist until later prompts migrate the rest. */
-  --color-obsidian: #0A0A0A;
-  --color-obsidian-light: #111111;
-  --color-aura-gold: #D4AF37;
-  --color-aura-gold-light: #E8C84A;
-  --color-aura-gold-dim: rgba(212, 175, 55, 0.08);
+  /* ─── Canvas ──────────────────────────────────────────────────── */
+  --color-base: #0a0908;
+  --color-raised: #141110;
+  --color-sunken: #050404;
+  --color-hairline: #2a2422;
 
-  /* ─── Brand palette (forest green / champagne) ─────────────────────
-     Introduced with the hero rebuild. Champagne is the only warm metal
-     tone — never pair it with the legacy aura-gold yellow. Oxblood is
-     reserved for seasonal accents and is intentionally absent from
-     the hero composition. */
-  --color-forest: #14261F;
-  --color-forest-surface: #1A332A;
-  --color-cream: #F0EBE0;
-  --color-cream-muted: #C0B8A6;
-  --color-champagne: #C4A875;
-  --color-oxblood: #6B2317;
+  /* ─── Type ────────────────────────────────────────────────────── */
+  --color-cream: #f0ebe0;
+  --color-cream-muted: #a39c93;
+  --color-cream-subtle: #6b655e;
 
-  /* Display serif — Fraunces is variable on optical size + weight + italic,
-     which gives the hero its editorial / magazine character. Playfair stays
-     as the legacy serif for sections that haven't been migrated yet. */
-  --font-display: "Fraunces", "Playfair Display", "Georgia", serif;
-  --font-serif: "Playfair Display", "Georgia", serif;
+  /* ─── Brand maroon (accents only) ─────────────────────────────── */
+  --color-brand: #3d0f16;
+  --color-brand-raised: #5c1a24;
+  --color-brand-hover: #7a2430;
+
+  /* ─── Metal accent ────────────────────────────────────────────── */
+  --color-champagne: #c4a875;
+
+  /* ─── Typefaces ───────────────────────────────────────────────────
+     Fraunces is the display serif and is used with restraint: the
+     wordmark, homepage section headers, and PDP product names. Its
+     variable optical-size axis is driven at opsz 72 (text-weight
+     drawing) rather than 144 (poster drawing) — commerce headings sit
+     at 28-40px, where the poster cut looks bloated.
+
+     Manrope carries everything else: nav, product names, prices,
+     buttons, filters, forms, body copy. Playfair and JetBrains Mono
+     were dropped from the font payload with the storefront rebuild —
+     mono micro-caps read as editorial, not retail. --font-mono stays
+     defined against system faces so tabular contexts have a stack.
+     ─────────────────────────────────────────────────────────────── */
+  --font-display: "Fraunces", "Georgia", serif;
+  --font-serif: "Fraunces", "Georgia", serif;
   --font-sans: "Manrope", "Inter", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
 
-  --animate-shimmer: shimmer 3s ease-in-out infinite;
-  --animate-float: float 6s ease-in-out infinite;
-  --animate-pulse-gold: pulse-gold 2s ease-in-out infinite;
-  --animate-grain: grain 8s steps(10) infinite;
-  --animate-marquee: marquee 30s linear infinite;
-  --animate-fade-up: fade-up 0.8s ease-out forwards;
-  --animate-glow: glow 3s ease-in-out infinite alternate;
-
-  /* ─── Motion system tokens ──────────────────────────────────────────
+  /* ─── Motion system tokens ────────────────────────────────────────
      CSS-side mirror of src/lib/motion.ts. Use these for elements driven
      by CSS transitions (button hovers, link underlines, simple opacity
-     shifts). Anything Framer Motion drives reads from motion.ts directly.
+     shifts). Anything Framer Motion drives reads from motion.ts.
      Generated utilities: duration-{name}, ease-{name}.
-     ─────────────────────────────────────────────────────────────────── */
+     ─────────────────────────────────────────────────────────────── */
   --duration-instant: 100ms;
   --duration-hover: 180ms;
   --duration-micro: 300ms;
@@ -52,10 +68,9 @@
   --duration-page: 1200ms;
 
   /* Tailwind v4 generates the duration-{name} utility from the
-     --transition-duration-* namespace, not --duration-*. These alias the
-     tokens above so `duration-hover` etc. resolve to the brand timings
-     (previously they silently fell back to the 150ms default) and a
-     future retune only needs the one edit above. */
+     --transition-duration-* namespace, not --duration-*. These alias
+     the tokens above so `duration-hover` etc. resolve to the brand
+     timings and a future retune only needs the one edit above. */
   --transition-duration-instant: var(--duration-instant);
   --transition-duration-hover: var(--duration-hover);
   --transition-duration-micro: var(--duration-micro);
@@ -69,300 +84,185 @@
 }
 
 /* ═══════════════════════════════════════════
-   KEYFRAMES — Luxury Motion Library
-   ═══════════════════════════════════════════ */
-
-@keyframes shimmer {
-  0% { transform: translateX(-200%) skewX(-15deg); }
-  100% { transform: translateX(200%) skewX(-15deg); }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  33% { transform: translateY(-10px) rotate(1deg); }
-  66% { transform: translateY(5px) rotate(-1deg); }
-}
-
-@keyframes pulse-gold {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
-}
-
-@keyframes grain {
-  0%, 100% { transform: translate(0, 0); }
-  10% { transform: translate(-5%, -10%); }
-  20% { transform: translate(-15%, 5%); }
-  30% { transform: translate(7%, -25%); }
-  40% { transform: translate(-5%, 25%); }
-  50% { transform: translate(-15%, 10%); }
-  60% { transform: translate(15%, 0%); }
-  70% { transform: translate(0%, 15%); }
-  80% { transform: translate(3%, 35%); }
-  90% { transform: translate(-10%, 10%); }
-}
-
-@keyframes marquee {
-  0% { transform: translateX(0%); }
-  100% { transform: translateX(-50%); }
-}
-
-@keyframes fade-up {
-  0% { opacity: 0; transform: translateY(20px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes glow {
-  0% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.1), 0 0 60px rgba(212, 175, 55, 0.05); }
-  100% { box-shadow: 0 0 30px rgba(212, 175, 55, 0.2), 0 0 80px rgba(212, 175, 55, 0.1); }
-}
-
-@keyframes spin-slow {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Hero marquee — slow horizontal scroll for the editorial ticker.
-   Two copies of the content sit inside the track, so the loop
-   wraps seamlessly when the first copy slides off-screen. */
-@keyframes hero-ticker {
-  0%   { transform: translate3d(0, 0, 0); }
-  100% { transform: translate3d(-50%, 0, 0); }
-}
-
-/* Hero scroll-indicator hairline — pulses opacity on a 2s loop so
-   the user picks up the prompt without it shouting. The only signal
-   that more content lives below the wordless first frame. */
-@keyframes hero-pulse {
-  0%, 100% { opacity: 0.4; }
-  50%      { opacity: 0.8; }
-}
-
-/* Hero portrait frame aspect — taller on mobile (matches the vertical
-   asset), more landscape on desktop (matches the horizontal asset).
-   Lives in CSS rather than inline style so the breakpoint override
-   doesn't collide with style-attribute specificity. */
-.hero-frame-aspect {
-  aspect-ratio: 4 / 5;
-}
-@media (min-width: 1024px) {
-  .hero-frame-aspect {
-    aspect-ratio: 5 / 6;
-  }
-}
-
-@keyframes dash {
-  0% { stroke-dashoffset: 300; }
-  100% { stroke-dashoffset: 0; }
-}
-
-/* ═══════════════════════════════════════════
    BASE LAYER
    ═══════════════════════════════════════════ */
 
 @layer base {
   html {
     font-family: var(--font-sans);
-    background-color: var(--color-obsidian);
-    color: white;
+    background-color: var(--color-base);
+    color: var(--color-cream);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    scroll-behavior: smooth;
   }
 
   body {
     overflow-x: hidden;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-serif);
-  }
+  /* Headings inherit the sans by default — the display serif is opted
+     into explicitly (font-display) at the handful of places that earn
+     it. A blanket serif rule on h1-h6 is what made every product name
+     and filter legend read as editorial. */
 
   ::selection {
-    background: var(--color-aura-gold);
-    color: black;
+    background: var(--color-brand-hover);
+    color: var(--color-cream);
   }
 
-  /* Custom scrollbar — minimal gold accent */
   ::-webkit-scrollbar {
-    width: 6px;
+    width: 10px;
+    height: 10px;
   }
   ::-webkit-scrollbar-track {
-    background: var(--color-obsidian);
+    background: var(--color-sunken);
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(212, 175, 55, 0.3);
-    border-radius: 3px;
+    background: var(--color-hairline);
+    border-radius: 0;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(212, 175, 55, 0.5);
+    background: #3d3733;
+  }
+
+  /* Keyboard focus is a maroon-forward ring everywhere. Mouse users
+     never see it; keyboard users always do. */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-hover);
+    outline-offset: 2px;
   }
 }
 
 /* ═══════════════════════════════════════════
-   UTILITY LAYER — Luxury Design System
+   UTILITIES
    ═══════════════════════════════════════════ */
 
 @layer utilities {
-  /* Glassmorphism panel */
-  .glass-panel {
-    background: linear-gradient(
-      135deg,
-      rgba(20, 20, 20, 0.6) 0%,
-      rgba(10, 10, 10, 0.4) 100%
-    );
-    backdrop-filter: blur(20px) saturate(150%);
-    -webkit-backdrop-filter: blur(20px) saturate(150%);
-    border: 1px solid rgba(212, 175, 55, 0.12);
-    box-shadow:
-      0 8px 32px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  /* The storefront's label idiom: sans, uppercase, wide but not
+     precious. Nav, buttons, badges, filter legends, eyebrows. */
+  .label {
+    font-family: var(--font-sans);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
   }
 
-  .glass-panel-hover {
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .glass-panel-hover:hover {
-    border-color: rgba(212, 175, 55, 0.35);
-    box-shadow:
-      0 12px 48px rgba(0, 0, 0, 0.5),
-      0 0 30px rgba(212, 175, 55, 0.06),
-      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  /* Wider tracking for the smallest labels (announcement bar, badges)
+     where 0.08em closes up too much at 10-11px. */
+  .label-wide {
+    font-family: var(--font-sans);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 500;
   }
 
-  /* Gold text shadow */
-  .text-shadow-gold {
-    text-shadow: 0 0 40px rgba(212, 175, 55, 0.3), 0 0 80px rgba(212, 175, 55, 0.1);
+  /* Horizontal rails hide their scrollbar — the peeking next card is
+     the affordance, a scrollbar under a product row is noise. */
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 
-  /* Gold shimmer sweep on buttons */
-  .gold-shimmer {
-    position: relative;
-    overflow: hidden;
+  /* Product photography sits on the raised surface with a hairline so
+     a transparent-background PNG still reads as a framed tile. */
+  .tile-frame {
+    box-shadow: inset 0 0 0 1px var(--color-hairline);
   }
-  .gold-shimmer::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-      105deg,
-      transparent 40%,
-      rgba(255, 255, 255, 0.25) 45%,
-      rgba(255, 255, 255, 0.35) 50%,
-      rgba(255, 255, 255, 0.25) 55%,
-      transparent 60%
-    );
-    animation: shimmer 3s ease-in-out infinite;
-    pointer-events: none;
-  }
+}
 
-  /* Film grain overlay */
-  .grain-overlay::before {
-    content: '';
-    position: fixed;
-    top: -50%;
-    left: -50%;
-    right: -50%;
-    bottom: -50%;
-    width: 200%;
-    height: 200%;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-    animation: grain 8s steps(10) infinite;
-    pointer-events: none;
-    z-index: 9999;
-    opacity: 0.5;
-  }
+/* ═══════════════════════════════════════════
+   PHOTOGRAPHY TREATMENTS
+   ═══════════════════════════════════════════ */
 
-  /* Gold divider line */
-  .gold-divider {
-    height: 1px;
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(212, 175, 55, 0.5) 50%,
-      transparent 100%
-    );
-  }
+/* ─── The case plate ────────────────────────────────────────────────
+   The workshop's catalog photography is shot on white. Dropping white
+   rectangles onto a near-black canvas is the single loudest thing on a
+   dark storefront — the eye reads the background, not the chain.
 
-  /* Radial gold glow background */
-  .gold-radial {
-    background: radial-gradient(
-      ellipse at 50% 0%,
-      rgba(212, 175, 55, 0.08) 0%,
-      transparent 60%
-    );
-  }
+   So product frames get a warm off-white plate instead of the raised
+   surface: the photo's white edge dissolves into it, and the tile reads
+   as a lit display case set into a dark room rather than an unfinished
+   cut-out. The plate is a shade below paper white so it sits down in
+   the page instead of glaring, and the image is nudged fractionally
+   darker to meet it.
 
-  /* Stagger delay utilities for animation orchestration */
-  .stagger-1 { animation-delay: 0.1s; }
-  .stagger-2 { animation-delay: 0.2s; }
-  .stagger-3 { animation-delay: 0.3s; }
-  .stagger-4 { animation-delay: 0.4s; }
-  .stagger-5 { animation-delay: 0.5s; }
-  .stagger-6 { animation-delay: 0.6s; }
+   If the catalog is ever re-shot on a dark ground, delete this class
+   and the frames go back to `bg-raised` with nothing else to change. */
+.case-plate {
+  background-color: #e9e3d7;
+}
+/* The photograph fills the frame, so the plate colour alone would never
+   be seen — the white has to be brought down in the image itself. A 7%
+   brightness cut lands paper-white on the plate colour so the two read
+   as one surface, and the trace of sepia warms it to match rather than
+   leaving a cold grey. Hue is untouched: the metal still reads true,
+   which is the one thing this treatment must not cost. */
+.case-plate img {
+  filter: brightness(0.93) sepia(0.05) saturate(1.04);
+}
+
+/* ─── Velvet grade ──────────────────────────────────────────────────
+   The editorial photography (hero, category tiles, commission gallery)
+   was shot on FOREST-GREEN velvet for the previous brand. There is no
+   maroon-velvet shoot in the repo, so the green is graded out rather
+   than left to fight the palette: saturation down, then a maroon layer
+   in `color` blend mode, which replaces hue while keeping the
+   photograph's own luminance — so the velvet goes deep maroon and the
+   gold stays bright and warm rather than rotating to a false colour.
+
+   Applied only to editorial frames, never to product photography: a
+   shopper judging metal colour has to see the metal as it is.
+
+   Replace the assets with a maroon-velvet shoot and this comes off. */
+.velvet-grade {
+  position: relative;
+  isolation: isolate;
+}
+/* Saturation sets the whole trade-off. The hue blend can only colour a
+   pixel in proportion to the saturation already there — and the stones
+   in these photographs are not neutral, they carry reflected green off
+   the velvet, so any hue shift takes them toward pink along with the
+   fabric. Pulling saturation to 0.6 keeps the velvet reading as a warm
+   maroon-black while leaving the diamonds close enough to white to
+   pass. It also lands where the brief wants the page: near-black
+   dominant, brand colour as a cast rather than a flood.
+
+   The real fix is a maroon-velvet reshoot; then this whole block and
+   the ::after below come out. */
+.velvet-grade img {
+  filter: saturate(0.6) contrast(1.06) brightness(0.97);
+}
+.velvet-grade::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: #5c1a24;
+  /* `hue` rather than `color`: it replaces hue but leaves the
+     backdrop's own saturation alone, so a near-neutral pixel — a
+     diamond, a white-gold prong, a highlight — has almost no
+     saturation for the maroon to land on and stays white. `color`
+     overrides saturation too, which turned every stone pink. The
+     velvet, being genuinely saturated, still shifts fully. */
+  mix-blend-mode: hue;
+  pointer-events: none;
 }
 
 /* ═══════════════════════════════════════════
    COMPONENT STYLES
    ═══════════════════════════════════════════ */
 
-/* Mobile menu overlay */
-.mobile-menu-overlay {
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  background: rgba(10, 10, 10, 0.92);
-}
-
-/* Hero section gold accent bar */
-.hero-accent-bar {
-  width: 60px;
-  height: 2px;
-  background: linear-gradient(90deg, var(--color-aura-gold), transparent);
-}
-
-/* Service card inner glow on hover */
-.service-card-glow {
-  position: relative;
-}
-.service-card-glow::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: radial-gradient(
-    circle at 50% 0%,
-    rgba(212, 175, 55, 0.08) 0%,
-    transparent 60%
-  );
-  opacity: 0;
-  transition: opacity 0.5s ease;
-}
-.service-card-glow:hover::before {
-  opacity: 1;
-}
-
-/* Map container dark mode filter */
+/* Map embed on the Visit section — desaturated to sit inside the
+   near-black canvas instead of glowing white. */
 .map-dark-filter {
   filter: grayscale(100%) invert(92%) contrast(83%);
 }
 
-/* Luxury link underline animation */
-.luxury-link {
-  position: relative;
-  display: inline-block;
-}
-.luxury-link::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 0%;
-  height: 1px;
-  background: var(--color-aura-gold);
-  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.luxury-link:hover::after {
-  width: 100%;
+/* Custom Work gallery: the mobile carousel's scrollbar is suppressed
+   through the shared utility; this keeps the scoped override for the
+   pinned desktop strip's nested scroller. */
+[data-section="custom-work"] [data-scroller]::-webkit-scrollbar {
+  display: none;
 }

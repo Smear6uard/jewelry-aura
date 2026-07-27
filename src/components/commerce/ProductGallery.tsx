@@ -1,15 +1,14 @@
 /**
- * components/shop/ProductGallery.tsx — PDP image gallery.
+ * components/commerce/ProductGallery.tsx — PDP imagery.
  *
- * Owner-approved interaction model: desktop shows a vertical thumbnail
- * rail beside the main image; mobile is an edge-to-edge scroll-snap
- * swipe track with dot indicators; tapping/clicking the main image opens
- * a full-screen zoom view (Escape or click closes, focus returns).
- * The first image is the LCP candidate — eager + high priority; the
- * rest lazy-load (R21).
+ * Desktop: a vertical thumbnail rail beside the main image, click to
+ * zoom. Phones: an edge-to-edge scroll-snap track with dot indicators,
+ * tap to zoom. The first image is the LCP candidate — eager and high
+ * priority; the rest lazy-load (R21).
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { X } from 'lucide-react'
 import type { GalleryImage } from '~/lib/shopify/adapters'
 
 interface ProductGalleryProps {
@@ -41,7 +40,7 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
     }
   }, [zoomed, closeZoom])
 
-  // Keep the dot indicators in sync with manual swipes on mobile.
+  // Keep the dot indicators in sync with manual swipes on phones.
   const onTrackScroll = () => {
     const track = trackRef.current
     if (!track) return
@@ -51,10 +50,8 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
 
   if (images.length === 0) {
     return (
-      <div className="flex aspect-[4/5] w-full items-center justify-center bg-forest-surface">
-        <span className="font-display text-5xl italic text-cream-muted/30">
-          JA
-        </span>
+      <div className="case-plate flex aspect-[4/5] w-full items-center justify-center tile-frame">
+        <span className="font-display text-4xl text-base/25">JA</span>
       </div>
     )
   }
@@ -63,12 +60,12 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
 
   return (
     <div>
-      {/* Mobile: scroll-snap swipe track */}
+      {/* Phones: snap track */}
       <div className="md:hidden">
         <div
           ref={trackRef}
           onScroll={onTrackScroll}
-          className="-mx-6 flex snap-x snap-mandatory overflow-x-auto scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="no-scrollbar -mx-4 flex snap-x snap-mandatory overflow-x-auto"
           aria-label={`${title} images`}
         >
           {images.map((image, index) => (
@@ -79,7 +76,7 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
                 setActive(index)
                 setZoomed(true)
               }}
-              className="w-full shrink-0 snap-center px-6"
+              className="case-plate w-full shrink-0 snap-center"
               aria-label={`Zoom image ${index + 1} of ${images.length}`}
             >
               <img
@@ -91,18 +88,18 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
                 height={image.height}
                 loading={index === 0 ? 'eager' : 'lazy'}
                 fetchPriority={index === 0 ? 'high' : undefined}
-                className="aspect-[4/5] w-full bg-forest-surface object-cover"
+                className="aspect-[4/5] w-full object-cover"
               />
             </button>
           ))}
         </div>
         {images.length > 1 && (
-          <div className="mt-4 flex justify-center gap-2" aria-hidden>
+          <div className="mt-3 flex justify-center gap-1.5" aria-hidden>
             {images.map((image, index) => (
               <span
                 key={image.src}
-                className={`h-1 rounded-full transition-all duration-micro ease-apple ${
-                  index === active ? 'w-6 bg-champagne' : 'w-1.5 bg-cream-muted/30'
+                className={`h-1 transition-all duration-micro ease-apple ${
+                  index === active ? 'w-6 bg-champagne' : 'w-1.5 bg-hairline'
                 }`}
               />
             ))}
@@ -111,9 +108,9 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
       </div>
 
       {/* Desktop: thumbnail rail + main image */}
-      <div className="hidden gap-4 md:flex">
+      <div className="hidden gap-3 md:flex">
         {images.length > 1 && (
-          <div className="flex w-20 shrink-0 flex-col gap-3">
+          <div className="flex w-[72px] shrink-0 flex-col gap-2">
             {images.map((image, index) => (
               <button
                 key={image.src}
@@ -121,10 +118,10 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
                 onClick={() => setActive(index)}
                 aria-label={`Show image ${index + 1} of ${images.length}`}
                 aria-current={index === active}
-                className={`aspect-square overflow-hidden bg-forest-surface transition-opacity duration-hover ease-apple ${
+                className={`case-plate aspect-square overflow-hidden transition-opacity duration-hover ease-apple ${
                   index === active
                     ? 'opacity-100 ring-1 ring-champagne'
-                    : 'opacity-50 hover:opacity-90'
+                    : 'opacity-55 hover:opacity-90'
                 }`}
               >
                 <img
@@ -143,7 +140,7 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
           ref={zoomTriggerRef}
           type="button"
           onClick={() => setZoomed(true)}
-          className="group relative flex-1 cursor-zoom-in overflow-hidden bg-forest-surface"
+          className="case-plate group relative flex-1 cursor-zoom-in overflow-hidden tile-frame"
           aria-label="Zoom image"
         >
           <img
@@ -155,21 +152,20 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
             height={activeImage.height}
             loading="eager"
             fetchPriority="high"
-            className="aspect-[4/5] h-full w-full object-cover transition-transform duration-page ease-out-expo group-hover:scale-[1.03]"
+            className="aspect-[4/5] h-full w-full object-cover transition-transform duration-content ease-out-expo group-hover:scale-[1.03] motion-reduce:transition-none"
           />
-          <span className="pointer-events-none absolute bottom-4 right-4 font-mono text-[10px] uppercase tracking-[0.22em] text-cream/70 opacity-0 transition-opacity duration-hover ease-apple group-hover:opacity-100">
+          <span className="pointer-events-none absolute bottom-3 right-3 text-[10px] label-wide text-cream/70 opacity-0 transition-opacity duration-hover ease-apple group-hover:opacity-100">
             Zoom
           </span>
         </button>
       </div>
 
-      {/* Zoom overlay */}
       {zoomed && (
         <div
           role="dialog"
           aria-modal="true"
           aria-label={`${title} — zoomed image`}
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-forest/95 backdrop-blur-sm"
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-sunken/95"
           onClick={closeZoom}
         >
           <img
@@ -183,10 +179,10 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
             type="button"
             onClick={closeZoom}
             autoFocus
-            className="absolute right-6 top-6 rounded-full border border-cream-muted/40 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-cream transition-colors duration-hover ease-apple hover:border-champagne hover:text-champagne"
-            style={{ borderWidth: '0.5px' }}
+            aria-label="Close zoom"
+            className="absolute right-5 top-5 p-2 text-cream-muted transition-colors duration-hover ease-apple hover:text-cream"
           >
-            Close
+            <X aria-hidden size={20} strokeWidth={1.4} />
           </button>
         </div>
       )}

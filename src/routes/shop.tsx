@@ -1,19 +1,28 @@
 /**
- * routes/shop.tsx — the all-products catalog page (plan U2).
+ * routes/shop.tsx — the all-products catalog (plan U2), now a full PLP.
  *
- * Fully SSR'd (buffered, KTD12): product data is fetched server-side via a
- * server function, rendered into the HTML, and cached at the CDN with SWR
- * headers + cache tags (KTD1/KTD2). The route never sets cookies (KTD3).
+ * Fully SSR'd (buffered, KTD12): product data is fetched server-side,
+ * filtered and paginated server-side, rendered into the HTML, and
+ * cached at the CDN with SWR headers + cache tags (KTD1/KTD2). The
+ * route never sets cookies (KTD3).
+ *
+ * Facets live in search params, so `/shop?price=under-250` is a real
+ * URL a shopper can share and a crawler can index — which is also what
+ * makes the homepage's Shop-by-price band work with no extra plumbing.
  */
 
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 
-import { Header } from '~/components/layout/Header'
-import { CatalogFallback } from '~/components/shop/CatalogFallback'
-import { ProductGrid } from '~/components/shop/ProductGrid'
-import { ShopCta } from '~/components/shop/ShopCta'
-import { mapProductCard, type ProductCardNode } from '~/lib/shopify/adapters'
+import { ListingLayout } from '~/components/commerce/ListingLayout'
+import { ProductGrid } from '~/components/commerce/ProductGrid'
+import { type ProductCardNode } from '~/lib/shopify/adapters'
+import {
+  listingHref,
+  parseFacets,
+  type Facets,
+} from '~/lib/shopify/facets'
+import { buildListing } from '~/lib/shopify/listing'
 import { SHOP_PRODUCTS_QUERY } from '~/lib/shopify/queries'
 import {
   HERO_SOCIAL_IMAGE,
@@ -24,33 +33,49 @@ import {
   pageMeta,
 } from '~/lib/seo'
 
+const PER_PAGE = 24
+const BASE_PATH = '/shop'
+
 const PAGE_TITLE =
   "Shop Men's Gold Chains, Moissanite & Pendants | Jewelry Aura"
 const PAGE_DESCRIPTION =
   'Shop every piece from the Jewelry Aura workshop — custom gold chains, moissanite, pendants, rings & bracelets, hand-finished to order. Repairs welcome.'
 
 interface ShopProductsData {
-  products: {
-    nodes: ProductCardNode[]
-  }
+  products: { nodes: ProductCardNode[] }
 }
 
 const getShopProducts = createServerFn({ method: 'GET' }).handler(
-  async () => {
+  async (): Promise<ProductCardNode[]> => {
     // Imported lazily so this server-only module never enters the client
     // graph through the route file.
     const { storefrontRequest } = await import('~/lib/shopify/client')
     const data = await storefrontRequest<ShopProductsData>(
       SHOP_PRODUCTS_QUERY,
-      { variables: { first: 24 } },
+      { variables: { first: 250 } },
     )
-    return data.products.nodes.map(mapProductCard)
+    return data.products.nodes
   },
 )
 
 export const Route = createFileRoute('/shop')({
-  loader: () => getShopProducts(),
-  // Client-side SWR for in-app navigation (KTD5); CDN handles shared cache.
+  validateSearch: (search: Record<string, unknown>) => {
+    const raw = Number(search.page)
+    const page = Number.isInteger(raw) && raw >= 2 ? raw : undefined
+    return { ...parseFacets(search), page }
+  },
+  loaderDeps: ({ search }) => search,
+  loader: async ({ deps }) => {
+    const nodes = await getShopProducts()
+    const facets: Facets = {
+      metal: deps.metal,
+      style: deps.style,
+      price: deps.price,
+      avail: deps.avail,
+      sort: deps.sort,
+    }
+    return { ...buildListing(nodes, facets, deps.page ?? 1, PER_PAGE), facets }
+  },
   staleTime: 30_000,
   gcTime: 5 * 60_000,
   headers: () => ({
@@ -61,17 +86,35 @@ export const Route = createFileRoute('/shop')({
     'Vercel-Cache-Tag': 'products,collections',
   }),
   head: ({ loaderData }) => {
-    const products = loaderData ?? []
+    const products = loaderData?.products ?? []
+    const facets = loaderData?.facets ?? {}
+    const filtered = Boolean(
+      facets.metal || facets.style || facets.price || facets.avail,
+    )
+    const canonical = `${SITE_URL}${listingHref(
+      BASE_PATH,
+      facets,
+      loaderData?.page ?? 1,
+    )}`
+
     return {
-      meta: pageMeta({
-        title: PAGE_TITLE,
-        description: PAGE_DESCRIPTION,
-        url: `${SITE_URL}/shop`,
-        image: HERO_SOCIAL_IMAGE,
-        imageAlt: HERO_SOCIAL_IMAGE_ALT,
-      }),
+      meta: [
+        ...pageMeta({
+          title: PAGE_TITLE,
+          description: PAGE_DESCRIPTION,
+          url: canonical,
+          image: HERO_SOCIAL_IMAGE,
+          imageAlt: HERO_SOCIAL_IMAGE_ALT,
+        }),
+        // Facet permutations are near-infinite and individually thin.
+        // The unfiltered catalog is the page worth indexing; filtered
+        // views stay followable so crawlers still reach the products.
+        ...(filtered
+          ? [{ name: 'robots', content: 'noindex, follow' }]
+          : []),
+      ],
       links: [
-        { rel: 'canonical', href: `${SITE_URL}/shop` },
+        { rel: 'canonical', href: canonical },
         { rel: 'preconnect', href: 'https://cdn.shopify.com' },
       ],
       // ItemList of the listed pieces — the storefront's catalog page is
@@ -83,6 +126,7 @@ export const Route = createFileRoute('/shop')({
               children: jsonLdScript(
                 itemListJsonLd(
                   products.map((product) => `/products/${product.handle}`),
+                  ((loaderData?.page ?? 1) - 1) * PER_PAGE + 1,
                 ),
               ),
             },
@@ -92,43 +136,57 @@ export const Route = createFileRoute('/shop')({
   },
   component: ShopPage,
   errorComponent: () => (
-    <CatalogFallback
-      eyebrow="The cases are closed for a moment"
-      headline="We couldn’t reach the collection. Give it a breath and try again."
-      ctaLabel="Reload the shop"
-    />
+    <main className="mx-auto max-w-[1440px] px-4 py-20 md:px-8">
+      <h1 className="font-display text-[28px] tracking-tight text-cream md:text-[38px]">
+        The catalog didn’t load
+      </h1>
+      <p className="mt-3 max-w-[52ch] text-[14px] text-cream-muted">
+        Give it a moment and try again — or call 630-965-6464 and we’ll tell you
+        what’s in the case right now.
+      </p>
+      <a
+        href="/shop"
+        className="mt-6 inline-flex items-center bg-brand px-6 py-3 text-[11px] label text-cream transition-colors duration-hover ease-apple hover:bg-brand-hover"
+      >
+        Reload the shop
+      </a>
+      <div className="mt-12">
+        <ProductGrid products={[]} />
+      </div>
+    </main>
   ),
 })
 
 function ShopPage() {
-  const products = Route.useLoaderData()
+  const data = Route.useLoaderData()
+
+  const hrefForFacets = (patch: Partial<Facets>) =>
+    listingHref(BASE_PATH, { ...data.facets, ...patch }, 1)
+  const hrefForPage = (page: number) =>
+    listingHref(BASE_PATH, data.facets, page)
 
   return (
-    <div className="grain-overlay">
-      <Header solid />
-      <main className="bg-forest text-cream">
-        <section className="mx-auto max-w-[1440px] px-6 pb-24 pt-36 md:px-12 md:pb-40 md:pt-48">
-          <header className="mb-16 md:mb-28">
-            <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-champagne">
-              The collection
-            </p>
-            <div className="mt-6 flex flex-wrap items-end justify-between gap-x-12 gap-y-6 md:mt-8">
-              <h1 className="max-w-3xl font-display text-5xl font-light leading-[0.95] tracking-tight text-cream md:text-7xl">
-                Every piece leaves
-                <span className="italic"> the bench</span> ready to be worn
-                for decades.
-              </h1>
-              <p className="mb-1 shrink-0 font-mono text-[11px] uppercase tracking-[0.18em] text-cream-muted">
-                {products.length} {products.length === 1 ? 'piece' : 'pieces'}
-              </p>
-            </div>
-          </header>
-
-          <ProductGrid products={products} />
-        </section>
-
-        <ShopCta />
-      </main>
-    </div>
+    <ListingLayout
+      title="Every piece"
+      description="Chains, pendants, bracelets and rings from the bench — plus the stones and gold we keep in the case."
+      breadcrumbs={[
+        { name: 'Home', path: '/' },
+        { name: 'Shop', path: BASE_PATH },
+      ]}
+      products={data.products}
+      total={data.total}
+      page={data.page}
+      totalPages={data.totalPages}
+      facets={data.facets}
+      counts={data.counts}
+      // The catch-all catalog spans every category, so it offers the
+      // cross-category facets (metal, price) and no style list — style
+      // vocabulary is category-specific and "Cuban" would mean chains
+      // and bracelets at once here.
+      styles={[]}
+      hrefForFacets={hrefForFacets}
+      hrefForPage={hrefForPage}
+      clearHref={BASE_PATH}
+    />
   )
 }

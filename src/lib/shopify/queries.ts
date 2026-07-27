@@ -15,6 +15,23 @@ export const SHOP_NAME_QUERY = `#graphql
  * collections, homepage best sellers). Image aliases feed the srcset the
  * adapter assembles; Shopify serves the transform from its CDN.
  */
+/**
+ * Card-level product data shared by every listing surface (/shop,
+ * collections, homepage rails, search). Image aliases feed the srcset
+ * the adapter assembles; Shopify serves the transform from its CDN.
+ *
+ * Three fields exist purely so the card component's built-in behaviour
+ * is reachable rather than dead:
+ *
+ *   images(first: 2)     the second photograph the card crossfades to
+ *                        on hover; absent on single-image products, and
+ *                        the card falls back to a slow scale.
+ *   variants(first: 2)   asked for two so one node means "one variant,
+ *                        safe to Quick add with this id" and two means
+ *                        "needs a size or length chosen first". Cheaper
+ *                        and more exact than counting option values.
+ *   compareAtPriceRange  drives the struck was-price and the Sale badge.
+ */
 export const PRODUCT_CARD_FRAGMENT = `#graphql
   fragment ProductCard on Product {
     handle
@@ -29,6 +46,23 @@ export const PRODUCT_CARD_FRAGMENT = `#graphql
       w800: url(transform: { maxWidth: 800 })
       w1200: url(transform: { maxWidth: 1200 })
     }
+    images(first: 2) {
+      nodes {
+        altText
+        width
+        height
+        w400: url(transform: { maxWidth: 400 })
+        w600: url(transform: { maxWidth: 600 })
+        w800: url(transform: { maxWidth: 800 })
+        w1200: url(transform: { maxWidth: 1200 })
+      }
+    }
+    variants(first: 2) {
+      nodes {
+        id
+        availableForSale
+      }
+    }
     priceRange {
       minVariantPrice {
         amount
@@ -39,12 +73,27 @@ export const PRODUCT_CARD_FRAGMENT = `#graphql
         currencyCode
       }
     }
+    compareAtPriceRange {
+      minVariantPrice {
+        amount
+        currencyCode
+      }
+    }
   }
 `
 
+/**
+ * The catalog listing query. `sortKey` defaults to BEST_SELLING so every
+ * existing caller (the /shop grid, the best-sellers window) is
+ * unchanged; the homepage's New arrivals rail passes CREATED_AT.
+ *
+ * The default lives in the GraphQL variable definition rather than in
+ * each caller so there is exactly one place that decides what "no sort
+ * specified" means.
+ */
 export const SHOP_PRODUCTS_QUERY = `#graphql
-  query ShopProducts($first: Int!) {
-    products(first: $first, sortKey: BEST_SELLING) {
+  query ShopProducts($first: Int!, $sortKey: ProductSortKeys = BEST_SELLING) {
+    products(first: $first, sortKey: $sortKey) {
       nodes {
         ...ProductCard
       }

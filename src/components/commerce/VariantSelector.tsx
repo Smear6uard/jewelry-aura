@@ -1,11 +1,14 @@
 /**
- * components/shop/VariantSelector.tsx — option buttons for the PDP.
+ * components/commerce/VariantSelector.tsx — option controls for the PDP.
  *
- * Options render as buttons — swatch dots when the option is a color,
- * pills otherwise. Selecting a value navigates to the same route with
- * updated search params, so every variant state is a shareable, SSR'd
- * URL. Values with no purchasable variant for the rest of the current
- * selection render disabled (dimmed + struck), not hidden.
+ * Swatch dots for colour options, square-cornered pills otherwise.
+ * Selecting a value navigates to the same route with updated search
+ * params, so every variant state is a shareable, SSR'd URL.
+ *
+ * Unavailable values render disabled and struck rather than
+ * disappearing. Hiding them makes the option list change shape as you
+ * click through it, and hides the useful fact that the length you want
+ * exists but is out of stock.
  */
 
 import type { OptionModel } from '~/lib/shopify/adapters'
@@ -19,16 +22,17 @@ export function VariantSelector({ options, onSelect }: VariantSelectorProps) {
   if (options.length === 0) return null
 
   return (
-    <div className="flex flex-col gap-7">
+    <div className="flex flex-col gap-6">
       {options.map((option) => (
         <fieldset key={option.name}>
-          <legend className="font-mono text-[11px] uppercase tracking-[0.22em] text-cream-muted">
+          <legend className="text-[11px] label text-cream-subtle">
             {option.name}
-            <span className="ml-3 normal-case tracking-normal text-cream">
+            <span className="ml-2 normal-case tracking-normal text-cream">
               {option.values.find((v) => v.selected)?.name}
             </span>
           </legend>
-          <div className="mt-3 flex flex-wrap items-center gap-2.5">
+
+          <div className="mt-2.5 flex flex-wrap items-center gap-2">
             {option.values.map((value) =>
               option.isColor && value.swatchColor ? (
                 <button
@@ -36,13 +40,15 @@ export function VariantSelector({ options, onSelect }: VariantSelectorProps) {
                   type="button"
                   disabled={!value.available}
                   aria-pressed={value.selected}
-                  aria-label={`${option.name}: ${value.name}${value.available ? '' : ' (unavailable)'}`}
+                  aria-label={`${option.name}: ${value.name}${
+                    value.available ? '' : ' (unavailable)'
+                  }`}
                   title={value.name}
                   onClick={() => onSelect(value.search)}
-                  className={`relative h-9 w-9 rounded-full transition-transform duration-hover ease-apple ${
+                  className={`relative h-8 w-8 rounded-full transition-transform duration-hover ease-apple ${
                     value.selected
-                      ? 'ring-1 ring-champagne ring-offset-2 ring-offset-forest'
-                      : 'ring-1 ring-cream-muted/25 hover:ring-cream-muted/60'
+                      ? 'ring-1 ring-champagne ring-offset-2 ring-offset-base'
+                      : 'ring-1 ring-hairline hover:ring-cream-subtle'
                   } ${
                     value.available
                       ? 'active:scale-[0.94]'
@@ -53,7 +59,7 @@ export function VariantSelector({ options, onSelect }: VariantSelectorProps) {
                   {!value.available && (
                     <span
                       aria-hidden
-                      className="absolute inset-0 m-auto h-px w-7 rotate-45 bg-cream-muted"
+                      className="absolute inset-0 m-auto h-px w-6 rotate-45 bg-cream-muted"
                     />
                   )}
                 </button>
@@ -64,14 +70,13 @@ export function VariantSelector({ options, onSelect }: VariantSelectorProps) {
                   disabled={!value.available}
                   aria-pressed={value.selected}
                   onClick={() => onSelect(value.search)}
-                  className={`rounded-full px-4 py-2 font-sans text-[13px] transition-colors duration-hover ease-apple ${
+                  className={`min-w-[3rem] px-3.5 py-2 text-[13px] transition-colors duration-hover ease-apple ${
                     value.selected
-                      ? 'bg-champagne text-forest'
+                      ? 'bg-cream text-base'
                       : value.available
-                        ? 'border border-champagne/30 text-cream hover:border-champagne/70 active:scale-[0.98]'
-                        : 'cursor-not-allowed border border-cream-muted/15 text-cream-muted/40 line-through'
+                        ? 'border border-hairline text-cream hover:border-cream-subtle active:scale-[0.98]'
+                        : 'cursor-not-allowed border border-hairline text-cream-subtle/50 line-through'
                   }`}
-                  style={value.selected ? undefined : { borderWidth: '0.5px' }}
                 >
                   {value.name}
                 </button>

@@ -6,6 +6,7 @@ import {
   mapCollectionPage,
   mapProductCard,
   paginate,
+  parseFormattedMoney,
   type CollectionNode,
   type ProductCardNode,
 } from './adapters'
@@ -421,5 +422,94 @@ describe('breadcrumbJsonLd', () => {
     expect(jsonLd.itemListElement[1].item).toBe(
       'https://www.thejewelryaura.com/collections/chains',
     )
+  })
+})
+
+// ─── Card enrichments (hover image, quick add, sale) ─────────────────
+// These branches drive behaviour the current catalog does not exercise
+// — every live product is multi-variant or sold out — so they are
+// pinned here rather than left to be discovered by the first
+// single-variant product the shop adds.
+
+describe('mapProductCard enrichments', () => {
+  const image = (n: number) => ({
+    altText: `Image ${n}`,
+    width: 1600,
+    height: 2000,
+    w400: `https://cdn.shopify.com/img${n}?width=400`,
+    w600: `https://cdn.shopify.com/img${n}?width=600`,
+    w800: `https://cdn.shopify.com/img${n}?width=800`,
+    w1200: `https://cdn.shopify.com/img${n}?width=1200`,
+  })
+
+  it('takes the second image as the hover frame', () => {
+    const card = mapProductCard(
+      cardNode({ images: { nodes: [image(1), image(2)] } }),
+    )
+    expect(card.hoverImage?.src).toBe('https://cdn.shopify.com/img2?width=800')
+  })
+
+  it('has no hover frame when the product has one image', () => {
+    expect(mapProductCard(cardNode({ images: { nodes: [image(1)] } })).hoverImage)
+      .toBeNull()
+  })
+
+  it('exposes a variant id for quick add when there is exactly one variant', () => {
+    const card = mapProductCard(
+      cardNode({
+        variants: {
+          nodes: [{ id: 'gid://shopify/ProductVariant/1', availableForSale: true }],
+        },
+      }),
+    )
+    expect(card.variantId).toBe('gid://shopify/ProductVariant/1')
+    expect(card.optionCount).toBe(1)
+  })
+
+  it('withholds the variant id when a choice is needed first', () => {
+    const card = mapProductCard(
+      cardNode({
+        variants: {
+          nodes: [
+            { id: 'gid://shopify/ProductVariant/1', availableForSale: true },
+            { id: 'gid://shopify/ProductVariant/2', availableForSale: true },
+          ],
+        },
+      }),
+    )
+    expect(card.variantId).toBeNull()
+    expect(card.optionCount).toBe(2)
+  })
+
+  it('formats a compare-at price only when it is above the sale price', () => {
+    const onSale = mapProductCard(
+      cardNode({
+        compareAtPriceRange: {
+          minVariantPrice: { amount: '1800.0', currencyCode: 'USD' },
+        },
+      }),
+    )
+    expect(onSale.compareAtPrice).toBe('$1,800')
+
+    // Shopify returns 0 rather than null when nothing is discounted.
+    const notOnSale = mapProductCard(
+      cardNode({
+        compareAtPriceRange: {
+          minVariantPrice: { amount: '0.0', currencyCode: 'USD' },
+        },
+      }),
+    )
+    expect(notOnSale.compareAtPrice).toBeNull()
+  })
+})
+
+describe('parseFormattedMoney', () => {
+  it('reads formatted money back to a number', () => {
+    expect(parseFormattedMoney('$2,900')).toBe(2900)
+    expect(parseFormattedMoney('$89.50')).toBe(89.5)
+  })
+
+  it('returns 0 for a string with no digits', () => {
+    expect(parseFormattedMoney('—')).toBe(0)
   })
 })

@@ -1,5 +1,5 @@
 /**
- * components/shop/CartProvider.tsx — client-side cart state.
+ * components/commerce/CartProvider.tsx — client-side cart state.
  *
  * Hydrates AFTER paint via the uncached getCart server function (KTD3 —
  * page HTML stays cookie-free and CDN-cacheable; the badge shows a
