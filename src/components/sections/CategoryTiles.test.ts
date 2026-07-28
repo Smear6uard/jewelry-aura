@@ -65,10 +65,24 @@ describe('resolveTiles', () => {
     expect(tile?.remote).toBeUndefined()
   })
 
-  it('caps the row at five doors', () => {
+  it('caps the row at six doors — five categories plus Custom', () => {
     const all = Object.fromEntries(
       CATEGORIES.map((c) => [c.handle, remote(c.label)]),
     )
-    expect(resolveTiles(all).length).toBeLessThanOrEqual(5)
+    const tiles = resolveTiles(all)
+    expect(tiles.length).toBeLessThanOrEqual(6)
+    // Custom is pinned last, so a full house of categories must not
+    // push it off the end — the old slice(0, 5) silently did.
+    expect(tiles.at(-1)?.key).toBe('custom')
+  })
+
+  it('keeps every category door when they all resolve', () => {
+    const all = Object.fromEntries(
+      CATEGORIES.map((c) => [c.handle, remote(c.label)]),
+    )
+    const keys = resolveTiles(all).map((tile) => tile.key)
+    for (const category of CATEGORIES) {
+      expect(keys).toContain(category.handle)
+    }
   })
 })

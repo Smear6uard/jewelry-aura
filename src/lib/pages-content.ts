@@ -51,9 +51,9 @@ const PAGES: ContentPage[] = [
         ],
       },
       {
-        heading: 'Local pickup',
+        heading: 'Tracking',
         body: [
-          `Pickup at the shop is free. Choose it at checkout and we hold the piece at our ${STORE.city} counter — we send the exact address and a pickup window when it is ready. Bring the order confirmation and a photo ID.`,
+          'Tracking is emailed the moment the label is printed, and again with a delivery window on the morning it arrives. If a package looks stalled, call us before you call the carrier — insured jewelry claims move faster from our side.',
         ],
       },
     ],
@@ -113,7 +113,7 @@ const PAGES: ContentPage[] = [
       {
         heading: 'Free maintenance',
         body: [
-          'Bring anything you bought from us in for cleaning, polishing and a prong check any time. There is no charge and no appointment needed.',
+          'Send anything you bought from us back for cleaning, polishing and a prong check any time. There is no charge for the work — call and we send a prepaid insured label.',
         ],
       },
     ],
@@ -146,7 +146,7 @@ const PAGES: ContentPage[] = [
       {
         heading: 'Rings',
         body: [
-          'The most reliable method is having a ring you already wear measured on a mandrel. We will do it free, in about a minute, no appointment.',
+          'The most reliable method is a jeweller measuring a ring you already wear on a mandrel. Any jeweller will do it in a minute, usually free, and the number they give you is the one to order.',
           'If you are measuring at home, wrap a strip of paper around the base of the finger, mark where it overlaps, and measure the length in millimetres — that is the circumference. Measure at the end of the day when fingers are largest, and check that it clears the knuckle.',
         ],
       },
@@ -179,13 +179,13 @@ const PAGES: ContentPage[] = [
       {
         heading: 'Do you repair pieces I did not buy here?',
         body: [
-          'Yes, and it is a large part of what the bench does. Broken clasps, retipped prongs, lost stones, cracked shanks, restringing, watch movements. Bring it in for a free quote.',
+          'Yes, and it is a large part of what the bench does. Broken clasps, retipped prongs, lost stones, cracked shanks, restringing, watch movements. Send a photo for a free quote and we mail you an insured label.',
         ],
       },
       {
-        heading: 'Do I need an appointment?',
+        heading: 'How do I talk to someone about a custom piece?',
         body: [
-          `Not for repairs, sizing or browsing. For a custom consultation, call ${STORE.phone} first so we can set aside the time and have stones ready to look at.`,
+          `Call ${STORE.phone} or send the form on the custom page. A consultation runs over the phone and by photo — sketches, references and stone options go back and forth until the specification is right, and nothing goes to the bench until you approve it.`,
         ],
       },
       {
@@ -199,18 +199,19 @@ const PAGES: ContentPage[] = [
   {
     handle: 'about',
     title: 'About the shop',
-    summary: `A working jewelry bench in ${STORE.city}, serving ${STORE.region}.`,
+    summary: 'A working jewelry bench, shipping insured across the United States.',
     blocks: [
       {
         body: [
-          'Jewelry Aura is a bench, a case and a small team. We design and set custom pieces, sell gold and stones we would wear ourselves, and repair whatever comes through the door — including work nobody else wants to take on.',
+          'Jewelry Aura is a bench and a small team. We design and set custom pieces, sell gold and stones we would wear ourselves, and repair whatever comes to us — including work nobody else wants to take on.',
           'Almost everything you see on this site was made a few feet from where it is photographed. When you call, you are talking to the person who will do the work.',
         ],
       },
       {
-        heading: 'Where we are',
+        heading: 'How we work',
         body: [
-          `We are based in ${STORE.city} and serve ${STORE.region}. Visits are by appointment — call ${STORE.phone} and we will confirm a time and send directions.`,
+          `We are an online shop, so everything happens by phone, photo and post: ${STORE.phone} for the conversation, insured shipping both ways for the piece. ${STORE.replyWindow}`,
+          'A custom commission runs the same way. You see renderings and stone options before anything is cut, you approve the specification, and the finished piece ships insured and signature-required.',
         ],
       },
     ],
@@ -249,7 +250,7 @@ const PAGES: ContentPage[] = [
     blocks: [
       {
         body: [
-          'Most repairs are quoted the moment you walk in and finished within the week. Bring the piece in — no appointment, no charge to look at it.',
+          'Send a photo and we quote the repair the same day, at no charge. Approve it and we mail you a prepaid insured label; most pieces are back on their way to you within the week.',
         ],
         list: [
           'Clasp replacement and chain soldering',
@@ -288,9 +289,9 @@ const PAGES: ContentPage[] = [
         ],
       },
       {
-        heading: 'Before you bring a watch in',
+        heading: 'Before you send a watch',
         body: [
-          `Call ${STORE.phone} if the piece is high-value or vintage, so a watchmaker is on site when you arrive rather than the counter taking it in.`,
+          `Call ${STORE.phone} first if the piece is high-value or vintage. We agree the declared value, insure the shipment for it in both directions, and have the right watchmaker holding time before the package moves.`,
         ],
       },
     ],
@@ -299,12 +300,12 @@ const PAGES: ContentPage[] = [
     handle: 'appraisal',
     title: 'Appraisal',
     summary:
-      'Written appraisals for insurance, estate and resale, prepared on site.',
+      'Written appraisals for insurance, estate and resale, prepared in house.',
     blocks: [
       {
         body: [
-          'We prepare written appraisals with photographs, measurements, stone grading and a replacement value your insurer will accept. Most are completed while you wait; complex estate pieces take a few days.',
-          `Call ${STORE.phone} to confirm timing before you come in with a large group of pieces.`,
+          'We prepare written appraisals with photographs, measurements, stone grading and a replacement value your insurer will accept. Anything bought here can be appraised from our own records; anything else is appraised in hand and returned insured.',
+          `Call ${STORE.phone} before sending a large group of pieces so we can quote the turnaround and insure the shipment properly.`,
         ],
       },
     ],

@@ -1,8 +1,12 @@
 # Jewelry Aura
 
-Editorial site + headless Shopify storefront for Jewelry Aura (Norridge, IL).
+Headless Shopify storefront for Jewelry Aura, an online jewelry shop.
 TanStack Start (React 19, Vite, Nitro) deployed on Vercel; commerce via the
 Shopify Storefront API (server-side only) with Shopify-hosted checkout.
+
+The store publishes no physical location — no address, hours, map or
+pickup anywhere in copy or structured data. See "No published location"
+in `SEO_NOTES.md` before adding any.
 
 ## Quick start
 

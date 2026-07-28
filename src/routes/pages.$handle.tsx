@@ -113,9 +113,7 @@ function StaticPage() {
             >
               {STORE.phone}
             </a>
-            <p className="text-[13px] text-ink-muted">
-              {STORE.hours[0].days} · {STORE.hours[0].time}
-            </p>
+            <p className="text-[13px] text-ink-muted">{STORE.replyWindow}</p>
           </div>
         </header>
 

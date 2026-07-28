@@ -254,41 +254,16 @@ export const PRODUCT_QUERY = `#graphql
   ${VARIANT_AVAILABILITY_FRAGMENT}
 `
 
-/**
- * Category-tile imagery fallback.
- *
- * A category tile is a promise about what is behind it, so it may never
- * render without a correct photograph and it may never borrow another
- * category's. Where the workshop has no dedicated asset for a category,
- * the tile falls back to that collection's first in-stock product image
- * — which is by definition a correct picture of the category.
- *
- * Aliased rather than variable-driven because the Storefront API takes
- * one handle per `collection` field; five aliases is one round trip. An
- * uncreated collection resolves to null, the tile is omitted, and the
- * grid closes up.
+/*
+ * CATEGORY_TILE_IMAGES_QUERY used to live here: five aliased
+ * `collection(handle:)` fields whose first in-stock product image
+ * backed a homepage category tile. It was deleted when the tiles moved
+ * onto the virtual-collection rules — with no collections in the store
+ * every alias resolved to null and every tile was dropped, so the
+ * homepage lost its category row to a query that could only work after
+ * the admin work it was meant to survive. Tiles now come out of the
+ * same catalog fetch the page already makes (see routes/index.tsx).
  */
-export const CATEGORY_TILE_IMAGES_QUERY = `#graphql
-  query CategoryTileImages {
-    chains: collection(handle: "chains") { ...TileImage }
-    pendants: collection(handle: "pendants") { ...TileImage }
-    bracelets: collection(handle: "bracelets") { ...TileImage }
-    rings: collection(handle: "rings") { ...TileImage }
-  }
-  fragment TileImage on Collection {
-    products(first: 12) {
-      nodes {
-        title
-        availableForSale
-        featuredImage {
-          altText
-          w600: url(transform: { maxWidth: 600 })
-          w1200: url(transform: { maxWidth: 1200 })
-        }
-      }
-    }
-  }
-`
 
 /**
  * One collection with up to 250 products in a single fetch (KTD8):

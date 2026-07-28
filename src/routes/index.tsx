@@ -8,11 +8,19 @@ import {
   type TileFallbacks,
 } from '~/components/sections/CategoryTiles'
 import { TrustBar } from '~/components/sections/TrustBar'
+import { MoissaniteBand } from '~/components/sections/MoissaniteBand'
+import { WomensShelf } from '~/components/sections/WomensShelf'
 import { CustomPromo } from '~/components/sections/CustomPromo'
 import { ShopByPrice } from '~/components/sections/ShopByPrice'
 import { Reviews } from '~/components/sections/Reviews'
 import { ProductRail } from '~/components/commerce/ProductRail'
-import { mapProductCard, type ProductCardModel, type ProductCardNode } from '~/lib/shopify/adapters'
+import { CATEGORIES } from '~/lib/catalog'
+import {
+  buildCardImage,
+  mapProductCard,
+  type ProductCardModel,
+  type ProductCardNode,
+} from '~/lib/shopify/adapters'
 import {
   HERO_SOCIAL_IMAGE,
   HERO_SOCIAL_IMAGE_ALT,
@@ -31,9 +39,12 @@ import {
 /** How many products a homepage rail needs before it is worth rendering. */
 const MIN_RAIL_PRODUCTS = 4
 
+/** The homepage shelf is a shop window, not the catalog: eight pieces. */
+const BEST_SELLER_LIMIT = 8
+
 interface HomeData {
   bestSellers: ProductCardModel[]
-  newArrivals: ProductCardModel[]
+  moissanite: ProductCardModel[]
   tileFallbacks: TileFallbacks
 }
 
@@ -41,55 +52,23 @@ interface ShopProductsData {
   products: { nodes: ProductCardNode[] }
 }
 
-/** Shape of one aliased collection in CATEGORY_TILE_IMAGES_QUERY. */
-interface TileCollection {
-  products: {
-    nodes: Array<{
-      title: string
-      availableForSale: boolean
-      featuredImage: {
-        altText: string | null
-        w600: string
-        w1200: string
-      } | null
-    }>
-  }
-}
-
-type TileImagesData = Record<string, TileCollection | null>
-
-/**
- * First in-stock product image in a collection — the fallback for a
- * category tile with no dedicated asset. Returns null when the
- * collection does not exist, is empty, or has nothing photographed and
- * in stock, and the tile is then dropped rather than rendered blank.
- */
-function firstInStockImage(
-  collection: TileCollection | null | undefined,
-  label: string,
-): TileFallbackImage | null {
-  const node = collection?.products.nodes.find(
-    (product) => product.availableForSale && product.featuredImage,
-  )
-  if (!node?.featuredImage) return null
-  const image = node.featuredImage
-  return {
-    src: image.w600,
-    srcSet: `${image.w600} 600w, ${image.w1200} 1200w`,
-    alt: image.altText || `${node.title} — ${label} from Jewelry Aura.`,
-  }
-}
-
 /**
  * Everything the homepage needs, in one round trip pair.
  *
  * The homepage must never break on commerce trouble (missing env, API
- * hiccup) — it degrades to empty shelves and no category fallbacks, and
+ * hiccup) — it degrades to an empty shelf and no category fallbacks, and
  * both surfaces render nothing rather than a titled blank space.
  *
- * Rails are deduped and filtered HERE rather than in the components, so
- * the guarantee is a property of the page's data and not of whichever
+ * Rails are filtered HERE rather than in the components, so the
+ * guarantee is a property of the page's data and not of whichever
  * component happens to render last.
+ *
+ * Category tile images used to come from an aliased per-collection
+ * query. They now come out of the same catalog fetch, matched by the
+ * virtual-collection rules — which is what makes the tiles work while
+ * the Shopify collections behind the menu do not exist yet. One fetch,
+ * and a tile that resolves for any category with a photographed,
+ * in-stock piece in it.
  */
 const getHomeData = createServerFn({ method: 'GET' }).handler(
   async (): Promise<HomeData> => {
@@ -97,55 +76,70 @@ const getHomeData = createServerFn({ method: 'GET' }).handler(
       const [
         { storefrontRequest },
         { getBestSellersLogic },
-        { SHOP_PRODUCTS_QUERY, CATEGORY_TILE_IMAGES_QUERY },
+        { SHOP_PRODUCTS_QUERY },
+        { findVirtualCollection, selectVirtual },
       ] = await Promise.all([
         import('~/lib/shopify/client'),
         import('~/lib/shopify/best-sellers'),
         import('~/lib/shopify/queries'),
+        import('~/lib/shopify/virtual-collections'),
       ])
 
-      const [bestSellers, newest, tiles] = await Promise.all([
-        getBestSellersLogic(storefrontRequest, 8),
+      const [bestSellers, catalog] = await Promise.all([
+        getBestSellersLogic(storefrontRequest, BEST_SELLER_LIMIT),
         storefrontRequest<ShopProductsData>(SHOP_PRODUCTS_QUERY, {
-          // Over-fetched: sold-out pieces and anything already in Best
-          // sellers come out below, and 8 must survive both filters.
-          variables: { first: 24, sortKey: 'CREATED_AT' },
+          variables: { first: 250 },
         }),
-        // A missing tile fallback costs one tile; it must never cost the
-        // shelves. Resolved independently of the product queries.
-        storefrontRequest<TileImagesData>(CATEGORY_TILE_IMAGES_QUERY).catch(
-          () => ({}) as TileImagesData,
-        ),
       ])
 
-      // No product appears twice on this page. Best sellers is ranked by
-      // real sales and wins the tie; New arrivals shows what is left.
-      const alreadyShown = new Set(bestSellers.map((product) => product.handle))
+      const nodes = catalog.products.nodes
 
-      const newArrivals = newest.products.nodes
-        .map(mapProductCard)
-        .filter(
-          (product) =>
-            product.availableForSale && !alreadyShown.has(product.handle),
+      const tileFallbacks: TileFallbacks = {}
+      for (const category of CATEGORIES) {
+        const virtual = findVirtualCollection(category.handle)
+        if (!virtual) continue
+        tileFallbacks[category.handle] = firstInStockImage(
+          selectVirtual(nodes, virtual),
+          category.label,
         )
-        .slice(0, 8)
-
-      return {
-        bestSellers,
-        newArrivals,
-        tileFallbacks: {
-          chains: firstInStockImage(tiles.chains, 'chains'),
-          pendants: firstInStockImage(tiles.pendants, 'pendants'),
-          bracelets: firstInStockImage(tiles.bracelets, 'bracelets'),
-          rings: firstInStockImage(tiles.rings, 'rings'),
-        },
       }
+
+      const moissaniteCollection = findVirtualCollection('moissanite')
+      const moissanite = moissaniteCollection
+        ? selectVirtual(nodes, moissaniteCollection)
+            .map(mapProductCard)
+            .filter((product) => product.availableForSale)
+            .slice(0, 2)
+        : []
+
+      return { bestSellers, moissanite, tileFallbacks }
     } catch (error) {
       console.warn(`[home] degrading to empty shelves: ${String(error)}`)
-      return { bestSellers: [], newArrivals: [], tileFallbacks: {} }
+      return { bestSellers: [], moissanite: [], tileFallbacks: {} }
     }
   },
 )
+
+/**
+ * First in-stock, photographed piece in a category — the fallback for a
+ * category tile with no dedicated asset. Returns null when nothing
+ * matches, and the tile is then dropped rather than rendered blank.
+ */
+function firstInStockImage(
+  nodes: ReadonlyArray<ProductCardNode>,
+  label: string,
+): TileFallbackImage | null {
+  const node = nodes.find(
+    (product) => product.availableForSale && product.featuredImage,
+  )
+  if (!node) return null
+  const image = buildCardImage(
+    node.featuredImage,
+    `${node.title} — ${label.toLowerCase()} from Jewelry Aura.`,
+  )
+  if (!image) return null
+  return { src: image.src, srcSet: image.srcSet, alt: image.alt }
+}
 
 // ═══════════════════════════════════════════
 // ROUTE CONFIG + SEO
@@ -224,12 +218,20 @@ export const Route = createFileRoute('/')({
 // The order is a shopping funnel, not a narrative:
 //   Hero           one frame, two category CTAs
 //   CategoryTiles  the "I can shop here" moment, above the fold
-//   Best sellers   what other people bought
-//   Trust bar      the terms, before the second shelf
-//   New arrivals   what just landed, deduped against the shelf above
+//   Best sellers   what other people bought — the ONE product shelf
+//   Trust bar      the terms, immediately after the shelf
+//   Moissanite     the stone, argued, with a route into the case
+//   Women's        the five categories again, cut for her
 //   Custom promo   the workshop's differentiator, one band
 //   Shop by price  for the visitor who knows the budget, not the piece
 //   Reviews        social proof — omitted until three real ones exist
+//
+// ONE PRODUCT SHELF, NOT TWO. A "New arrivals" rail used to sit below
+// the trust bar. On a catalog this size the two shelves between them
+// listed most of the store, which turns the homepage into the catalog
+// and leaves /shop with nothing to be. Best sellers is ranked by real
+// sales and capped at eight; everything else on this page is a door,
+// and every door leads to a listing page that can hold the rest.
 //
 // A pinned custom-work gallery and a store-location section used to sit
 // in this list. Both read as brand-site rather than marketplace, and both
@@ -237,7 +239,7 @@ export const Route = createFileRoute('/')({
 // ═══════════════════════════════════════════
 
 function HomePage() {
-  const { bestSellers, newArrivals, tileFallbacks } = Route.useLoaderData()
+  const { bestSellers, moissanite, tileFallbacks } = Route.useLoaderData()
 
   return (
     <main>
@@ -249,6 +251,7 @@ function HomePage() {
         title="Best sellers"
         eyebrow="Most bought"
         products={bestSellers}
+        limit={BEST_SELLER_LIMIT}
         link={{ href: '/shop', label: 'View all' }}
         minProducts={MIN_RAIL_PRODUCTS}
         eager
@@ -256,13 +259,8 @@ function HomePage() {
 
       <TrustBar />
 
-      <ProductRail
-        title="New arrivals"
-        eyebrow="Just finished"
-        products={newArrivals}
-        link={{ href: '/shop', label: 'View all' }}
-        minProducts={MIN_RAIL_PRODUCTS}
-      />
+      <MoissaniteBand products={moissanite} />
+      <WomensShelf />
 
       <CustomPromo />
       <ShopByPrice />

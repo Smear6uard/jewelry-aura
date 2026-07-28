@@ -1,9 +1,10 @@
 /**
  * components/sections/CategoryTiles.tsx — the "I can shop here" moment.
  *
- * Sits immediately under the hero, above every rail. Two across on
- * phones, five across on desktop, close enough to the fold that a
- * visitor sees them without committing to a scroll.
+ * Sits immediately under the hero, above the shelf. Two across on
+ * phones, and on desktop as many columns as there are doors, close
+ * enough to the fold that a visitor sees them without committing to a
+ * scroll.
  *
  * EVERY TILE HAS A CORRECT IMAGE OR IT DOES NOT RENDER.
  *
@@ -14,7 +15,7 @@
  *
  *   1. A dedicated asset, where the workshop's shot list covers the
  *      category (see Category.tileImage in lib/catalog.ts).
- *   2. The collection's first in-stock product image, fetched by the
+ *   2. The category's first in-stock product image, resolved by the
  *      route. By definition a correct picture of the category.
  *   3. Nothing — and the tile is dropped from the list entirely.
  *
@@ -61,14 +62,23 @@ const CUSTOM_TILE = {
 }
 
 /** Desktop column counts, keyed by surviving tile count. Static strings
- *  because Tailwind cannot see a computed class name. */
+ *  because Tailwind cannot see a computed class name. Six doors set as
+ *  two rows of three rather than a six-across ribbon — at 1440px, six
+ *  across gives each tile less width than a phone does. */
 const COLUMNS: Record<number, string> = {
   2: 'md:grid-cols-2',
   3: 'md:grid-cols-3',
   4: 'md:grid-cols-4',
   5: 'md:grid-cols-5',
+  6: 'md:grid-cols-3',
 }
 
+/**
+ * Custom is pinned last and never dropped, so the five categories get
+ * the first five slots and the row tops out at six. Slicing the whole
+ * list instead would quietly delete Bracelets — the last category — on
+ * the day the workshop finally photographs all five.
+ */
 export function resolveTiles(fallbacks: TileFallbacks): ResolvedTile[] {
   const tiles: ResolvedTile[] = []
 
@@ -96,8 +106,7 @@ export function resolveTiles(fallbacks: TileFallbacks): ResolvedTile[] {
     // No asset and no in-stock product: the tile is dropped.
   }
 
-  tiles.push(CUSTOM_TILE)
-  return tiles.slice(0, 5)
+  return [...tiles.slice(0, 5), CUSTOM_TILE]
 }
 
 export function CategoryTiles({ fallbacks }: { fallbacks: TileFallbacks }) {
@@ -112,7 +121,7 @@ export function CategoryTiles({ fallbacks }: { fallbacks: TileFallbacks }) {
       className="mx-auto max-w-[1440px] px-4 pt-8 md:px-8 md:pt-12"
     >
       <ul
-        className={`grid grid-cols-2 gap-2 md:gap-3 ${COLUMNS[tiles.length] ?? 'md:grid-cols-5'}`}
+        className={`grid grid-cols-2 gap-2 md:gap-3 ${COLUMNS[tiles.length] ?? 'md:grid-cols-3'}`}
       >
         {tiles.map((tile) => (
           <li key={tile.key}>

@@ -8,8 +8,15 @@
  * fake an infinite loop, because a crawler reads the duplicates as real
  * products and the shopper pays for them in page weight.
  *
- * Desktop: a level four-across grid. Same ProductCard as the catalog
- * grid — a rail is a different layout, not a different product.
+ * Desktop: a level four-across grid, rounded DOWN to whole rows. Five
+ * products would otherwise leave one card alone on row two, which reads
+ * as a shelf someone stopped filling — the same "thin catalog" signal
+ * `minProducts` exists to prevent, one row further down. The phone
+ * carousel still shows all of them; a scroll track has no rows to leave
+ * ragged.
+ *
+ * Same ProductCard as the catalog grid — a rail is a different layout,
+ * not a different product.
  *
  * `minProducts` is the merchandising guard. A homepage rail passes 4: a
  * shelf with two pieces on it advertises a thin catalog, and a missing
@@ -49,6 +56,14 @@ export function ProductRail({
   const shown = products.slice(0, limit)
   if (shown.length < minProducts) return null
 
+  // Whole rows only on the desktop grid. Below four there is no full row
+  // to keep, so a short rail shows what it has rather than nothing.
+  const COLUMNS = 4
+  const level =
+    shown.length >= COLUMNS
+      ? shown.slice(0, Math.floor(shown.length / COLUMNS) * COLUMNS)
+      : shown
+
   return (
     <section
       id={id}
@@ -78,7 +93,7 @@ export function ProductRail({
 
       {/* md and up: a level grid. Four across, tight gutters. */}
       <ul className="mt-8 hidden gap-3 md:grid md:grid-cols-4">
-        {shown.map((product, index) => (
+        {level.map((product, index) => (
           <li key={product.handle}>
             <ProductCard
               product={product}

@@ -7,6 +7,7 @@ import {
 } from './queries'
 import { SITE_URL } from '../seo'
 import { PAGE_HANDLES } from '../pages-content'
+import { virtualCollectionHandles } from './virtual-collections'
 
 const PAGE_SIZE = 250
 
@@ -75,6 +76,13 @@ export function buildSitemapXml(entries: ReadonlyArray<SitemapEntry>): string {
 /**
  * Enumerates homepage, /shop, every collection, and every product —
  * products and collections walked with cursor pagination (250/page).
+ *
+ * Menu handles Shopify has no collection for are listed too. They
+ * resolve to real, crawlable pages through the virtual-collection
+ * fallback, and a page the whole site links to but the sitemap omits
+ * reads to a crawler as a page we are not sure about. Deduped against
+ * the live collections so a handle that exists in both is listed once,
+ * with its real `lastmod`.
  */
 export async function generateSitemapXml(
   request: SitemapRequest,
@@ -83,6 +91,11 @@ export async function generateSitemapXml(
     collectAll(request, SITEMAP_PRODUCTS_QUERY, 'products'),
     collectAll(request, SITEMAP_COLLECTIONS_QUERY, 'collections'),
   ])
+
+  const live = new Set(collections.map((c) => c.handle))
+  const menuOnly = virtualCollectionHandles().filter(
+    (handle) => !live.has(handle),
+  )
 
   const entries: SitemapEntry[] = [
     { path: '/' },
@@ -96,6 +109,7 @@ export async function generateSitemapXml(
       path: `/collections/${c.handle}`,
       lastmod: c.updatedAt,
     })),
+    ...menuOnly.map((handle) => ({ path: `/collections/${handle}` })),
     ...products.map((p) => ({
       path: `/products/${p.handle}`,
       lastmod: p.updatedAt,

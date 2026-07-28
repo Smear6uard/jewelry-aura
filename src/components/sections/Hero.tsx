@@ -52,16 +52,22 @@ const PHOTO_ALT =
 
 const EYEBROW = 'Custom · Iced · One of one'
 const SUPPORT =
-  'Solid gold and certified stones, hand-set in Norridge. Free shipping over $150 and a lifetime warranty on everything we make.'
+  'Solid gold and certified stones, hand-set to order. Free shipping over $150 and a lifetime warranty on everything we make.'
 
 /**
- * Carries the cream canvas across the left quarter of the desktop frame
- * so the overlaid type sits on page colour, not on the photograph. Two
- * stops rather than one: a solid hold to ~10% keeps the first word off
- * the velvet even on a 2560px screen.
+ * Carries the cream canvas across the left of the desktop frame so the
+ * overlaid type sits on page colour, not on the photograph.
+ *
+ * The stops are driven by where the type actually ends, not by taste.
+ * The block is 30rem wide inside a 1440px container, so it runs to 50%
+ * of a 1024px viewport but only 42% of a 2560px one — a single fade
+ * that clears the type on a wide screen leaves the last two words of
+ * the headline sitting on near-black velvet at 1024px, which is what
+ * the earlier 27% fade did. Two ranges, each ending past the type.
+ *
+ * See the media queries in the <style> block at the foot of this file.
  */
-const DESKTOP_WASH =
-  'linear-gradient(to right, #F2EDE4 0%, #F2EDE4 10%, rgba(242,237,228,0.72) 18%, rgba(242,237,228,0) 27%)'
+const WASH_CLASS = 'hero-wash'
 
 export function Hero() {
   const reduced = !!useReducedMotion()
@@ -168,8 +174,7 @@ export function Hero() {
 
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0"
-          style={{ background: DESKTOP_WASH }}
+          className={`pointer-events-none absolute inset-0 ${WASH_CLASS}`}
         />
 
         <div className="absolute inset-0 flex items-center">
@@ -234,6 +239,30 @@ export function Hero() {
             font-size: clamp(2.4rem, 3.4vw, 3.25rem);
             line-height: 1.02;
             max-width: 17ch;
+          }
+          /* 1024–1279: the type block runs to ~50% of the viewport. */
+          .hero-wash {
+            background: linear-gradient(
+              to right,
+              #f2ede4 0%,
+              #f2ede4 16%,
+              rgba(242, 237, 228, 0.74) 38%,
+              rgba(242, 237, 228, 0) 60%
+            );
+          }
+        }
+        /* 1280 and up: the container stops growing, so the type block
+           takes a smaller share of the frame and the wash follows it
+           back — the photograph gets the width the type gives up. */
+        @media (min-width: 1280px) {
+          .hero-wash {
+            background: linear-gradient(
+              to right,
+              #f2ede4 0%,
+              #f2ede4 12%,
+              rgba(242, 237, 228, 0.74) 28%,
+              rgba(242, 237, 228, 0) 50%
+            );
           }
         }
       `}</style>

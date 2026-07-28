@@ -3,7 +3,7 @@
 Implemented:
 
 - Added TanStack Start head metadata for title, description, canonical, robots, theme color, Open Graph, and Twitter card tags.
-- Added `JewelryStore` and `Organization` JSON-LD with the provided address, phone, hours, Instagram profile, and looked-up coordinates for 4104 N Harlem Ave.
+- Added business + `Organization` JSON-LD with phone and Instagram profile. (The original version of this node carried a street address, coordinates and opening hours; all of it was removed — see "No published location" below.)
 - Generated brand icons from a cream-on-forest Jewelry Aura wordmark: favicon 16/32, Apple touch icon 180, and a 512 maskable manifest icon.
 - Added `robots.txt` and `sitemap.xml` for the single-page site.
 - Converted hero and custom-piece images to AVIF/WebP with JPEG fallbacks, added `<picture>` sources, lazy loading for below-fold gallery images, and intrinsic dimensions.
@@ -38,14 +38,47 @@ Deliberately NOT added — would be fabricated without real data (the owner just
 - `shippingDetails` + `hasMerchantReturnPolicy` on product offers, and any "free shipping / 30-day returns" copy — needs the real policy (or set once at the Google Merchant Center account level).
 - Image sitemap entries (`image:image`) — needs the sitemap query to also fetch product images.
 
+## No published location (2026-07-27)
+
+The store ships; it does not receive visitors. Every location signal was
+removed from copy, meta and structured data in the same pass:
+
+- **`JewelryStore` → `OnlineStore`.** `JewelryStore` is a `LocalBusiness`,
+  and a LocalBusiness with no address is an incomplete entity — it invites
+  Google to look for a storefront, a map pin and hours that do not exist.
+  `OnlineStore` ⊂ `OnlineBusiness` ⊂ `Organization` describes what this
+  business actually is, and still anchors `#organization` for `WebSite`
+  and every `Product.offers.seller`.
+- `openingHoursSpecification` deleted. `telephone`, `contactPoint`,
+  `areaServed: United States`, `paymentAccepted` and `sameAs` stay.
+- Copy: no city, no region, no map, no pickup counter, no walk-in or
+  appointment language on any page. Repairs, appraisals, watch service
+  and warranty maintenance are all described as insured post both ways.
+  An hours table is replaced by a reply window ("answered within one
+  business day") — the promise a shopper was reading hours for anyway.
+- `STORE` in `src/lib/catalog.ts` no longer carries `city`, `region`,
+  `street` or `hours`, so the type system stops a location coming back
+  by way of a template string.
+
+## Virtual collections (2026-07-27)
+
+The menu's twelve collection handles do not exist in Shopify yet, so
+`/collections/*` was a wall of 404s. `src/lib/shopify/virtual-collections.ts`
+derives a listing from product titles (the same technique `facets.ts`
+uses for metal and style) whenever Shopify has no collection under the
+handle. A real collection always wins, the fallback costs one extra
+query only on the miss, and every menu link is now a crawlable 200 with
+either products or a branded empty state that routes onward. Creating
+the real collections in the admin remains the fix; this stops the
+storefront lying in the meantime.
+
 Manual owner steps:
 
 - **Fix the $0-priced products in Shopify admin.** Merchant listings require price > 0; a $0 offer = disapproval, no Product rich result, no free Shopping listing. The PDP JSON-LD / OG price is live-bound, so it currently (correctly) reports `0.0` for those pieces.
-- Create the 12 menu collections (`chains`, `pendants`, `earrings`, `rings`, `bracelets`, `moissanite`, and the `womens-*` set) in Shopify admin so the drawer links resolve instead of 404ing.
+- Create the 12 menu collections (`chains`, `pendants`, `earrings`, `rings`, `bracelets`, `moissanite`, and the `womens-*` set) in Shopify admin. They no longer 404 without them, but a real collection gives the owner merchandising control over order and membership.
 - Stand up a reviews app, surface reviews on PDPs, then wire `aggregateRating`/`review` into `productJsonLd`.
 - Set up Google Merchant Center and connect the catalog (free product listings + Shopping surface read the same Product data).
 - Production URL is `https://www.thejewelryaura.com` (apex 307s to www; DNS on Cloudflare, records DNS-only). `SITE_URL` in `src/lib/seo.ts` carries it — sitemap, robots, canonicals, and JSON-LD all derive from it.
-- Claim and fully complete the Google Business Profile for Jewelry Aura at 4104 N Harlem Ave, Norridge, IL 60706.
 - Add the final domain to Google Search Console and submit `/sitemap.xml`.
 - Add the same website URL to Instagram and any other social profiles so `sameAs` signals match public profiles.
 - After launch, test the deployed URL in Google Rich Results Test, PageSpeed Insights, and social card debuggers for X/Twitter, LinkedIn, and iMessage.

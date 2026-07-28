@@ -7,13 +7,20 @@
  * mean what it says. The handle is validated before it reaches the
  * query or the cache-tag header. Fully SSR'd and CDN-cached on the
  * collection policy (KTD2).
+ *
+ * When Shopify has no collection under the handle, the route falls back
+ * to a virtual collection derived from product titles rather than
+ * throwing a 404 — see lib/shopify/virtual-collections.ts. That is what
+ * lets the menu ship its full taxonomy before the admin has the
+ * collections to back it. A real collection always wins; the fallback
+ * costs one extra query and only on the miss.
  */
 
 import { createFileRoute, notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 
 import { ListingLayout } from '~/components/commerce/ListingLayout'
-import { findCategory } from '~/lib/catalog'
+import { findCategory, parentOfWomens } from '~/lib/catalog'
 import {
   isValidHandle,
   type CollectionNode,
@@ -27,7 +34,7 @@ import {
   type Facets,
 } from '~/lib/shopify/facets'
 import { buildListing } from '~/lib/shopify/listing'
-import { COLLECTION_QUERY } from '~/lib/shopify/queries'
+import { COLLECTION_QUERY, SHOP_PRODUCTS_QUERY } from '~/lib/shopify/queries'
 import { BTN_PRIMARY } from '~/lib/ui'
 import {
   HERO_SOCIAL_IMAGE,
@@ -45,6 +52,10 @@ interface CollectionData {
   collection: CollectionNode | null
 }
 
+interface ShopProductsData {
+  products: { nodes: ProductCardNode[] }
+}
+
 interface CollectionShell {
   handle: string
   title: string
@@ -52,6 +63,9 @@ interface CollectionShell {
   seoTitle: string
   seoDescription: string
   nodes: ProductCardNode[]
+  /** Set only on a virtual collection: where an empty case sends you. */
+  emptyAction?: { href: string; label: string }
+  emptyBody?: string
 }
 
 function collectionCrumbs(title: string, basePath: string): BreadcrumbItem[] {
@@ -75,14 +89,38 @@ const getCollection = createServerFn({ method: 'GET' })
       variables: { handle: data.handle, first: 250 },
     })
     const collection = result.collection
-    if (!collection) return null
+    if (collection) {
+      return {
+        handle: collection.handle,
+        title: collection.title,
+        description: collection.description,
+        seoTitle: collection.seo?.title || collection.title,
+        seoDescription: collection.seo?.description || collection.description,
+        nodes: collection.products.nodes,
+      }
+    }
+
+    // No collection under this handle. If the menu promises one, build it
+    // from the catalog; if nothing links here, it stays a 404.
+    const { findVirtualCollection, selectVirtual } = await import(
+      '~/lib/shopify/virtual-collections'
+    )
+    const virtual = findVirtualCollection(data.handle)
+    if (!virtual) return null
+
+    const catalog = await storefrontRequest<ShopProductsData>(
+      SHOP_PRODUCTS_QUERY,
+      { variables: { first: 250 } },
+    )
     return {
-      handle: collection.handle,
-      title: collection.title,
-      description: collection.description,
-      seoTitle: collection.seo?.title || collection.title,
-      seoDescription: collection.seo?.description || collection.description,
-      nodes: collection.products.nodes,
+      handle: virtual.handle,
+      title: virtual.title,
+      description: virtual.description,
+      seoTitle: virtual.title,
+      seoDescription: virtual.description,
+      nodes: selectVirtual(catalog.products.nodes, virtual),
+      emptyAction: virtual.emptyAction,
+      emptyBody: virtual.emptyBody,
     }
   })
 
@@ -120,6 +158,8 @@ export const Route = createFileRoute('/collections/$handle')({
       description: collection.description,
       seoTitle: collection.seoTitle,
       seoDescription: collection.seoDescription,
+      emptyAction: collection.emptyAction,
+      emptyBody: collection.emptyBody,
       facets,
       ...listing,
     }
@@ -225,7 +265,9 @@ export const Route = createFileRoute('/collections/$handle')({
 function CollectionPage() {
   const data = Route.useLoaderData()
   const basePath = `/collections/${data.handle}`
-  const category = findCategory(data.handle)
+  // A women's collection filters on its parent category's styles — the
+  // pieces are the same vocabulary, cut smaller.
+  const category = findCategory(data.handle) ?? parentOfWomens(data.handle)
 
   const hrefForFacets = (patch: Partial<Facets>) =>
     listingHref(basePath, { ...data.facets, ...patch }, 1)
@@ -248,6 +290,8 @@ function CollectionPage() {
       hrefForFacets={hrefForFacets}
       hrefForPage={hrefForPage}
       clearHref={basePath}
+      emptyAction={data.emptyAction}
+      emptyBody={data.emptyBody}
     />
   )
 }

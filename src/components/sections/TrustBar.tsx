@@ -13,13 +13,15 @@
  * marketing rather than information.
  */
 
-import { FREE_SHIPPING_THRESHOLD, STORE } from '~/lib/catalog'
+import { FREE_SHIPPING_THRESHOLD } from '~/lib/catalog'
 
 const PROMISES = [
   { label: `Free shipping over $${FREE_SHIPPING_THRESHOLD}`, href: '/pages/shipping' },
   { label: 'Lifetime warranty', href: '/pages/warranty' },
   { label: '30-day returns', href: '/pages/returns' },
-  { label: `Hand-set in ${STORE.city.split(',')[0]}`, href: '/pages/about' },
+  // Was "Hand-set in <city>". The claim a shopper can act on is who
+  // makes the piece, not where the bench sits.
+  { label: 'Hand-set to order', href: '/pages/about' },
 ]
 
 export function TrustBar() {

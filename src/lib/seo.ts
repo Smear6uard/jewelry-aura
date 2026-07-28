@@ -26,37 +26,29 @@ export const HERO_SOCIAL_IMAGE_ALT =
 export const SITE_TITLE =
   "Men's Gold Chains, Moissanite & Custom Jewelry | Jewelry Aura"
 export const SITE_DESCRIPTION =
-  "Custom men's gold chains, moissanite, pendants & rings — hand-finished to order in our workshop, with expert in-house jewelry repair. Shop the collection."
+  "Custom men's and women's gold chains, moissanite, pendants, earrings & rings — hand-finished to order, shipped insured, with expert in-house repair."
 
 const TELEPHONE = '+1-630-965-6464'
 const sameAs = ['https://instagram.com/Jewelryaura01'] as const
 
-const OPENING_HOURS = [
-  {
-    '@type': 'OpeningHoursSpecification',
-    dayOfWeek: [
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-    ],
-    opens: '10:00',
-    closes: '18:00',
-  },
-] as const
-
 /**
  * The single canonical business identity, emitted site-wide from the root
- * route. `JewelryStore` ⊂ `LocalBusiness` ⊂ `Organization`, so this one
- * node carries the storefront identity, local signals, and the publisher
- * reference that `WebSite` and every Product offer's `seller` point back
- * to by `@id`.
+ * route. `OnlineStore` ⊂ `OnlineBusiness` ⊂ `Organization`, so this one
+ * node carries the storefront identity and the publisher reference that
+ * `WebSite` and every Product offer's `seller` point back to by `@id`.
+ *
+ * DELIBERATELY NOT A `JewelryStore`.
+ *
+ * `JewelryStore` is a `LocalBusiness`, and a LocalBusiness node without
+ * an address is an incomplete entity that invites Google to ask for a
+ * storefront, a map pin and opening hours this business does not have.
+ * There is no address, no geo, no openingHoursSpecification here on
+ * purpose — this store ships, it does not receive visitors, and the
+ * markup should say the same thing the pages say.
  */
 export const jewelryStoreSchema = {
   '@context': 'https://schema.org',
-  '@type': 'JewelryStore',
+  '@type': 'OnlineStore',
   '@id': ORG_ID,
   name: SITE_NAME,
   url: `${SITE_URL}/`,
@@ -69,12 +61,11 @@ export const jewelryStoreSchema = {
   },
   image: HERO_SOCIAL_IMAGE,
   description:
-    "Custom men's gold chains, moissanite, pendants, rings, and bridal pieces — hand-finished to order, with expert in-house jewelry repair.",
+    "Gold chains, pendants, earrings, rings and bracelets for men and women — moissanite and custom work hand-finished to order, with expert in-house jewelry repair.",
   telephone: TELEPHONE,
   priceRange: '$$$',
   paymentAccepted: 'Credit Card, Apple Pay, Google Pay, Shop Pay',
   areaServed: 'United States',
-  openingHoursSpecification: OPENING_HOURS,
   contactPoint: {
     '@type': 'ContactPoint',
     telephone: TELEPHONE,

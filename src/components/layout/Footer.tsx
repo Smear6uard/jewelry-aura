@@ -25,11 +25,11 @@
  * full footer taxonomy is in the SSR payload either way. With JavaScript
  * off the columns stay accordions at every width, which still works.
  *
- * The Studio column replaced a "Visit" column that carried a map link
- * and an hours table. This is a marketplace, not a neighbourhood shop
- * window: city, phone and Instagram are the facts a shopper wants, and
- * the LocalBusiness JSON-LD in the head still carries the hours for
- * search engines.
+ * The Contact column replaced a "Visit" column that carried a map link,
+ * a city and an hours table. This store ships; it does not receive
+ * visitors, so there is no location anywhere in this footer or in the
+ * JSON-LD behind it. Phone, reply window and Instagram are the facts a
+ * shopper can act on.
  */
 
 import { useState } from 'react'
@@ -67,7 +67,7 @@ export function Footer() {
             <Column key={column.title} {...column} />
           ))}
           <div className="border-b border-cream/15 py-5 md:border-b-0 md:py-0">
-            <Studio />
+            <Contact />
           </div>
         </div>
 
@@ -85,9 +85,7 @@ export function Footer() {
 
         <div className="mt-4 flex flex-col gap-2 text-[11px] text-cream/60 md:flex-row md:items-center md:justify-between">
           <p>© {new Date().getFullYear()} Jewelry Aura. All rights reserved.</p>
-          <p>
-            {STORE.city} · Serving {STORE.region}
-          </p>
+          <p>Shipping insured across the United States</p>
         </div>
       </div>
     </footer>
@@ -133,26 +131,26 @@ function Column({ title, links }: LinkColumn) {
   )
 }
 
-/** City, phone, Instagram. No map, no hours table, no icons. */
-function Studio() {
+/** Phone, reply window, Instagram. No address, no map, no hours table. */
+function Contact() {
   return (
     <div>
-      <h2 className="mb-4 text-[11px] label-wide text-cream">Studio</h2>
-      <address className="flex flex-col gap-2.5 text-[13px] not-italic text-cream/75">
-        <span>{STORE.city}</span>
+      <h2 className="mb-4 text-[11px] label-wide text-cream">Contact</h2>
+      <div className="flex flex-col gap-2.5 text-[13px] text-cream/75">
         <a
           href={STORE.phoneHref}
           className="text-cream transition-colors duration-hover ease-apple hover:text-cream/80"
         >
           {STORE.phone}
         </a>
+        <p className="max-w-[26ch] leading-relaxed">{STORE.replyWindow}</p>
         <a
           href={STORE.instagram}
           className="text-cream/75 transition-colors duration-hover ease-apple hover:text-cream"
         >
           {STORE.instagramHandle}
         </a>
-      </address>
+      </div>
     </div>
   )
 }

@@ -1,11 +1,11 @@
 /**
  * lib/catalog.ts — the storefront's navigation taxonomy.
  *
- * One source of truth for: the primary nav, the mega-menu panels, the
- * mobile drawer's accordion, the footer's Shop column, and the filter
- * sidebar's facet lists. Every one of those surfaces renders from this
- * file, so a category can't exist in the menu and vanish from the
- * footer.
+ * One source of truth for: the burger drawer, the desktop nav and its
+ * mega-menu panels, the women's submenu, the homepage sections, the
+ * footer's Shop column, and the filter sidebar's facet lists. Every one
+ * of those surfaces renders from this file, so a category can't exist in
+ * the menu and vanish from the footer.
  *
  * Why the mega-menu links carry search params
  * -------------------------------------------
@@ -94,6 +94,13 @@ export const PRICE_FACETS: FacetOption[] = [
   { value: '750-plus', label: '$750 and up' },
 ]
 
+/**
+ * The five shopping categories, in menu order: chains, pendants,
+ * earrings, rings, bracelets. This order is the store's spine — the
+ * burger drawer, the desktop nav, the women's submenu, the homepage
+ * tiles and the footer all walk this array, so the sequence a shopper
+ * learns in the menu is the sequence they meet everywhere else.
+ */
 export const CATEGORIES: Category[] = [
   {
     handle: 'chains',
@@ -136,20 +143,20 @@ export const CATEGORIES: Category[] = [
     },
   },
   {
-    handle: 'bracelets',
-    label: 'Bracelets',
-    blurb: 'The chain vocabulary, sized for the wrist.',
+    handle: 'earrings',
+    label: 'Earrings',
+    blurb: 'Studs and hoops in gold, silver and moissanite — sold as pairs.',
     styles: [
-      { value: 'cuban', label: 'Cuban link' },
-      { value: 'tennis', label: 'Tennis' },
-      { value: 'rope', label: 'Rope' },
-      { value: 'bangle', label: 'Bangles' },
+      { value: 'stud', label: 'Studs' },
+      { value: 'hoop', label: 'Hoops' },
+      { value: 'huggie', label: 'Huggies' },
+      { value: 'moissanite', label: 'Moissanite' },
     ],
     featured: {
-      image: '/JA-image4',
-      name: 'ATDB',
-      meta: 'Two-tone · Hand-engraved plate',
-      alt: 'A custom ATDB block pendant in two-tone gold with an engraved tagline and hand-set diamonds.',
+      image: '/JA-image2',
+      name: 'Monogram',
+      meta: 'White gold · Round and baguette set',
+      alt: 'A custom monogram pendant in white gold, fully set with round and baguette stones.',
     },
   },
   {
@@ -169,45 +176,103 @@ export const CATEGORIES: Category[] = [
       alt: 'A custom Queen script piece with a heart drop, in yellow gold and pavé diamonds.',
     },
   },
+  {
+    handle: 'bracelets',
+    label: 'Bracelets',
+    blurb: 'The chain vocabulary, sized for the wrist.',
+    styles: [
+      { value: 'cuban', label: 'Cuban link' },
+      { value: 'tennis', label: 'Tennis' },
+      { value: 'rope', label: 'Rope' },
+      { value: 'bangle', label: 'Bangles' },
+    ],
+    featured: {
+      image: '/JA-image4',
+      name: 'ATDB',
+      meta: 'Two-tone · Hand-engraved plate',
+      alt: 'A custom ATDB block pendant in two-tone gold with an engraved tagline and hand-set diamonds.',
+    },
+  },
 ]
 
 export function findCategory(handle: string): Category | undefined {
   return CATEGORIES.find((category) => category.handle === handle)
 }
 
-/** Categories that carry a mega-menu panel, by handle. */
-const MEGA_MENU_HANDLES = new Set(CATEGORIES.map((c) => c.handle))
+// ─── Women's ───────────────────────────────────────────────────────────
+//
+// Women's is not a sixth category sitting beside the other five — it is
+// the same five categories, cut for women. So it behaves like a second
+// floor of the same shop: opening it in the menu re-offers Chains,
+// Pendants, Earrings, Rings and Bracelets, each routed to
+// /collections/womens-<handle>.
+//
+// One prefix, declared once. The menu, the submenu, the homepage section
+// and the collection route all derive the handle from it, so there is no
+// second place where "womens-earrings" is spelled out and can drift.
+
+export const WOMENS_PREFIX = 'womens'
+
+/** `chains` → `womens-chains`. */
+export function womensHandle(handle: string): string {
+  return `${WOMENS_PREFIX}-${handle}`
+}
+
+/** The parent category handle behind a women's handle, if it is one. */
+export function parentOfWomens(handle: string): Category | undefined {
+  if (!handle.startsWith(`${WOMENS_PREFIX}-`)) return undefined
+  return findCategory(handle.slice(WOMENS_PREFIX.length + 1))
+}
+
+export const WOMENS = {
+  handle: WOMENS_PREFIX,
+  label: "Women's",
+  href: `/collections/${WOMENS_PREFIX}`,
+  blurb: 'The same five cases, cut for women — lighter links and smaller settings.',
+  /** The five categories again, routed to their women's collection. */
+  links: CATEGORIES.map((category) => ({
+    label: category.label,
+    href: `/collections/${womensHandle(category.handle)}`,
+    handle: womensHandle(category.handle),
+  })),
+} as const
+
+/** Moissanite is a destination of its own, not only a metal filter. */
+export const MOISSANITE = {
+  handle: 'moissanite',
+  label: 'Moissanite',
+  href: '/collections/moissanite',
+} as const
 
 export interface NavLink {
   label: string
   href: string
   /** Present when the link opens a mega-menu panel on hover. */
   category?: Category
+  /** Opens the women's panel — the five categories again. */
+  womens?: boolean
   /** Maroon-coloured nav item — reserved for Sale. */
   accent?: boolean
 }
 
 /**
- * Primary nav, left to right: Chains · Pendants · Bracelets · Rings ·
- * Watches · Custom · Sale. The four categories open mega-menu panels;
- * the rest are direct links.
+ * The desktop nav row: the five categories, then Women's, Custom and
+ * Sale. Categories and Women's open mega-menu panels; the rest are
+ * direct links.
  *
- * "Watches" points at the service page rather than a collection — the
- * workshop services timepieces, it does not carry a watch catalog, and
- * a nav item that lands on an empty collection is worse than no nav
- * item at all.
- *
- * Moissanite is not a top-level item: it is a metal facet inside every
- * category panel, a row in the phone drawer, and a footer link, which is
- * three routes to it without spending a slot in a seven-item nav.
+ * This row is a shortcut, not the taxonomy's only home — the burger in
+ * the corner opens the same list at every breakpoint, which is why the
+ * row can hide below lg without stranding anyone. Watch service moved
+ * into the drawer and the footer's Services column for the same reason:
+ * it is a service, and it was spending a category slot.
  */
 export const NAV_LINKS: NavLink[] = [
   ...CATEGORIES.map((category) => ({
     label: category.label,
     href: `/collections/${category.handle}`,
-    category: MEGA_MENU_HANDLES.has(category.handle) ? category : undefined,
+    category,
   })),
-  { label: 'Watches', href: '/pages/watch-service' },
+  { label: WOMENS.label, href: WOMENS.href, womens: true },
   { label: 'Custom', href: '/custom' },
   { label: 'Sale', href: '/collections/sale', accent: true },
 ]
@@ -215,8 +280,8 @@ export const NAV_LINKS: NavLink[] = [
 /** Footer "Shop" column — categories plus the catch-all surfaces. */
 export const FOOTER_SHOP_LINKS = [
   ...CATEGORIES.map((c) => ({ label: c.label, href: `/collections/${c.handle}` })),
-  { label: 'Moissanite', href: '/collections/moissanite' },
-  { label: 'Earrings', href: '/collections/earrings' },
+  { label: WOMENS.label, href: WOMENS.href },
+  { label: MOISSANITE.label, href: MOISSANITE.href },
   { label: 'Sale', href: '/collections/sale' },
   { label: 'Shop all', href: '/shop' },
 ]
@@ -237,29 +302,28 @@ export const FOOTER_SUPPORT_LINKS = [
 ]
 
 // ─── Store details ─────────────────────────────────────────────────────
-// The one place the phone number and hours are written down. Visit,
-// Footer, the custom-inquiry page and the contact schema all read here.
+//
+// The one place the store's contact facts are written down. The footer,
+// the custom-inquiry page and the contact schema all read from here.
+//
+// THIS STORE HAS NO PUBLIC LOCATION.
+//
+// It ships; it does not receive visitors. So there is no street line, no
+// city, no map, no opening hours and no pickup counter anywhere in this
+// repo — not in copy, not in JSON-LD, not as a commented-out constant
+// waiting to be switched back on. Phone, email and Instagram are the
+// three ways in, and the reply window below is what an hours table used
+// to promise: how long before a person answers.
 
 export const STORE = {
   phone: '630-965-6464',
   phoneHref: 'tel:6309656464',
   /**
-   * The shop's street address is deliberately not published — the same
-   * decision the previous build made, and no street line exists
-   * anywhere in this repo to publish. The phone call is the funnel:
-   * directions are given when an appointment is confirmed.
-   *
-   * To put the address on the site, set `street` to the real one. The
-   * footer, the Visit section and the directions link all read from
-   * here and will pick it up; nothing else needs to change.
+   * What replaces an hours table: the promise a shopper actually needs.
+   * No email constant here on purpose — the site has never published
+   * one, and the inquiry form is the written channel.
    */
-  street: '' as string,
-  city: 'Norridge, IL',
-  region: 'Chicago and the surrounding suburbs',
-  hours: [
-    { days: 'Mon – Sat', time: '10:00 AM – 6:00 PM' },
-    { days: 'Sunday', time: 'Closed' },
-  ],
+  replyWindow: 'Calls and messages answered within one business day.',
   instagram: 'https://instagram.com/Jewelryaura01',
   instagramHandle: '@jewelryaura01',
 } as const

@@ -52,6 +52,14 @@ interface ListingLayoutProps {
   hrefForPage: (page: number) => string
   /** Href that clears every filter — shown in the empty state. */
   clearHref: string
+  /**
+   * Where an unfiltered empty case sends the shopper. Women's earrings
+   * with nothing in them should offer earrings, not a generic "shop
+   * all" — an empty page is a fork in the road, not a dead end.
+   */
+  emptyAction?: { href: string; label: string }
+  /** Replaces the generic restocking line when the surface knows better. */
+  emptyBody?: string
 }
 
 export function ListingLayout({
@@ -69,6 +77,8 @@ export function ListingLayout({
   hrefForFacets,
   hrefForPage,
   clearHref,
+  emptyAction,
+  emptyBody,
 }: ListingLayoutProps) {
   const filtered = hasActiveFacets(facets)
   const sort = facets.sort ?? 'featured'
@@ -146,7 +156,14 @@ export function ListingLayout({
             <ProductGrid
               products={products}
               density="compact"
-              empty={<EmptyListing filtered={filtered} clearHref={clearHref} />}
+              empty={
+                <EmptyListing
+                  filtered={filtered}
+                  clearHref={clearHref}
+                  action={emptyAction}
+                  body={emptyBody}
+                />
+              }
             />
             <Pagination page={page} totalPages={totalPages} hrefFor={hrefForPage} />
           </div>
@@ -182,9 +199,13 @@ function ResultCount({
 function EmptyListing({
   filtered,
   clearHref,
+  action,
+  body,
 }: {
   filtered: boolean
   clearHref: string
+  action?: { href: string; label: string }
+  body?: string
 }) {
   if (!filtered) {
     return (
@@ -193,11 +214,11 @@ function EmptyListing({
           Nothing in this case yet
         </p>
         <p className="mx-auto mt-3 max-w-sm text-[15px] text-ink-muted">
-          Pieces are being finished on the bench. The full catalog is one step
-          away.
+          {body ??
+            'Pieces are being finished on the bench. The full catalog is one step away.'}
         </p>
-        <a href="/shop" className={`${BTN_PRIMARY} mt-6`}>
-          Shop all pieces
+        <a href={action?.href ?? '/shop'} className={`${BTN_PRIMARY} mt-6`}>
+          {action?.label ?? 'Shop all pieces'}
         </a>
       </div>
     )

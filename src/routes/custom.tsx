@@ -32,7 +32,7 @@ import {
 
 const TITLE = 'Custom Jewelry & Commissions | Jewelry Aura'
 const DESCRIPTION =
-  'Commission a one-of-one piece from the Jewelry Aura bench — name plates, pendants, chains and bridal, designed with you and set by hand in Norridge, IL.'
+  'Commission a one-of-one piece from the Jewelry Aura bench — name plates, pendants, chains, earrings and bridal, designed with you and set by hand.'
 
 const STEPS = [
   {
@@ -53,7 +53,7 @@ const STEPS = [
   {
     n: '04',
     title: 'Fitted and warrantied',
-    body: 'Pick it up or have it shipped insured. Sizing, cleaning and the lifetime warranty start the day it is yours.',
+    body: 'It ships insured and signature-required. Sizing, cleaning and the lifetime warranty start the day it is yours.',
   },
 ]
 
@@ -111,8 +111,8 @@ function CustomPage() {
         </h1>
         <p className="mt-4 max-w-[58ch] text-[16px] leading-relaxed text-ink-muted">
           Bring a sketch, a reference or a name. We design it with you, quote it
-          firmly, and set it by hand at our bench in {STORE.city}. Most
-          commissions take three to five weeks.
+          firmly, and set it by hand at our bench. Most commissions take three
+          to five weeks.
         </p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <a href="#inquiry" onClick={toInquiry} className={BTN_PRIMARY}>
@@ -275,14 +275,9 @@ function InquiryForm() {
               Call {STORE.phone}
             </a>
 
-            <dl className="mt-6 border-t border-hairline pt-4">
-              {STORE.hours.map((entry) => (
-                <div key={entry.days} className="flex justify-between gap-4 py-1">
-                  <dt className="text-[14px] text-ink-muted">{entry.days}</dt>
-                  <dd className="text-[14px] text-ink">{entry.time}</dd>
-                </div>
-              ))}
-            </dl>
+            <p className="mt-6 border-t border-hairline pt-4 text-[14px] text-ink-muted">
+              {STORE.replyWindow}
+            </p>
 
             <a
               href={STORE.instagram}

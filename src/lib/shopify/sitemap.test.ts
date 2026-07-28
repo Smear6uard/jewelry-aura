@@ -6,6 +6,7 @@ import {
   type SitemapRequest,
 } from './sitemap'
 import { PAGE_HANDLES } from '../pages-content'
+import { virtualCollectionHandles } from './virtual-collections'
 
 function connection(
   nodes: Array<{ handle: string; updatedAt: string }>,
@@ -58,11 +59,21 @@ describe('generateSitemapXml', () => {
     expect(xml).toContain('/products/piece-250</loc>')
     expect(xml).toContain('/collections/col-0</loc>')
     expect(xml).toContain('/collections/col-250</loc>')
-    // Static routes + 251 collections + 251 products. The static count
-    // is derived rather than hardcoded so adding a content page does not
-    // fail an assertion about cursor pagination.
+    // Static routes + 251 collections + 251 products + the menu handles
+    // Shopify has no collection for (none of the fixture's `col-N`
+    // handles collide with them, so all are listed). Both counts are
+    // derived rather than hardcoded so adding a content page or a
+    // category does not fail an assertion about cursor pagination.
     const STATIC_ROUTES = 2 + 1 + PAGE_HANDLES.length // home, /shop, /custom, /pages/*
-    expect(xml.match(/<url>/g)).toHaveLength(STATIC_ROUTES + 251 + 251)
+    const MENU_ONLY = virtualCollectionHandles().length
+    expect(xml.match(/<url>/g)).toHaveLength(
+      STATIC_ROUTES + 251 + 251 + MENU_ONLY,
+    )
+    // Every menu handle is crawlable even with no Shopify collection.
+    expect(xml).toContain('<loc>https://www.thejewelryaura.com/collections/earrings</loc>')
+    expect(xml).toContain(
+      '<loc>https://www.thejewelryaura.com/collections/womens-rings</loc>',
+    )
     expect(xml).toContain('<loc>https://www.thejewelryaura.com/custom</loc>')
     expect(xml).toContain(
       `<loc>https://www.thejewelryaura.com/pages/${PAGE_HANDLES[0]}</loc>`,

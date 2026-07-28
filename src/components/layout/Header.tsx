@@ -7,37 +7,41 @@
  * route so search, categories and the cart are one movement away from
  * anywhere on the site.
  *
- * Desktop: wordmark left, category nav centre, search / account / cart
- * right. Chains, Pendants, Bracelets and Rings open a mega-menu panel.
+ * THE BURGER IS THE MENU — AT EVERY BREAKPOINT.
  *
- * Phones: burger left, wordmark centre, cart right, plus a persistent
- * search field pinned under the bar — on a phone, search is the primary
- * way people navigate a catalog, and burying it behind an icon costs
- * more than the 44px it saves.
+ * Three lines in the left corner, on a phone and on a desktop alike,
+ * opening the full taxonomy (see MenuDrawer). Categories used to live
+ * only in a desktop nav row that phones never saw and that could not
+ * hold six doors plus a women's floor without wrapping. Now there is one
+ * canonical menu, and the nav row is a shortcut layered on top of it:
+ * the five categories, Women's, Custom and Sale, shown from lg up where
+ * there is room to set them without crowding. Below lg the burger
+ * carries the whole taxonomy on its own.
+ *
+ * Phones also keep a persistent search field pinned under the bar — on a
+ * phone, search is the primary way people navigate a catalog, and
+ * burying it behind an icon costs more than the 44px it saves.
  *
  * SSR completeness
  * ----------------
- * Every navigational link in this component is in the server-rendered
- * HTML, including all four mega-menu panels. The panels open on CSS
- * hover/focus-within rather than React state, so a crawler (and a
+ * Every mega-menu panel is in the server-rendered HTML. The panels open
+ * on CSS hover/focus-within rather than React state, so a crawler (and a
  * keyboard) sees the full taxonomy without executing a line of
  * JavaScript. The transition-delay on the panel is the hover intent that
- * a JS timer used to provide: dragging the pointer across the nav row no
- * longer fires four panels in sequence.
+ * a JS timer used to provide.
  *
- * The phone drawer is still a JS dialog — focus trapping and body scroll
- * lock have no CSS equivalent — so a <noscript> row of category links
- * sits under the bar for the no-JavaScript case. Without it a phone with
- * JS disabled has a burger that does nothing and no way into the
- * catalog.
+ * The drawer is a JS dialog — focus trapping and body scroll lock have
+ * no CSS equivalent — so a <noscript> row of category links sits under
+ * the bar for the no-JavaScript case. Without it, a visitor with JS off
+ * has a burger that does nothing and, below lg, no way into the catalog.
  */
 
 import { useEffect, useRef, useState } from 'react'
-import { Menu, Search, ShoppingBag, User } from 'lucide-react'
-import { NAV_LINKS } from '~/lib/catalog'
+import { Search, ShoppingBag, User } from 'lucide-react'
+import { CATEGORIES, NAV_LINKS, WOMENS } from '~/lib/catalog'
 import { useCart } from '~/components/commerce/CartProvider'
-import { MegaMenuPanel } from '~/components/layout/MegaMenu'
-import { MobileNav } from '~/components/layout/MobileNav'
+import { MegaMenuPanel, WomensMenuPanel } from '~/components/layout/MegaMenu'
+import { MenuDrawer } from '~/components/layout/MenuDrawer'
 import { SearchOverlay } from '~/components/layout/SearchOverlay'
 
 export function Header() {
@@ -67,19 +71,12 @@ export function Header() {
         {/* `relative` on phones so the wordmark can centre against this
             row; `static` from md up so the mega-menu panels resolve
             against the <header> and span the full viewport width. */}
-        <div className="relative mx-auto flex h-14 max-w-[1440px] items-center gap-4 px-4 md:static md:h-16 md:px-8">
-          {/* Burger — phones only; the desktop nav is the menu. 44px. */}
-          <button
+        <div className="relative mx-auto flex h-14 max-w-[1440px] items-center gap-3 px-4 md:static md:h-16 md:gap-4 md:px-8">
+          <BurgerButton
             ref={burgerRef}
-            type="button"
+            open={menuOpen}
             onClick={() => setMenuOpen(true)}
-            aria-label="Open menu"
-            aria-haspopup="dialog"
-            aria-expanded={menuOpen}
-            className="-ml-2.5 flex h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-brand md:hidden"
-          >
-            <Menu aria-hidden size={21} strokeWidth={1.5} />
-          </button>
+          />
 
           <a
             href="/"
@@ -91,18 +88,19 @@ export function Header() {
             Jewelry Aura
           </a>
 
-          {/* Centre nav — the store's spine. Each category item owns its
-              own panel so hover state is local to the item. */}
+          {/* Centre nav — a shortcut over the burger's taxonomy, not a
+              second one. Each item owns its panel so hover state is
+              local to the item. */}
           <nav
             aria-label="Primary"
-            className="mx-auto hidden items-center md:flex"
+            className="mx-auto hidden items-center lg:flex"
           >
             <ul className="flex items-center">
               {NAV_LINKS.map((link) => (
                 <li key={link.label} className="group/nav static">
                   <a
                     href={link.href}
-                    className={`relative flex h-16 items-center px-3 text-[12px] label transition-colors duration-hover ease-apple lg:px-3.5 ${
+                    className={`relative flex h-16 items-center px-2.5 text-[12px] label transition-colors duration-hover ease-apple xl:px-3.5 ${
                       link.accent
                         ? 'text-brand hover:text-brand-hover'
                         : 'text-ink-muted hover:text-ink'
@@ -118,6 +116,7 @@ export function Header() {
                   </a>
 
                   {link.category && <MegaMenuPanel category={link.category} />}
+                  {link.womens && <WomensMenuPanel />}
                 </li>
               ))}
             </ul>
@@ -167,18 +166,31 @@ export function Header() {
             id="header-search"
             type="search"
             name="q"
-            placeholder="Search chains, pendants, moissanite…"
+            placeholder="Search chains, earrings, moissanite…"
             autoComplete="off"
             className="w-full bg-transparent text-[16px] text-ink placeholder:text-ink-muted focus:outline-none"
           />
         </form>
 
-        {/* No-JavaScript path into the catalog on a phone: the burger
-            below opens a JS dialog, so without this there is none. */}
+        {/* No-JavaScript path into the catalog: the burger opens a JS
+            dialog, so without this there is none below lg. */}
         <noscript>
-          <ul className="flex flex-wrap gap-1.5 border-t border-hairline px-4 py-3 md:hidden">
-            {NAV_LINKS.map((link) => (
-              <li key={link.label}>
+          <ul className="flex flex-wrap gap-1.5 border-t border-hairline px-4 py-3 lg:hidden">
+            {CATEGORIES.map((category) => (
+              <li key={category.handle}>
+                <a
+                  href={`/collections/${category.handle}`}
+                  className="inline-flex bg-raised px-3 py-2 text-[12px] label text-ink shadow-sm"
+                >
+                  {category.label}
+                </a>
+              </li>
+            ))}
+            {[
+              { label: WOMENS.label, href: WOMENS.href },
+              { label: 'Shop all', href: '/shop' },
+            ].map((link) => (
+              <li key={link.href}>
                 <a
                   href={link.href}
                   className="inline-flex bg-raised px-3 py-2 text-[12px] label text-ink shadow-sm"
@@ -187,19 +199,11 @@ export function Header() {
                 </a>
               </li>
             ))}
-            <li>
-              <a
-                href="/shop"
-                className="inline-flex bg-raised px-3 py-2 text-[12px] label text-ink shadow-sm"
-              >
-                Shop all
-              </a>
-            </li>
           </ul>
         </noscript>
       </header>
 
-      <MobileNav
+      <MenuDrawer
         open={menuOpen}
         onClose={() => {
           setMenuOpen(false)
@@ -214,6 +218,48 @@ export function Header() {
         }}
       />
     </>
+  )
+}
+
+/**
+ * Three lines, drawn rather than iconised.
+ *
+ * A 24px lucide glyph next to a Fraunces wordmark reads as an app
+ * chrome affordance borrowed from somewhere else. Three 18px hairlines
+ * in ink read as a mark set in the same ink as the type beside them.
+ * The one flourish: on hover the middle line pulls in from the right
+ * and the set goes maroon — the same maroon the nav underline uses, so
+ * the header has one hover language rather than two.
+ */
+function BurgerButton({
+  ref,
+  open,
+  onClick,
+}: {
+  ref: React.Ref<HTMLButtonElement>
+  open: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      ref={ref}
+      type="button"
+      onClick={onClick}
+      aria-label="Open category menu"
+      aria-haspopup="dialog"
+      aria-expanded={open}
+      className="group/burger -ml-2.5 flex h-11 w-11 shrink-0 flex-col items-center justify-center gap-[5px]"
+    >
+      {[0, 1, 2].map((line) => (
+        <span
+          key={line}
+          aria-hidden
+          className={`block h-[1.5px] w-[18px] origin-left bg-ink transition-[background-color,transform] duration-hover ease-apple group-hover/burger:bg-brand motion-reduce:transition-none ${
+            line === 1 ? 'group-hover/burger:scale-x-[0.62]' : ''
+          }`}
+        />
+      ))}
+    </button>
   )
 }
 
