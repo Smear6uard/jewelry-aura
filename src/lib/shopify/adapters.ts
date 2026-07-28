@@ -16,6 +16,11 @@ export interface ProductCardImageNode {
   w1200: string
 }
 
+/** A Storefront metafield, as returned by `metafield(namespace:key:)`. */
+export interface MetafieldNode {
+  value: string | null
+}
+
 export interface ProductCardNode {
   handle: string
   title: string
@@ -33,6 +38,10 @@ export interface ProductCardNode {
   images?: { nodes: ProductCardImageNode[] }
   variants?: { nodes: Array<{ id: string; availableForSale: boolean }> }
   compareAtPriceRange?: { minVariantPrice: MoneyNode }
+  /** `reviews.rating` — the metafield every major review app writes. */
+  ratingMetafield?: MetafieldNode | null
+  /** `reviews.rating_count` — an integer as a string. */
+  ratingCountMetafield?: MetafieldNode | null
 }
 
 export interface ProductCardImage {
@@ -44,7 +53,7 @@ export interface ProductCardImage {
 }
 
 /** Small uppercase flag in a card's top-left corner. */
-export type ProductBadge = 'new' | 'sale' | 'one-of-one'
+export type ProductBadge = 'new' | 'sale' | 'one-of-one' | 'sold-out'
 
 export interface ProductRating {
   /** 0–5, one decimal. */
@@ -55,32 +64,33 @@ export interface ProductRating {
 export interface ProductCardModel {
   handle: string
   title: string
-  /** Formatted min price, e.g. "$1,450" or "$89.50". */
+  /** Formatted min price, e.g. "$1,450" or "$89.50". "" when unpriced. */
   price: string
   /** True when variants span a price range — render as "From {price}". */
   priceFrom: boolean
+  /**
+   * True when the piece carries no real price in Shopify (amount is
+   * missing or zero). The card renders an "Enquire" link to /custom
+   * rather than a dead "Price on request" string — a shopper looking at
+   * an unpriced chain needs somewhere to go, not a notice.
+   */
+  unpriced: boolean
   availableForSale: boolean
   image: ProductCardImage | null
   /**
-   * Optional card enrichments. `mapProductCard` leaves every one of
-   * these undefined — the Storefront card query does not fetch them
-   * yet — and ProductCard degrades cleanly in each case: no second
-   * image means the hover falls back to a slow scale, no rating means
-   * no stars, no variantId means Quick add becomes "Choose options"
-   * and routes to the product page instead of the cart.
-   *
-   * Populating them is a query change, not a component change:
-   *   hoverImage    images(first: 2)
-   *   compareAtPrice / variantId / optionCount
-   *                 variants(first: 1) + options
-   *   rating        a reviews app's product metafield
+   * Optional card enrichments. Each degrades to a quieter card rather
+   * than an error: no second image means the desktop hover falls back
+   * to a slow scale, no rating means no star row at all (never a zero
+   * state), no variantId means Quick add becomes "Choose options" and
+   * routes to the product page instead of the cart.
    */
-  /** Second photograph, crossfaded in on hover. */
+  /** Second photograph, crossfaded in on desktop hover. */
   hoverImage?: ProductCardImage | null
   /** Formatted was-price; presence flags the card as on sale. */
   compareAtPrice?: string | null
   /** Explicit badge; a compareAtPrice implies "sale" without one. */
   badge?: ProductBadge
+  /** Present only when a review app has written real rating data. */
   rating?: ProductRating
   /** Merchandise id for one-click add. Absent → link to the PDP. */
   variantId?: string | null
@@ -117,28 +127,63 @@ export function formatMoney(money: MoneyNode): string {
   return moneyFormatter(money.currencyCode, Number.isInteger(value)).format(value)
 }
 
-/** Shown wherever a piece carries no real price in Shopify. */
-export const PRICE_ON_REQUEST = 'Price on request'
-
 /**
- * Display price for a listing or product surface.
+ * True when the amount is missing or zero.
  *
  * A zero amount means the piece has not been priced in the admin yet,
  * not that it is free. Rendering "$0" next to a gold chain reads as a
- * broken store, so unpriced pieces say so and send the shopper to ask.
- * (The underlying Shopify variant is still $0 — that is a catalog fix,
- * not a display one, and this only stops the storefront advertising it.)
+ * broken store, so the view models carry an `unpriced` flag and the UI
+ * offers an action ("Enquire", routing to /custom) in place of a number.
+ * The underlying Shopify variant is still $0 — that is a catalog fix,
+ * not a display one, and this only stops the storefront advertising it.
  */
-export function displayPrice(money: MoneyNode): string {
-  const value = Number.parseFloat(money.amount)
-  if (!Number.isFinite(value) || value <= 0) return PRICE_ON_REQUEST
-  return formatMoney(money)
-}
-
-/** True when the amount is missing or zero. */
 export function isUnpriced(money: MoneyNode): boolean {
   const value = Number.parseFloat(money.amount)
   return !Number.isFinite(value) || value <= 0
+}
+
+/** Formatted price, or "" when the piece has not been priced yet. */
+export function priceLabel(money: MoneyNode): string {
+  return isUnpriced(money) ? '' : formatMoney(money)
+}
+
+/**
+ * Rating from a review app's product metafields.
+ *
+ * `reviews.rating` is Shopify's `rating` metafield type, whose value is
+ * JSON: {"value":"4.7","scale_min":"1","scale_max":"5"}. Judge.me,
+ * Okendo, Loox, Yotpo and Shopify's own Product Reviews all write it, or
+ * a plain decimal string. Both shapes are accepted.
+ *
+ * Returns null unless there is a positive count AND a positive value —
+ * "★☆☆☆☆ (0)" is a worse signal than no stars at all, so a product with
+ * no reviews renders nothing.
+ */
+export function mapRating(
+  ratingField: MetafieldNode | null | undefined,
+  countField: MetafieldNode | null | undefined,
+): ProductRating | undefined {
+  const count = Number.parseInt(countField?.value ?? '', 10)
+  if (!Number.isFinite(count) || count <= 0) return undefined
+
+  const raw = ratingField?.value
+  if (!raw) return undefined
+
+  let value = Number.NaN
+  if (raw.trim().startsWith('{')) {
+    try {
+      const parsed = JSON.parse(raw) as { value?: string | number }
+      value = Number.parseFloat(String(parsed.value ?? ''))
+    } catch {
+      return undefined
+    }
+  } else {
+    value = Number.parseFloat(raw)
+  }
+
+  if (!Number.isFinite(value) || value <= 0) return undefined
+  // One decimal, never rounded up to a whole star.
+  return { value: Math.min(5, Math.round(value * 10) / 10), count }
 }
 
 /**
@@ -283,16 +328,17 @@ export function mapProductCard(node: ProductCardNode): ProductCardModel {
   return {
     handle: node.handle,
     title: node.title,
-    price: displayPrice(min),
-    // "From Price on request" is nonsense — a range only reads as a
-    // range when there is a number to open it.
+    price: priceLabel(min),
+    // A range only reads as a range when there is a number to open it.
     priceFrom:
       !unpriced &&
       (min.amount !== max.amount || min.currencyCode !== max.currencyCode),
+    unpriced,
     availableForSale: node.availableForSale,
     image: buildCardImage(node.featuredImage, node.title),
     hoverImage,
     compareAtPrice: onSale && compareAt ? formatMoney(compareAt) : null,
+    rating: mapRating(node.ratingMetafield, node.ratingCountMetafield),
     // One variant node back from `variants(first: 2)` means there is
     // exactly one — safe to add straight to the cart.
     variantId: variants.length === 1 ? variants[0].id : null,
@@ -339,6 +385,8 @@ export interface ProductDetailNode {
   variants: { nodes: VariantAvailabilityNode[] }
   selectedVariant: VariantNode | null
   fallbackVariant: VariantNode | null
+  ratingMetafield?: MetafieldNode | null
+  ratingCountMetafield?: MetafieldNode | null
 }
 
 export interface GalleryImage {
@@ -370,7 +418,10 @@ export interface OptionModel {
 export interface VariantModel {
   id: string
   title: string
+  /** Formatted price, or "" when the variant has not been priced. */
   price: string
+  /** True when the variant carries no real price — the PDP offers to quote. */
+  unpriced: boolean
   compareAtPrice: string | null
   availableForSale: boolean
 }
@@ -384,6 +435,8 @@ export interface ProductDetailModel {
   images: GalleryImage[]
   options: OptionModel[]
   variant: VariantModel | null
+  /** Present only when a review app has written real rating data. */
+  rating?: ProductRating
   /** Raw amount/currency of the displayed variant — feeds JSON-LD. */
   offer: { price: string; currency: string; available: boolean } | null
 }
@@ -428,13 +481,15 @@ function variantMatching(
 }
 
 export function mapVariant(variant: VariantNode): VariantModel {
+  const unpriced = isUnpriced(variant.price)
   return {
     id: variant.id,
     title: variant.title,
-    price: displayPrice(variant.price),
+    price: priceLabel(variant.price),
+    unpriced,
     // A compare-at only means something beside a real price.
     compareAtPrice:
-      variant.compareAtPrice && !isUnpriced(variant.price)
+      variant.compareAtPrice && !unpriced
         ? formatMoney(variant.compareAtPrice)
         : null,
     availableForSale: variant.availableForSale,
@@ -483,6 +538,7 @@ export function mapProductDetail(node: ProductDetailNode): ProductDetailModel {
     ),
     options,
     variant: resolved ? mapVariant(resolved) : null,
+    rating: mapRating(node.ratingMetafield, node.ratingCountMetafield),
     offer: resolved
       ? {
           price: resolved.price.amount,

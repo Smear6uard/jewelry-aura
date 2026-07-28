@@ -1,21 +1,27 @@
 /**
  * components/layout/MobileNav.tsx — the phone drawer.
  *
- * Slides in from the left. Categories are accordion rows: tapping the
- * chevron opens the same style list the desktop mega menu shows,
- * tapping the label goes straight to the collection. Splitting those
- * two targets matters on a phone — an accordion that swallows the tap
- * you meant as navigation is the most common mobile-menu failure.
+ * Slides in from the left, full height, white on the cream canvas at
+ * --shadow-lg. Categories are accordion rows: tapping the chevron opens
+ * the same list the desktop mega menu shows, tapping the label goes
+ * straight to the collection. Splitting those two targets matters on a
+ * phone — an accordion that swallows the tap you meant as navigation is
+ * the most common mobile-menu failure.
+ *
+ * Every row is 48px and every control is at least 44px wide.
  *
  * Accessibility contract mirrors CartDrawer: role="dialog" +
  * aria-modal, focus moves into the panel on open and is trapped while
- * open, Escape closes, and focus returns to the burger (Header owns
- * the trigger ref).
+ * open, Escape closes, body scroll is locked, and focus returns to the
+ * burger (Header owns the trigger ref).
+ *
+ * A no-JavaScript visitor never reaches this component — see the
+ * <noscript> category row in Header.
  */
 
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronDown, Phone, X } from 'lucide-react'
+import { ChevronDown, Phone, User, X } from 'lucide-react'
 import { DURATION, easeApple, easeOutExpo } from '~/lib/motion'
 import {
   CATEGORIES,
@@ -26,6 +32,14 @@ import {
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])'
+
+/** Top-level rows that are not accordions. */
+const FLAT_ROWS = [
+  { label: 'Moissanite', href: '/collections/moissanite' },
+  { label: 'Watch service', href: '/pages/watch-service' },
+  { label: 'Custom work', href: '/custom' },
+  { label: 'Shop all', href: '/shop' },
+]
 
 interface MobileNavProps {
   open: boolean
@@ -83,7 +97,7 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
             type="button"
             aria-label="Close menu"
             tabIndex={-1}
-            className="absolute inset-0 h-full w-full cursor-default bg-sunken/80"
+            className="absolute inset-0 h-full w-full cursor-default bg-ink/35"
             onClick={onClose}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -96,23 +110,21 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
             aria-modal="true"
             aria-label="Shop menu"
             tabIndex={-1}
-            className="absolute left-0 top-0 flex h-full w-full max-w-[21rem] flex-col border-r border-hairline bg-raised text-cream outline-none"
+            className="absolute left-0 top-0 flex h-full w-full max-w-[21rem] flex-col bg-raised text-ink shadow-lg outline-none"
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{ duration: DURATION.content, ease: easeOutExpo }}
           >
-            <header className="flex items-center justify-between border-b border-hairline px-5 py-4">
-              <span className="font-display text-[17px] text-cream">
-                Jewelry Aura
-              </span>
+            <header className="flex items-center justify-between border-b border-hairline px-5 py-3">
+              <span className="display text-[18px] text-ink">Jewelry Aura</span>
               <button
                 type="button"
                 onClick={onClose}
                 aria-label="Close menu"
-                className="p-1.5 text-cream-muted transition-colors duration-hover ease-apple hover:text-cream"
+                className="-mr-2.5 flex h-11 w-11 items-center justify-center text-ink-muted transition-colors duration-hover ease-apple hover:text-ink"
               >
-                <X aria-hidden size={18} strokeWidth={1.4} />
+                <X aria-hidden size={19} strokeWidth={1.5} />
               </button>
             </header>
 
@@ -127,7 +139,7 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
                     <div className="flex items-stretch">
                       <a
                         href={`/collections/${category.handle}`}
-                        className="flex-1 px-5 py-4 text-[15px] font-medium text-cream"
+                        className="flex min-h-12 flex-1 items-center px-5 text-[15px] font-medium text-ink"
                       >
                         {category.label}
                       </a>
@@ -140,7 +152,7 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
                         }
                         aria-expanded={expanded === category.handle}
                         aria-label={`Show ${category.label} subcategories`}
-                        className="px-5 text-cream-muted transition-colors duration-hover ease-apple hover:text-cream"
+                        className="flex w-12 items-center justify-center text-ink-muted transition-colors duration-hover ease-apple hover:text-ink"
                       >
                         <motion.span
                           aria-hidden
@@ -153,7 +165,7 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
                           }}
                           className="block"
                         >
-                          <ChevronDown size={16} strokeWidth={1.4} />
+                          <ChevronDown size={17} strokeWidth={1.5} />
                         </motion.span>
                       </button>
                     </div>
@@ -168,14 +180,14 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
                             duration: DURATION.micro,
                             ease: easeOutExpo,
                           }}
-                          className="overflow-hidden bg-base"
+                          className="overflow-hidden bg-sunken"
                         >
-                          <ul className="px-5 py-3">
+                          <ul className="px-5 py-2">
                             {category.styles.map((style) => (
                               <li key={style.value}>
                                 <a
                                   href={`/collections/${category.handle}?style=${style.value}`}
-                                  className="block py-2 text-[14px] text-cream-muted"
+                                  className="flex min-h-11 items-center text-[14px] text-ink-muted"
                                 >
                                   {style.label}
                                 </a>
@@ -185,7 +197,7 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
                               <li key={metal.value}>
                                 <a
                                   href={`/collections/${category.handle}?metal=${metal.value}`}
-                                  className="block py-2 text-[14px] text-cream-muted"
+                                  className="flex min-h-11 items-center text-[14px] text-ink-muted"
                                 >
                                   {metal.label}
                                 </a>
@@ -198,49 +210,36 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
                   </li>
                 ))}
 
-                <li className="border-b border-hairline">
-                  <a
-                    href="/collections/moissanite"
-                    className="block px-5 py-4 text-[15px] font-medium text-cream"
-                  >
-                    Moissanite
-                  </a>
-                </li>
-                <li className="border-b border-hairline">
-                  <a
-                    href="/custom"
-                    className="block px-5 py-4 text-[15px] font-medium text-cream"
-                  >
-                    Custom work
-                  </a>
-                </li>
+                {FLAT_ROWS.map((row) => (
+                  <li key={row.href} className="border-b border-hairline">
+                    <a
+                      href={row.href}
+                      className="flex min-h-12 items-center px-5 text-[15px] font-medium text-ink"
+                    >
+                      {row.label}
+                    </a>
+                  </li>
+                ))}
+
                 <li className="border-b border-hairline">
                   <a
                     href="/collections/sale"
-                    className="block px-5 py-4 text-[15px] font-medium"
-                    style={{ color: '#C4A875' }}
+                    className="flex min-h-12 items-center px-5 text-[15px] font-medium text-brand"
                   >
                     Sale
-                  </a>
-                </li>
-                <li className="border-b border-hairline">
-                  <a
-                    href="/shop"
-                    className="block px-5 py-4 text-[15px] font-medium text-cream"
-                  >
-                    Shop all
                   </a>
                 </li>
               </ul>
 
               <div className="px-5 py-6">
-                <p className="text-[11px] label-wide text-cream-subtle">
-                  Services
-                </p>
-                <ul className="mt-3 flex flex-col gap-2.5">
+                <p className="text-[11px] label-wide text-ink-muted">Services</p>
+                <ul className="mt-2 flex flex-col">
                   {FOOTER_SERVICE_LINKS.map((link) => (
                     <li key={link.href}>
-                      <a href={link.href} className="text-[14px] text-cream-muted">
+                      <a
+                        href={link.href}
+                        className="flex min-h-11 items-center text-[14px] text-ink-muted"
+                      >
                         {link.label}
                       </a>
                     </li>
@@ -249,13 +248,22 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
               </div>
             </nav>
 
-            <footer className="border-t border-hairline px-5 py-4">
+            {/* Account and orders sit at the bottom, in the thumb's reach
+                and out of the way of the categories people came for. */}
+            <footer className="safe-bottom border-t border-hairline px-5 pt-3">
+              <a
+                href="/pages/orders"
+                className="flex min-h-11 items-center gap-2.5 text-[14px] font-medium text-ink"
+              >
+                <User aria-hidden size={16} strokeWidth={1.5} />
+                Account and orders
+              </a>
               <a
                 href={STORE.phoneHref}
-                className="flex items-center justify-center gap-2 bg-brand px-5 py-3.5 text-[12px] label text-cream transition-colors duration-hover ease-apple hover:bg-brand-hover"
+                className="flex min-h-11 items-center gap-2.5 text-[14px] text-ink-muted"
               >
-                <Phone aria-hidden size={14} strokeWidth={1.5} />
-                Call {STORE.phone}
+                <Phone aria-hidden size={16} strokeWidth={1.5} />
+                {STORE.phone}
               </a>
             </footer>
           </motion.div>

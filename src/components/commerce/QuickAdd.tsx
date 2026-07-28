@@ -1,21 +1,30 @@
 /**
- * components/commerce/QuickAdd.tsx — the button that slides up from the
- * bottom of a product card's image on hover.
+ * components/commerce/QuickAdd.tsx — the add button on a product card.
  *
  * Two honest states, chosen by what the card actually knows:
  *
  *   • The card carries a single purchasable variant → "Quick add".
- *     One click adds it and opens the cart drawer.
+ *     One tap adds it and opens the cart.
  *   • The piece needs a length, size or metal chosen first, or the card
  *     has no variant id → "Choose options", rendered as a link to the
  *     product page.
  *
- * A button labelled "Quick add" that silently navigates somewhere else
- * is the worst version of this control, so the label always matches
- * what pressing it does.
+ * A button labelled "Quick add" that silently navigates somewhere else is
+ * the worst version of this control, so the label always matches what
+ * pressing it does.
  *
- * On touch devices (no hover) the control is always visible — there is
- * no hover to reveal it, and a hidden buy button is a lost sale.
+ * TWO PLACEMENTS, NOT ONE RESPONSIVE ONE.
+ *
+ *   placement="inline"  Phones. A permanently visible, full-width button
+ *                       at the foot of the tile. Nothing about it is
+ *                       hover-dependent, because there is no hover on a
+ *                       touch screen and a buy button that only exists
+ *                       under a pointer is a lost sale.
+ *   placement="overlay" Desktop. Slides up over the bottom edge of the
+ *                       image on card hover or keyboard focus.
+ *
+ * The card renders both and lets the breakpoint pick, so the mobile
+ * control is never a hidden desktop control that happens to be visible.
  */
 
 import { useRef, useState } from 'react'
@@ -23,48 +32,34 @@ import { Link } from '@tanstack/react-router'
 import { useCart } from '~/components/commerce/CartProvider'
 import type { ProductCardModel } from '~/lib/shopify/adapters'
 
-/**
- * Hidden-until-hover on pointer devices, always shown on touch. Kept as
- * a constant because the `@media(hover:hover)` variant chain is long
- * enough to bury the rest of the className.
- */
-const REVEAL =
-  'translate-y-0 opacity-100 transition-[transform,opacity] duration-hover ease-apple ' +
-  '[@media(hover:hover)]:translate-y-[130%] [@media(hover:hover)]:opacity-0 ' +
-  '[@media(hover:hover)]:group-hover:translate-y-0 [@media(hover:hover)]:group-hover:opacity-100 ' +
-  '[@media(hover:hover)]:group-focus-within:translate-y-0 [@media(hover:hover)]:group-focus-within:opacity-100 ' +
-  'motion-reduce:transition-none motion-reduce:translate-y-0 ' +
-  '[@media(hover:hover)]:motion-reduce:opacity-0 [@media(hover:hover)]:motion-reduce:group-hover:opacity-100'
+/** Slide-up reveal for the desktop overlay placement only. */
+const OVERLAY_REVEAL =
+  'absolute inset-x-0 bottom-0 translate-y-[130%] opacity-0 ' +
+  'transition-[transform,opacity] duration-hover ease-apple ' +
+  'group-hover/card:translate-y-0 group-hover/card:opacity-100 ' +
+  'group-focus-within/card:translate-y-0 group-focus-within/card:opacity-100 ' +
+  'motion-reduce:transition-none'
 
-const BASE =
-  'flex w-full items-center justify-center px-3 py-2.5 text-[11px] label text-cream ' +
-  'bg-brand hover:bg-brand-hover active:scale-[0.99] ' +
-  'transition-colors duration-hover ease-apple disabled:opacity-70'
+const BUTTON =
+  'flex w-full min-h-11 items-center justify-center px-3 text-[12px] label ' +
+  'bg-brand text-cream hover:bg-brand-hover active:scale-[0.99] ' +
+  'transition-colors duration-hover ease-apple disabled:opacity-70 motion-reduce:transition-none'
 
 interface QuickAddProps {
   product: ProductCardModel
-  className?: string
+  placement: 'inline' | 'overlay'
 }
 
-export function QuickAdd({ product, className = '' }: QuickAddProps) {
+export function QuickAdd({ product, placement }: QuickAddProps) {
   const { add, openCart } = useCart()
   const [pending, setPending] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
 
-  const wrapper = `${REVEAL} ${className}`
+  // Sold-out pieces get no add control at all. A disabled "Sold out"
+  // button is a tap target that does nothing; the badge already says it.
+  if (!product.availableForSale) return null
 
-  if (!product.availableForSale) {
-    return (
-      <div className={wrapper}>
-        <span
-          className={`${BASE} cursor-not-allowed bg-raised text-cream-muted`}
-          style={{ boxShadow: 'inset 0 0 0 1px var(--color-hairline)' }}
-        >
-          Sold out
-        </span>
-      </div>
-    )
-  }
+  const wrapper = placement === 'overlay' ? OVERLAY_REVEAL : 'mt-3'
 
   // No variant id, or the piece needs a choice made first.
   const needsOptions = !product.variantId || (product.optionCount ?? 1) > 1
@@ -74,7 +69,7 @@ export function QuickAdd({ product, className = '' }: QuickAddProps) {
         <Link
           to="/products/$handle"
           params={{ handle: product.handle }}
-          className={`${BASE} relative z-20`}
+          className={`${BUTTON} relative z-20`}
         >
           Choose options
         </Link>
@@ -102,7 +97,7 @@ export function QuickAdd({ product, className = '' }: QuickAddProps) {
         disabled={pending}
         onClick={onClick}
         aria-label={`Add ${product.title} to cart`}
-        className={`${BASE} relative z-20`}
+        className={`${BUTTON} relative z-20`}
       >
         {pending ? 'Adding…' : 'Quick add'}
       </button>

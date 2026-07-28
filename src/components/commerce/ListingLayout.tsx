@@ -1,14 +1,21 @@
 /**
  * components/commerce/ListingLayout.tsx — the PLP shell.
  *
- * /shop, every collection and the search results page all render this,
- * so the toolbar, the sidebar, the result count and the pagination
- * behave identically wherever a shopper lands. The routes differ only
- * in what they fetch and how they title it.
+ * /shop, every collection and the search results page all render this, so
+ * the toolbar, the sidebar, the result count and the pagination behave
+ * identically wherever a shopper lands. The routes differ only in what
+ * they fetch and how they title it.
+ *
+ * Phones: a sticky toolbar pinned directly under the header carrying the
+ * result count, Filter and Sort. Both open bottom sheets. Products in a
+ * two-across grid. There is no sidebar at any width below md — a filter
+ * rail on a 390px screen either eats half the grid or hides behind a
+ * gesture.
+ *
+ * Desktop: filter rail on the left, sort top-right, four-across grid.
  *
  * No entry animation anywhere in here. Product browsing has to feel
- * instant, and a staggered reveal on a grid is a delay dressed as
- * craft.
+ * instant, and a staggered reveal on a grid is a delay dressed as craft.
  */
 
 import { Breadcrumbs } from '~/components/commerce/Breadcrumbs'
@@ -19,7 +26,8 @@ import {
 } from '~/components/commerce/FilterSidebar'
 import { Pagination } from '~/components/commerce/Pagination'
 import { ProductGrid } from '~/components/commerce/ProductGrid'
-import { SortSelect } from '~/components/commerce/SortSelect'
+import { SortSelect, SortSheet } from '~/components/commerce/SortSelect'
+import { BTN_PRIMARY } from '~/lib/ui'
 import type { FacetOption } from '~/lib/catalog'
 import type { BreadcrumbItem } from '~/lib/seo'
 import type { ProductCardModel } from '~/lib/shopify/adapters'
@@ -63,41 +71,69 @@ export function ListingLayout({
   clearHref,
 }: ListingLayoutProps) {
   const filtered = hasActiveFacets(facets)
+  const sort = facets.sort ?? 'featured'
+  const hrefForSort = (next: SortKey) => hrefForFacets({ sort: next })
 
   return (
-    <main className="mx-auto max-w-[1440px] px-4 pb-16 pt-6 md:px-8 md:pb-24 md:pt-8">
-      {breadcrumbs && breadcrumbs.length > 0 && (
-        <Breadcrumbs items={breadcrumbs} className="mb-4" />
-      )}
-
-      <header className="border-b border-hairline pb-4">
-        <h1 className="font-display text-[28px] leading-none tracking-tight text-cream md:text-[38px]">
-          {title}
-        </h1>
-        {description && (
-          <p className="mt-3 max-w-[62ch] text-[14px] leading-relaxed text-cream-muted">
-            {description}
-          </p>
+    <main className="pb-16 md:pb-24">
+      <div className="mx-auto max-w-[1440px] px-4 pt-6 md:px-8 md:pt-8">
+        {breadcrumbs && breadcrumbs.length > 0 && (
+          <Breadcrumbs items={breadcrumbs} className="mb-4" />
         )}
-      </header>
 
-      {/* Toolbar: count on the left, filter trigger and sort on the
-          right. The count updates with the filters, which is how a
-          shopper knows the filter did anything. */}
-      <div className="flex items-center justify-between gap-4 py-4">
-        <p className="text-[12px] text-cream-muted">
-          <span className="text-cream tabular-nums">{total}</span>{' '}
-          {total === 1 ? 'piece' : 'pieces'}
-          {totalPages > 1 && (
-            <span className="hidden md:inline">
-              {' '}
-              · page {page} of {totalPages}
-            </span>
+        <header className="border-b border-hairline pb-5">
+          <h1 className="display text-[28px] leading-none text-ink md:text-[38px]">
+            {title}
+          </h1>
+          {description && (
+            <p className="mt-3 max-w-[62ch] text-[15px] leading-relaxed text-ink-muted">
+              {description}
+            </p>
           )}
-        </p>
+        </header>
+      </div>
 
-        <div className="flex items-center gap-3">
-          <FilterSheet
+      {/*
+       * Phones: the toolbar sticks under the header so Filter and Sort
+       * stay reachable however far the shopper has scrolled. Pinned at
+       * --header-h rather than a hard-coded offset so it tracks the two-
+       * row phone header and the one-row desktop header without drift.
+       *
+       * Solid, not translucent-with-a-blur. Chrome on this site is never
+       * see-through, and a backdrop-filter here would also make this
+       * element the containing block for any `position: fixed` descendant
+       * — which would shrink the Filter and Sort sheets to the height of
+       * this bar. (They are portalled out for the same reason.)
+       */}
+      <div
+        className="sticky z-40 bg-base md:hidden"
+        style={{ top: 'var(--header-h)' }}
+      >
+        <div className="flex items-center justify-between gap-3 border-b border-hairline px-4 py-2.5">
+          <ResultCount total={total} page={page} totalPages={totalPages} />
+          <div className="flex items-center gap-2">
+            <FilterSheet
+              facets={facets}
+              counts={counts}
+              styles={styles}
+              hrefFor={hrefForFacets}
+              activeCategory={activeCategory}
+              total={total}
+            />
+            <SortSheet value={sort} hrefFor={hrefForSort} />
+          </div>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-[1440px] px-4 md:px-8">
+        {/* Desktop toolbar: count left, sort right. */}
+        <div className="hidden items-center justify-between gap-4 py-4 md:flex">
+          <ResultCount total={total} page={page} totalPages={totalPages} />
+          <SortSelect value={sort} hrefFor={hrefForSort} />
+        </div>
+
+        <div className="flex gap-6 pt-4 md:pt-0 lg:gap-10">
+          <FilterSidebar
             facets={facets}
             counts={counts}
             styles={styles}
@@ -105,35 +141,41 @@ export function ListingLayout({
             activeCategory={activeCategory}
             total={total}
           />
-          <SortSelect
-            value={facets.sort ?? 'featured'}
-            hrefFor={(sort: SortKey) => hrefForFacets({ sort })}
-          />
-        </div>
-      </div>
 
-      <div className="flex gap-6 lg:gap-10">
-        <FilterSidebar
-          facets={facets}
-          counts={counts}
-          styles={styles}
-          hrefFor={hrefForFacets}
-          activeCategory={activeCategory}
-          total={total}
-        />
-
-        <div className="min-w-0 flex-1">
-          <ProductGrid
-            products={products}
-            density="compact"
-            empty={
-              <EmptyListing filtered={filtered} clearHref={clearHref} />
-            }
-          />
-          <Pagination page={page} totalPages={totalPages} hrefFor={hrefForPage} />
+          <div className="min-w-0 flex-1">
+            <ProductGrid
+              products={products}
+              density="compact"
+              empty={<EmptyListing filtered={filtered} clearHref={clearHref} />}
+            />
+            <Pagination page={page} totalPages={totalPages} hrefFor={hrefForPage} />
+          </div>
         </div>
       </div>
     </main>
+  )
+}
+
+function ResultCount({
+  total,
+  page,
+  totalPages,
+}: {
+  total: number
+  page: number
+  totalPages: number
+}) {
+  return (
+    <p className="text-[13px] text-ink-muted">
+      <span className="font-medium text-ink tabular-nums">{total}</span>{' '}
+      {total === 1 ? 'piece' : 'pieces'}
+      {totalPages > 1 && (
+        <span className="hidden md:inline">
+          {' '}
+          · page {page} of {totalPages}
+        </span>
+      )}
+    </p>
   )
 }
 
@@ -146,18 +188,15 @@ function EmptyListing({
 }) {
   if (!filtered) {
     return (
-      <div className="border border-hairline px-6 py-20 text-center">
-        <p className="text-[11px] label-wide text-cream-subtle">
+      <div className="bg-raised px-6 py-20 text-center shadow-sm">
+        <p className="text-[11px] label-wide text-ink-muted">
           Nothing in this case yet
         </p>
-        <p className="mx-auto mt-3 max-w-sm text-[15px] text-cream-muted">
+        <p className="mx-auto mt-3 max-w-sm text-[15px] text-ink-muted">
           Pieces are being finished on the bench. The full catalog is one step
           away.
         </p>
-        <a
-          href="/shop"
-          className="mt-6 inline-flex items-center bg-brand px-6 py-3 text-[11px] label text-cream transition-colors duration-hover ease-apple hover:bg-brand-hover"
-        >
+        <a href="/shop" className={`${BTN_PRIMARY} mt-6`}>
           Shop all pieces
         </a>
       </div>
@@ -165,16 +204,13 @@ function EmptyListing({
   }
 
   return (
-    <div className="border border-hairline px-6 py-20 text-center">
-      <p className="text-[11px] label-wide text-cream-subtle">No matches</p>
-      <p className="mx-auto mt-3 max-w-sm text-[15px] text-cream-muted">
+    <div className="bg-raised px-6 py-20 text-center shadow-sm">
+      <p className="text-[11px] label-wide text-ink-muted">No matches</p>
+      <p className="mx-auto mt-3 max-w-sm text-[15px] text-ink-muted">
         Nothing matches every filter at once. Clearing one usually opens it back
         up.
       </p>
-      <a
-        href={clearHref}
-        className="mt-6 inline-flex items-center bg-brand px-6 py-3 text-[11px] label text-cream transition-colors duration-hover ease-apple hover:bg-brand-hover"
-      >
+      <a href={clearHref} className={`${BTN_PRIMARY} mt-6`}>
         Clear filters
       </a>
     </div>

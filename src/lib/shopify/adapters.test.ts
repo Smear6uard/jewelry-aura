@@ -5,8 +5,10 @@ import {
   isValidHandle,
   mapCollectionPage,
   mapProductCard,
+  mapRating,
   paginate,
   parseFormattedMoney,
+  priceLabel,
   type CollectionNode,
   type ProductCardNode,
 } from './adapters'
@@ -511,5 +513,98 @@ describe('parseFormattedMoney', () => {
 
   it('returns 0 for a string with no digits', () => {
     expect(parseFormattedMoney('—')).toBe(0)
+  })
+})
+
+// ─── Unpriced pieces ─────────────────────────────────────────────────
+// Most of the live chain catalog has no price set in the admin. The card
+// must not print "$0" and must not print a dead notice either — it flags
+// the piece so the UI can offer an "Enquire" link instead.
+
+describe('priceLabel and the unpriced flag', () => {
+  it('returns an empty label for a zero or missing amount', () => {
+    expect(priceLabel({ amount: '0.0', currencyCode: 'USD' })).toBe('')
+    expect(priceLabel({ amount: '', currencyCode: 'USD' })).toBe('')
+    expect(priceLabel({ amount: '-5', currencyCode: 'USD' })).toBe('')
+  })
+
+  it('formats a real amount', () => {
+    expect(priceLabel({ amount: '1450.0', currencyCode: 'USD' })).toBe('$1,450')
+  })
+
+  it('flags a $0 product as unpriced with no price string', () => {
+    const card = mapProductCard(
+      cardNode({
+        priceRange: {
+          minVariantPrice: { amount: '0.0', currencyCode: 'USD' },
+          maxVariantPrice: { amount: '0.0', currencyCode: 'USD' },
+        },
+      }),
+    )
+    expect(card.unpriced).toBe(true)
+    expect(card.price).toBe('')
+    // "From" on an unpriced piece would read as "From " with no number.
+    expect(card.priceFrom).toBe(false)
+  })
+
+  it('leaves a priced product unflagged', () => {
+    const card = mapProductCard(cardNode())
+    expect(card.unpriced).toBe(false)
+    expect(card.price).toBe('$1,450')
+  })
+})
+
+// ─── Review ratings from metafields ──────────────────────────────────
+// The card and the PDP light up when a review app writes reviews.rating
+// and reviews.rating_count. Until then every branch here must yield
+// undefined, because "★☆☆☆☆ (0)" is a worse signal than no stars.
+
+describe('mapRating', () => {
+  it('reads Shopify rating-type JSON', () => {
+    expect(
+      mapRating(
+        { value: '{"value":"4.7","scale_min":"1","scale_max":"5"}' },
+        { value: '24' },
+      ),
+    ).toEqual({ value: 4.7, count: 24 })
+  })
+
+  it('reads a plain decimal string', () => {
+    expect(mapRating({ value: '4.5' }, { value: '8' })).toEqual({
+      value: 4.5,
+      count: 8,
+    })
+  })
+
+  it('returns undefined when there are no reviews', () => {
+    expect(mapRating({ value: '4.9' }, { value: '0' })).toBeUndefined()
+    expect(mapRating({ value: '4.9' }, { value: '' })).toBeUndefined()
+    expect(mapRating({ value: '4.9' }, null)).toBeUndefined()
+    expect(mapRating({ value: '4.9' }, undefined)).toBeUndefined()
+  })
+
+  it('returns undefined when the metafield is absent or unparseable', () => {
+    expect(mapRating(null, { value: '12' })).toBeUndefined()
+    expect(mapRating({ value: null }, { value: '12' })).toBeUndefined()
+    expect(mapRating({ value: '{oops' }, { value: '12' })).toBeUndefined()
+    expect(mapRating({ value: 'n/a' }, { value: '12' })).toBeUndefined()
+    expect(mapRating({ value: '0' }, { value: '12' })).toBeUndefined()
+  })
+
+  it('clamps above five and never rounds a 4.5 up to a whole star', () => {
+    expect(mapRating({ value: '7' }, { value: '3' })?.value).toBe(5)
+    expect(mapRating({ value: '4.54' }, { value: '3' })?.value).toBe(4.5)
+  })
+
+  it('is wired into the card model', () => {
+    const card = mapProductCard(
+      cardNode({
+        ratingMetafield: { value: '{"value":"4.8"}' },
+        ratingCountMetafield: { value: '31' },
+      }),
+    )
+    expect(card.rating).toEqual({ value: 4.8, count: 31 })
+    // No metafields at all → no rating, not a zero.
+    expect(mapProductCard(cardNode()).rating).toBeUndefined()
   })
 })

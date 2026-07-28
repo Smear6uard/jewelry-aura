@@ -5,49 +5,70 @@
    ═══════════════════════════════════════════════════════════════════
 
    Color budget (the whole discipline of this palette in three lines):
-     ~85% of pixels  near-black canvas   base / raised / sunken
-     ~10% of pixels  cream type          primary / muted / subtle
-     ~ 5% of pixels  maroon              button fills, badges, 2 bands
-     ~ 2% of pixels  champagne           hairlines, metal accents
+     ~80% of pixels  warm cream canvas    base / raised / sunken
+     ~ 8% of pixels  near-black type      ink / ink-muted / ink-subtle
+     ~12% of pixels  maroon               chrome: announcement bar, trust
+                                          band, footer band, button fills,
+                                          badges, nav underline, stars
 
-   Maroon is an ACCENT, never a page background. The announcement bar
-   and the trust band are the only two full-maroon surfaces on the site.
-   If a section wants to feel branded, the answer is near-black with a
-   maroon accent inside it.
+   Maroon is CHROME. It is never a page background and never body copy.
+   The announcement bar, the trust band and the footer are the only
+   full-maroon surfaces on the site. If a section wants to feel branded,
+   the answer is a white tile on cream with a maroon accent inside it.
+
+   Separation on a light canvas comes from LUMINANCE plus SHADOW, not
+   from borders. A white tile on cream with --shadow-sm is the pattern;
+   a darker border is the failure mode.
    ═══════════════════════════════════════════════════════════════════ */
 
 @theme {
   /* ─── Canvas ──────────────────────────────────────────────────── */
-  --color-base: #0a0908;
-  --color-raised: #141110;
-  --color-sunken: #050404;
-  --color-hairline: #2a2422;
+  --color-base: #f2ede4; /* page background — warm cream          */
+  --color-raised: #ffffff; /* product tiles, cards, sheets, panels  */
+  --color-sunken: #e8e0d4; /* banded sections, input fields         */
+  --color-hairline: #ddd3c4; /* 1px dividers — never darkened         */
 
-  /* ─── Type ────────────────────────────────────────────────────── */
-  --color-cream: #f0ebe0;
-  --color-cream-muted: #a39c93;
-  --color-cream-subtle: #6b655e;
+  /* ─── Type ────────────────────────────────────────────────────────
+     ink         15.4:1 on cream
+     ink-muted    5.1:1 on cream — the floor for body copy (AA)
+     ink-subtle   2.7:1 on cream — NON-TEXT ONLY (dots, dividers,
+                  disabled marks). Anything a shopper has to read uses
+                  ink-muted or better. See docs/PALETTE-NOTES.md.
+     ─────────────────────────────────────────────────────────────── */
+  --color-ink: #1a1614;
+  --color-ink-muted: #6b625a;
+  --color-ink-subtle: #9a9088;
 
-  /* ─── Brand maroon (accents only) ─────────────────────────────── */
-  --color-brand: #3d0f16;
-  --color-brand-raised: #5c1a24;
-  --color-brand-hover: #7a2430;
+  /* ─── Brand maroon (chrome only) ──────────────────────────────── */
+  --color-brand: #6b1622;
+  --color-brand-hover: #8b2231;
+  --color-brand-deep: #4a0f18;
 
-  /* ─── Metal accent ────────────────────────────────────────────── */
-  --color-champagne: #c4a875;
+  /* Type and hairlines that sit ON a maroon band. 13.1:1 on
+     brand-deep, 10.2:1 on brand. */
+  --color-cream: #f2ede4;
+
+  /* ─── Elevation ───────────────────────────────────────────────────
+     Warm-tinted toward the near-black ink, never pure black and never
+     blue-grey — a cool shadow on a warm canvas reads as dirt.
+     ─────────────────────────────────────────────────────────────── */
+  --shadow-sm: 0 1px 2px rgba(26, 22, 20, 0.04), 0 1px 3px rgba(26, 22, 20, 0.06);
+  --shadow-md: 0 2px 4px rgba(26, 22, 20, 0.04), 0 4px 12px rgba(26, 22, 20, 0.08);
+  --shadow-lg: 0 4px 8px rgba(26, 22, 20, 0.05), 0 12px 32px rgba(26, 22, 20, 0.1);
 
   /* ─── Typefaces ───────────────────────────────────────────────────
      Fraunces is the display serif and is used with restraint: the
-     wordmark, homepage section headers, and PDP product names. Its
-     variable optical-size axis is driven at opsz 72 (text-weight
-     drawing) rather than 144 (poster drawing) — commerce headings sit
-     at 28-40px, where the poster cut looks bloated.
+     wordmark, section headers, and the PDP product name. Its variable
+     optical-size axis is driven at opsz 72 (text-weight drawing)
+     rather than 144 (poster drawing) — commerce headings sit at
+     26-44px, where the poster cut looks bloated.
+
+     Weight runs LIGHTER than the old dark-canvas setting. Type gains
+     apparent weight when it inverts to dark-on-light, so display
+     headings step down to 380 rather than shrinking.
 
      Manrope carries everything else: nav, product names, prices,
-     buttons, filters, forms, body copy. Playfair and JetBrains Mono
-     were dropped from the font payload with the storefront rebuild —
-     mono micro-caps read as editorial, not retail. --font-mono stays
-     defined against system faces so tabular contexts have a stack.
+     buttons, filters, forms, body copy.
      ─────────────────────────────────────────────────────────────── */
   --font-display: "Fraunces", "Georgia", serif;
   --font-serif: "Fraunces", "Georgia", serif;
@@ -84,6 +105,26 @@
 }
 
 /* ═══════════════════════════════════════════
+   LAYOUT CONSTANTS
+   ═══════════════════════════════════════════ */
+
+/*
+ * Height of the sticky header, so anything else that sticks (the PLP
+ * filter/sort bar, the PDP detail column) can pin directly beneath it
+ * instead of hard-coding a number that drifts.
+ *
+ * Phones: 56px bar + 44px search row. md and up: one 64px bar.
+ */
+:root {
+  --header-h: 100px;
+}
+@media (min-width: 768px) {
+  :root {
+    --header-h: 64px;
+  }
+}
+
+/* ═══════════════════════════════════════════
    BASE LAYER
    ═══════════════════════════════════════════ */
 
@@ -91,9 +132,11 @@
   html {
     font-family: var(--font-sans);
     background-color: var(--color-base);
-    color: var(--color-cream);
+    color: var(--color-ink);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Anchor targets clear the sticky header. */
+    scroll-padding-top: calc(var(--header-h) + 1rem);
   }
 
   body {
@@ -105,8 +148,20 @@
      it. A blanket serif rule on h1-h6 is what made every product name
      and filter legend read as editorial. */
 
+  /*
+   * 16px is the floor for any focusable text field: iOS Safari zooms
+   * the viewport on focus below that, which shifts the whole layout
+   * mid-interaction. Set here as a floor so a new form can't
+   * reintroduce the bug by forgetting a class.
+   */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
   ::selection {
-    background: var(--color-brand-hover);
+    background: var(--color-brand);
     color: var(--color-cream);
   }
 
@@ -122,13 +177,13 @@
     border-radius: 0;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #3d3733;
+    background: #cbbfad;
   }
 
-  /* Keyboard focus is a maroon-forward ring everywhere. Mouse users
-     never see it; keyboard users always do. */
+  /* Keyboard focus is a maroon ring everywhere. Mouse users never see
+     it; keyboard users always do. */
   :focus-visible {
-    outline: 2px solid var(--color-brand-hover);
+    outline: 2px solid var(--color-brand);
     outline-offset: 2px;
   }
 }
@@ -156,6 +211,16 @@
     font-weight: 500;
   }
 
+  /* Display serif at commerce weight. Fraunces at 400 reads chunky
+     once it is dark-on-light; 380 holds the same size at the same
+     presence. opsz 72 is the text cut, not the poster cut. */
+  .display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-variation-settings: "opsz" 72, "wght" 380;
+    letter-spacing: -0.02em;
+  }
+
   /* Horizontal rails hide their scrollbar — the peeking next card is
      the affordance, a scrollbar under a product row is noise. */
   .no-scrollbar {
@@ -166,103 +231,13 @@
     display: none;
   }
 
-  /* Product photography sits on the raised surface with a hairline so
-     a transparent-background PNG still reads as a framed tile. */
-  .tile-frame {
-    box-shadow: inset 0 0 0 1px var(--color-hairline);
+  /* Any element pinned to the bottom of the viewport has to clear the
+     iOS home indicator, or the last 34px of a checkout button is
+     unpressable. */
+  .safe-bottom {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
   }
-}
-
-/* ═══════════════════════════════════════════
-   PHOTOGRAPHY TREATMENTS
-   ═══════════════════════════════════════════ */
-
-/* ─── The case plate ────────────────────────────────────────────────
-   The workshop's catalog photography is shot on white. Dropping white
-   rectangles onto a near-black canvas is the single loudest thing on a
-   dark storefront — the eye reads the background, not the chain.
-
-   So product frames get a warm off-white plate instead of the raised
-   surface: the photo's white edge dissolves into it, and the tile reads
-   as a lit display case set into a dark room rather than an unfinished
-   cut-out. The plate is a shade below paper white so it sits down in
-   the page instead of glaring, and the image is nudged fractionally
-   darker to meet it.
-
-   If the catalog is ever re-shot on a dark ground, delete this class
-   and the frames go back to `bg-raised` with nothing else to change. */
-.case-plate {
-  background-color: #e9e3d7;
-}
-/* The photograph fills the frame, so the plate colour alone would never
-   be seen — the white has to be brought down in the image itself. A 7%
-   brightness cut lands paper-white on the plate colour so the two read
-   as one surface, and the trace of sepia warms it to match rather than
-   leaving a cold grey. Hue is untouched: the metal still reads true,
-   which is the one thing this treatment must not cost. */
-.case-plate img {
-  filter: brightness(0.93) sepia(0.05) saturate(1.04);
-}
-
-/* ─── Velvet grade ──────────────────────────────────────────────────
-   The editorial photography (hero, category tiles, commission gallery)
-   was shot on FOREST-GREEN velvet for the previous brand. There is no
-   maroon-velvet shoot in the repo, so the green is graded out rather
-   than left to fight the palette: saturation down, then a maroon layer
-   in `color` blend mode, which replaces hue while keeping the
-   photograph's own luminance — so the velvet goes deep maroon and the
-   gold stays bright and warm rather than rotating to a false colour.
-
-   Applied only to editorial frames, never to product photography: a
-   shopper judging metal colour has to see the metal as it is.
-
-   Replace the assets with a maroon-velvet shoot and this comes off. */
-.velvet-grade {
-  position: relative;
-  isolation: isolate;
-}
-/* Saturation sets the whole trade-off. The hue blend can only colour a
-   pixel in proportion to the saturation already there — and the stones
-   in these photographs are not neutral, they carry reflected green off
-   the velvet, so any hue shift takes them toward pink along with the
-   fabric. Pulling saturation to 0.6 keeps the velvet reading as a warm
-   maroon-black while leaving the diamonds close enough to white to
-   pass. It also lands where the brief wants the page: near-black
-   dominant, brand colour as a cast rather than a flood.
-
-   The real fix is a maroon-velvet reshoot; then this whole block and
-   the ::after below come out. */
-.velvet-grade img {
-  filter: saturate(0.6) contrast(1.06) brightness(0.97);
-}
-.velvet-grade::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-color: #5c1a24;
-  /* `hue` rather than `color`: it replaces hue but leaves the
-     backdrop's own saturation alone, so a near-neutral pixel — a
-     diamond, a white-gold prong, a highlight — has almost no
-     saturation for the maroon to land on and stays white. `color`
-     overrides saturation too, which turned every stone pink. The
-     velvet, being genuinely saturated, still shifts fully. */
-  mix-blend-mode: hue;
-  pointer-events: none;
-}
-
-/* ═══════════════════════════════════════════
-   COMPONENT STYLES
-   ═══════════════════════════════════════════ */
-
-/* Map embed on the Visit section — desaturated to sit inside the
-   near-black canvas instead of glowing white. */
-.map-dark-filter {
-  filter: grayscale(100%) invert(92%) contrast(83%);
-}
-
-/* Custom Work gallery: the mobile carousel's scrollbar is suppressed
-   through the shared utility; this keeps the scoped override for the
-   pinned desktop strip's nested scroller. */
-[data-section="custom-work"] [data-scroller]::-webkit-scrollbar {
-  display: none;
+  .safe-bottom-lg {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
 }

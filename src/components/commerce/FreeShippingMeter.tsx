@@ -2,10 +2,10 @@
  * components/commerce/FreeShippingMeter.tsx — progress toward free
  * shipping, shown in the cart drawer and on the cart page.
  *
- * The bar is the one place in the cart where maroon fills a shape: it
- * is a reward state, and the fill reaching the end of the track is the
- * message. Copy names the remaining amount rather than the percentage,
- * because "$38 away" is actionable and "74%" is not.
+ * The bar is the one place in the cart where maroon fills a shape, and
+ * the fill reaching the end of the track is the whole message. Copy names
+ * the remaining amount rather than the percentage, because "$38 away" is
+ * actionable and "74%" is not.
  */
 
 import { FREE_SHIPPING_THRESHOLD } from '~/lib/catalog'
@@ -27,12 +27,12 @@ export function FreeShippingMeter({ subtotal }: FreeShippingMeterProps) {
 
   return (
     <div>
-      <p className="text-[12px] text-cream-muted">
+      <p className="text-[13px] text-ink-muted">
         {reached ? (
-          <span className="text-cream">Free shipping unlocked.</span>
+          <span className="font-medium text-ink">Free shipping unlocked.</span>
         ) : (
           <>
-            <span className="text-cream">
+            <span className="font-medium text-ink">
               ${shortfall.toLocaleString('en-US')}
             </span>{' '}
             away from free shipping.
@@ -40,18 +40,23 @@ export function FreeShippingMeter({ subtotal }: FreeShippingMeterProps) {
         )}
       </p>
       <div
-        className="mt-2 h-[3px] w-full overflow-hidden bg-hairline"
+        className="mt-2 h-[4px] w-full overflow-hidden bg-hairline"
         role="progressbar"
         aria-valuemin={0}
         aria-valuemax={FREE_SHIPPING_THRESHOLD}
         aria-valuenow={Math.min(subtotal, FREE_SHIPPING_THRESHOLD)}
         aria-label="Progress toward free shipping"
       >
+        {/* Maroon throughout, deepening at the finish line. The reward
+            state is the bar reaching the end, not a change of colour —
+            a second accent here would be a fourth colour on the site. */}
         <div
           className="h-full transition-[width] duration-content ease-out-expo motion-reduce:transition-none"
           style={{
             width: `${percent}%`,
-            backgroundColor: reached ? '#C4A875' : 'var(--color-brand-hover)',
+            backgroundColor: reached
+              ? 'var(--color-brand-deep)'
+              : 'var(--color-brand)',
           }}
         />
       </div>

@@ -61,10 +61,10 @@ export const Route = createFileRoute('/pages/$handle')({
   component: StaticPage,
   notFoundComponent: () => (
     <main className="mx-auto max-w-[1440px] px-4 py-20 md:px-8 md:py-28">
-      <h1 className="font-display text-[28px] tracking-tight text-cream md:text-[38px]">
+      <h1 className="display text-[28px] text-ink md:text-[38px]">
         That page doesn’t exist
       </h1>
-      <p className="mt-3 max-w-[52ch] text-[14px] text-cream-muted">
+      <p className="mt-3 max-w-[52ch] text-[15px] text-ink-muted">
         The links below cover most of what people come here looking for.
       </p>
       <ul className="mt-6 flex flex-wrap gap-2">
@@ -72,7 +72,7 @@ export const Route = createFileRoute('/pages/$handle')({
           <li key={link.href}>
             <a
               href={link.href}
-              className="inline-flex border border-hairline px-4 py-2.5 text-[12px] text-cream-muted transition-colors duration-hover ease-apple hover:border-cream-subtle hover:text-cream"
+              className="inline-flex min-h-11 items-center bg-raised px-4 text-[13px] text-ink shadow-sm transition-shadow duration-hover ease-apple hover:shadow-md motion-reduce:transition-none"
             >
               {link.label}
             </a>
@@ -98,24 +98,22 @@ function StaticPage() {
 
       <div className="grid gap-10 md:grid-cols-12 md:gap-12">
         <header className="md:col-span-4">
-          <h1 className="font-display text-[30px] leading-tight tracking-tight text-cream md:text-[40px]">
+          <h1 className="display text-[30px] leading-tight text-ink md:text-[40px]">
             {page.title}
           </h1>
-          <p className="mt-3 max-w-[44ch] text-[14px] leading-relaxed text-cream-muted">
+          <p className="mt-3 max-w-[44ch] text-[15px] leading-relaxed text-ink-muted">
             {page.summary}
           </p>
 
           <div className="mt-6 border-t border-hairline pt-5">
-            <p className="text-[11px] label-wide text-cream-subtle">
-              Still stuck?
-            </p>
+            <p className="text-[11px] label-wide text-ink-muted">Still stuck?</p>
             <a
               href={STORE.phoneHref}
-              className="mt-2 inline-block text-[15px] text-cream transition-colors duration-hover ease-apple hover:text-champagne"
+              className="mt-2 inline-flex min-h-11 items-center text-[16px] font-medium text-brand transition-colors duration-hover ease-apple hover:text-brand-hover motion-reduce:transition-none"
             >
               {STORE.phone}
             </a>
-            <p className="mt-1 text-[12px] text-cream-subtle">
+            <p className="text-[13px] text-ink-muted">
               {STORE.hours[0].days} · {STORE.hours[0].time}
             </p>
           </div>
@@ -128,14 +126,14 @@ function StaticPage() {
               className="border-t border-hairline py-6 first:border-t-0 first:pt-0"
             >
               {block.heading && (
-                <h2 className="text-[16px] font-medium text-cream">
+                <h2 className="text-[17px] font-medium text-ink">
                   {block.heading}
                 </h2>
               )}
               {block.body?.map((paragraph) => (
                 <p
                   key={paragraph}
-                  className="mt-3 max-w-[68ch] text-[15px] leading-relaxed text-cream-muted first:mt-2"
+                  className="mt-3 max-w-[68ch] text-[16px] leading-relaxed text-ink-muted first:mt-2"
                 >
                   {paragraph}
                 </p>
@@ -145,11 +143,11 @@ function StaticPage() {
                   {block.list.map((entry) => (
                     <li
                       key={entry}
-                      className="flex gap-3 text-[15px] leading-relaxed text-cream-muted"
+                      className="flex gap-3 text-[16px] leading-relaxed text-ink-muted"
                     >
                       <span
                         aria-hidden
-                        className="mt-3 h-px w-3.5 shrink-0 bg-champagne"
+                        className="mt-3 h-px w-3.5 shrink-0 bg-brand"
                       />
                       {entry}
                     </li>

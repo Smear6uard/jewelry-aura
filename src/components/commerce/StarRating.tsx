@@ -1,15 +1,20 @@
 /**
- * components/commerce/StarRating.tsx — champagne star row.
+ * components/commerce/StarRating.tsx — maroon star row.
  *
- * Used on product cards and in the Reviews section. Renders a filled
- * star per whole point and a half-filled star for a .5 — no rounding up,
- * because a 4.5 shown as 5 is a small lie repeated on every card.
+ * Used on product cards, on the PDP, and in the Reviews section. Renders
+ * a filled star per whole point and a partial star for a fraction — no
+ * rounding up, because a 4.5 shown as 5 is a small lie repeated on every
+ * card.
+ *
+ * Only ever rendered when real rating data exists. There is no zero
+ * state: five empty outlines with "(0)" beside them is a worse signal
+ * than a card that says nothing about reviews at all.
  */
 
 interface StarRatingProps {
   /** 0–5. */
   value: number
-  /** Star edge length in px. Cards use 11, reviews use 14. */
+  /** Star edge length in px. Cards use 12, reviews use 14. */
   size?: number
   className?: string
 }
@@ -17,7 +22,9 @@ interface StarRatingProps {
 const STAR_PATH =
   'M8 1.4l1.9 4 4.4.6-3.2 3 .8 4.3L8 11.3 3.9 13.4l.8-4.3-3.2-3 4.4-.6z'
 
-export function StarRating({ value, size = 11, className }: StarRatingProps) {
+const BRAND = '#6B1622'
+
+export function StarRating({ value, size = 12, className }: StarRatingProps) {
   const clamped = Math.max(0, Math.min(5, value))
 
   return (
@@ -29,6 +36,7 @@ export function StarRating({ value, size = 11, className }: StarRatingProps) {
       {[0, 1, 2, 3, 4].map((index) => {
         // Portion of this star that is filled, 0–1.
         const fill = Math.max(0, Math.min(1, clamped - index))
+        const gradientId = `star-${index}-${Math.round(fill * 100)}`
         return (
           <svg
             key={index}
@@ -39,18 +47,18 @@ export function StarRating({ value, size = 11, className }: StarRatingProps) {
             className="shrink-0"
           >
             <defs>
-              <linearGradient id={`star-${index}-${Math.round(fill * 100)}`}>
-                <stop offset={`${fill * 100}%`} stopColor="#C4A875" />
+              <linearGradient id={gradientId}>
+                <stop offset={`${fill * 100}%`} stopColor={BRAND} />
                 <stop offset={`${fill * 100}%`} stopColor="transparent" />
               </linearGradient>
             </defs>
             <path
               d={STAR_PATH}
-              fill={`url(#star-${index}-${Math.round(fill * 100)})`}
-              stroke="#C4A875"
+              fill={`url(#${gradientId})`}
+              stroke={BRAND}
               strokeWidth="0.9"
               strokeLinejoin="round"
-              opacity={fill > 0 ? 1 : 0.35}
+              opacity={fill > 0 ? 1 : 0.3}
             />
           </svg>
         )

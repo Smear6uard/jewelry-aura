@@ -45,7 +45,9 @@ export const Route = createRootRoute({
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       { title: SITE_TITLE },
       { name: 'description', content: SITE_DESCRIPTION },
-      { name: 'theme-color', content: '#0A0908' },
+      // Matches --surface-base: the phone's browser chrome continues the
+      // cream canvas instead of capping it with a near-black bar.
+      { name: 'theme-color', content: '#F2EDE4' },
       {
         name: 'robots',
         content:
@@ -114,12 +116,29 @@ function RootComponent() {
   )
 }
 
+/**
+ * Framer Motion serialises its `hidden` variant into the SSR markup, so
+ * every reveal ships as inline `opacity:0`. With JavaScript enabled that
+ * is the first frame of an animation; with JavaScript disabled it is
+ * permanently invisible content — the hero headline and both of its CTAs
+ * among it.
+ *
+ * Every animated wrapper on the site carries `data-reveal`, and this
+ * stylesheet — which only parses when scripting is off — puts them back.
+ * The motion is the enhancement; the content is not.
+ */
+const NO_JS_REVEAL_CSS =
+  '[data-reveal],[data-reveal] *{opacity:1!important;transform:none!important;visibility:visible!important}'
+
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en">
       <head>
         <HeadContent />
         <style>{`.promo-dismissed [data-announcement]{display:none}`}</style>
+        <noscript>
+          <style>{NO_JS_REVEAL_CSS}</style>
+        </noscript>
       </head>
       <body>
         {children}

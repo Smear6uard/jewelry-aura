@@ -1,15 +1,16 @@
 /**
- * components/sections/TrustBar.tsx — the second and last full-maroon
- * band on the site.
+ * components/sections/TrustBar.tsx — one of three full-maroon bands.
  *
- * Four promises, champagne hairlines between them, nothing else. No
- * icons: a truck glyph next to "Free shipping" adds nothing a shopper
- * did not already read, and a row of pictograms is exactly the kind of
- * decoration that makes a trust band look like a template.
+ * Four promises, cream hairlines between them, nothing else. No icons: a
+ * truck glyph next to "Free shipping" adds nothing a shopper did not
+ * already read, and a row of pictograms is exactly the kind of
+ * decoration that makes a trust band look like a template. No counters,
+ * no fabricated stats — the claims are terms, and each one is a link to
+ * the page that states it.
  *
- * Every claim here is stated identically on its policy page. That is
- * the point of a trust band — if the band and the page disagree, the
- * band is marketing rather than information.
+ * Every claim here is stated identically on its policy page. That is the
+ * point of a trust band — if the band and the page disagree, the band is
+ * marketing rather than information.
  */
 
 import { FREE_SHIPPING_THRESHOLD, STORE } from '~/lib/catalog'
@@ -30,15 +31,15 @@ export function TrustBar() {
             key={promise.href}
             className={[
               'flex items-center justify-center',
-              // Champagne hairlines between cells, never around the band.
-              index % 2 === 1 ? 'border-l border-champagne/25' : '',
-              index >= 2 ? 'border-t border-champagne/25 md:border-t-0' : '',
-              index === 2 ? 'md:border-l md:border-champagne/25' : '',
+              // Cream hairlines between cells, never around the band.
+              index % 2 === 1 ? 'border-l border-cream/20' : '',
+              index >= 2 ? 'border-t border-cream/20 md:border-t-0' : '',
+              index === 2 ? 'md:border-l md:border-cream/20' : '',
             ].join(' ')}
           >
             <a
               href={promise.href}
-              className="block px-3 py-3.5 text-center text-[10px] label-wide text-cream/90 transition-colors duration-hover ease-apple hover:text-cream md:py-4 md:text-[11px]"
+              className="flex min-h-11 w-full items-center justify-center px-3 py-3 text-center text-[10px] label-wide text-cream/90 transition-colors duration-hover ease-apple hover:text-cream md:text-[11px] motion-reduce:transition-none"
             >
               {promise.label}
             </a>

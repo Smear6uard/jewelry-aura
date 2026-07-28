@@ -18,12 +18,15 @@ import { ListingLayout } from '~/components/commerce/ListingLayout'
 import { ProductGrid } from '~/components/commerce/ProductGrid'
 import { type ProductCardNode } from '~/lib/shopify/adapters'
 import {
+  facetsFromSearch,
+  hasActiveFacets,
   listingHref,
   parseFacets,
   type Facets,
 } from '~/lib/shopify/facets'
 import { buildListing } from '~/lib/shopify/listing'
 import { SHOP_PRODUCTS_QUERY } from '~/lib/shopify/queries'
+import { BTN_PRIMARY } from '~/lib/ui'
 import {
   HERO_SOCIAL_IMAGE,
   HERO_SOCIAL_IMAGE_ALT,
@@ -67,13 +70,7 @@ export const Route = createFileRoute('/shop')({
   loaderDeps: ({ search }) => search,
   loader: async ({ deps }) => {
     const nodes = await getShopProducts()
-    const facets: Facets = {
-      metal: deps.metal,
-      style: deps.style,
-      price: deps.price,
-      avail: deps.avail,
-      sort: deps.sort,
-    }
+    const facets: Facets = facetsFromSearch(deps)
     return { ...buildListing(nodes, facets, deps.page ?? 1, PER_PAGE), facets }
   },
   staleTime: 30_000,
@@ -88,9 +85,7 @@ export const Route = createFileRoute('/shop')({
   head: ({ loaderData }) => {
     const products = loaderData?.products ?? []
     const facets = loaderData?.facets ?? {}
-    const filtered = Boolean(
-      facets.metal || facets.style || facets.price || facets.avail,
-    )
+    const filtered = hasActiveFacets(facets)
     const canonical = `${SITE_URL}${listingHref(
       BASE_PATH,
       facets,
@@ -137,17 +132,14 @@ export const Route = createFileRoute('/shop')({
   component: ShopPage,
   errorComponent: () => (
     <main className="mx-auto max-w-[1440px] px-4 py-20 md:px-8">
-      <h1 className="font-display text-[28px] tracking-tight text-cream md:text-[38px]">
+      <h1 className="display text-[28px] text-ink md:text-[38px]">
         The catalog didn’t load
       </h1>
-      <p className="mt-3 max-w-[52ch] text-[14px] text-cream-muted">
+      <p className="mt-3 max-w-[52ch] text-[15px] text-ink-muted">
         Give it a moment and try again — or call 630-965-6464 and we’ll tell you
         what’s in the case right now.
       </p>
-      <a
-        href="/shop"
-        className="mt-6 inline-flex items-center bg-brand px-6 py-3 text-[11px] label text-cream transition-colors duration-hover ease-apple hover:bg-brand-hover"
-      >
+      <a href="/shop" className={`${BTN_PRIMARY} mt-6`}>
         Reload the shop
       </a>
       <div className="mt-12">

@@ -83,6 +83,32 @@ export function stylesOf(title: string): string[] {
   ).map(([style]) => style)
 }
 
+/**
+ * Length bands a title registers for, read from an inch measurement in
+ * the product title (`20"`, `20 inch`, `20in`).
+ *
+ * A title can carry more than one length ("Cuban Link 20\" / 24\"") and
+ * then registers for both bands, so filtering to 24" and up returns a
+ * chain that is offered at 24" even if its first listed length is 20".
+ * Returns empty for a piece with no length in its title — rings and
+ * pendants — which is what keeps the facet honest on a mixed catalog.
+ */
+const LENGTH_PATTERN = /(\d{1,2})(?:\.\d)?\s*(?:"|”|''|\s?in\b|\s?inch(?:es)?\b)/gi
+
+export function lengthsOf(title: string): string[] {
+  const bands = new Set<string>()
+  for (const match of title.matchAll(LENGTH_PATTERN)) {
+    const inches = Number.parseInt(match[1], 10)
+    // Below 8" is a bracelet measurement or a stray number, not a length
+    // a chain filter should claim; above 40" is not a neck measurement.
+    if (!Number.isFinite(inches) || inches < 8 || inches > 40) continue
+    if (inches < 18) bands.add('under-18')
+    else if (inches <= 22) bands.add('18-22')
+    else bands.add('24-plus')
+  }
+  return [...bands]
+}
+
 /** Price band a product's opening price falls into. */
 export function priceBandOf(node: ProductCardNode): string | null {
   const amount = Number.parseFloat(node.priceRange.minVariantPrice.amount)
@@ -118,6 +144,8 @@ export interface Facets {
   metal?: string
   style?: string
   price?: string
+  /** Length band, e.g. "18-22". Only chains and bracelets carry one. */
+  length?: string
   /** Only "in-stock" is meaningful; absent means no availability filter. */
   avail?: string
   sort?: SortKey
@@ -130,13 +158,51 @@ const PREDICATES = {
   style: (node: ProductCardNode, value: string) =>
     stylesOf(node.title).includes(value),
   price: (node: ProductCardNode, value: string) => priceBandOf(node) === value,
+  length: (node: ProductCardNode, value: string) =>
+    lengthsOf(node.title).includes(value),
   avail: (node: ProductCardNode, value: string) =>
     value !== 'in-stock' || node.availableForSale,
 } as const
 
-type FacetGroup = keyof typeof PREDICATES
+export type FacetGroup = keyof typeof PREDICATES
 
-const GROUPS: FacetGroup[] = ['metal', 'style', 'price', 'avail']
+/**
+ * The filter groups, in sidebar order. This array is the single place a
+ * facet is declared: filtering, counting, URL building, the active-filter
+ * badge, the clear-all link and every route's loader all read it. Adding
+ * `length` to the earlier hand-written copies of this list in three routes
+ * and two components is exactly the bug the helpers below prevent.
+ */
+export const FACET_GROUPS: FacetGroup[] = [
+  'metal',
+  'style',
+  'price',
+  'length',
+  'avail',
+]
+
+const GROUPS = FACET_GROUPS
+
+/** How many filters are currently applied — drives the mobile badge. */
+export function activeFacetCount(facets: Facets): number {
+  return GROUPS.filter((group) => Boolean(facets[group])).length
+}
+
+/** A patch that clears every filter, leaving sort alone. */
+export function clearedFacets(): Partial<Facets> {
+  return Object.fromEntries(GROUPS.map((group) => [group, undefined]))
+}
+
+/**
+ * Lifts the facet values out of a route's validated search params. Routes
+ * call this instead of copying field names, so a new facet reaches every
+ * listing surface at once.
+ */
+export function facetsFromSearch(search: Facets): Facets {
+  const facets: Facets = { sort: search.sort }
+  for (const group of GROUPS) facets[group] = search[group]
+  return facets
+}
 
 function matchesFacets(
   node: ProductCardNode,
@@ -186,16 +252,7 @@ export function facetCounts(
   const counts: Record<string, number> = {}
 
   for (const node of pool) {
-    const values =
-      group === 'metal'
-        ? metalsOf(node.title)
-        : group === 'style'
-          ? stylesOf(node.title)
-          : group === 'price'
-            ? [priceBandOf(node)].filter((v): v is string => v !== null)
-            : node.availableForSale
-              ? ['in-stock']
-              : []
+    const values = valuesFor(node, group)
     for (const value of values) {
       counts[value] = (counts[value] ?? 0) + 1
     }
@@ -203,10 +260,29 @@ export function facetCounts(
   return counts
 }
 
+/** Every value in `group` that a product registers for. */
+function valuesFor(node: ProductCardNode, group: FacetGroup): string[] {
+  switch (group) {
+    case 'metal':
+      return metalsOf(node.title)
+    case 'style':
+      return stylesOf(node.title)
+    case 'length':
+      return lengthsOf(node.title)
+    case 'price': {
+      const band = priceBandOf(node)
+      return band ? [band] : []
+    }
+    case 'avail':
+      return node.availableForSale ? ['in-stock'] : []
+  }
+}
+
 export interface FacetCounts {
   metal: Record<string, number>
   style: Record<string, number>
   price: Record<string, number>
+  length: Record<string, number>
   avail: Record<string, number>
 }
 
@@ -219,6 +295,7 @@ export function allFacetCounts(
     metal: facetCounts(nodes, facets, 'metal'),
     style: facetCounts(nodes, facets, 'style'),
     price: facetCounts(nodes, facets, 'price'),
+    length: facetCounts(nodes, facets, 'length'),
     avail: facetCounts(nodes, facets, 'avail'),
   }
 }
@@ -236,6 +313,7 @@ export function parseFacets(search: Record<string, unknown>): Facets {
     metal: str('metal'),
     style: str('style'),
     price: str('price'),
+    length: str('length'),
     avail: str('avail') === 'in-stock' ? 'in-stock' : undefined,
     sort: isSortKey(sort) ? sort : undefined,
   }

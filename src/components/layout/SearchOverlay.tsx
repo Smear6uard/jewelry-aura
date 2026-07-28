@@ -1,6 +1,6 @@
 /**
  * components/layout/SearchOverlay.tsx — the search panel behind the
- * header's magnifier.
+ * header's magnifier (desktop; phones carry a permanent search field).
  *
  * Drops from the top of the viewport with a single input and a short
  * list of popular searches, because an empty search box is a dead end
@@ -15,6 +15,7 @@ import { useEffect, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Search, X } from 'lucide-react'
 import { DURATION, easeApple, easeOutExpo } from '~/lib/motion'
+import { BTN_PRIMARY } from '~/lib/ui'
 
 const POPULAR = [
   'Cuban link',
@@ -57,7 +58,7 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
             type="button"
             aria-label="Close search"
             tabIndex={-1}
-            className="absolute inset-0 h-full w-full cursor-default bg-sunken/85"
+            className="absolute inset-0 h-full w-full cursor-default bg-ink/35"
             onClick={onClose}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -69,39 +70,43 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
             role="dialog"
             aria-modal="true"
             aria-label="Search"
-            className="absolute inset-x-0 top-0 border-b border-hairline bg-raised"
+            className="absolute inset-x-0 top-0 bg-raised shadow-lg"
             initial={{ y: '-100%' }}
             animate={{ y: 0 }}
             exit={{ y: '-100%' }}
             transition={{ duration: DURATION.content, ease: easeOutExpo }}
           >
             <div className="mx-auto max-w-[820px] px-5 py-8 md:py-12">
-              <form action="/search" method="get" className="flex items-center gap-3 border-b border-cream-subtle/40 pb-3">
+              <form
+                action="/search"
+                method="get"
+                className="flex items-center gap-3 border-b border-ink-muted/40 pb-3"
+              >
                 <Search
                   aria-hidden
-                  size={18}
-                  strokeWidth={1.4}
-                  className="shrink-0 text-cream-muted"
+                  size={19}
+                  strokeWidth={1.5}
+                  className="shrink-0 text-ink-muted"
                 />
+                <label className="sr-only" htmlFor="overlay-search">
+                  Search products
+                </label>
                 <input
                   ref={inputRef}
+                  id="overlay-search"
                   type="search"
                   name="q"
                   placeholder="Search chains, pendants, moissanite…"
                   autoComplete="off"
-                  aria-label="Search products"
-                  className="w-full bg-transparent text-[17px] text-cream placeholder:text-cream-subtle focus:outline-none md:text-[20px]"
+                  className="w-full bg-transparent text-[18px] text-ink placeholder:text-ink-subtle focus:outline-none md:text-[20px]"
                 />
-                <button
-                  type="submit"
-                  className="shrink-0 bg-brand px-4 py-2 text-[11px] label text-cream transition-colors duration-hover ease-apple hover:bg-brand-hover"
-                >
+                <button type="submit" className={`${BTN_PRIMARY} shrink-0`}>
                   Search
                 </button>
               </form>
 
               <div className="mt-6">
-                <p className="text-[11px] label-wide text-cream-subtle">
+                <p className="text-[11px] label-wide text-ink-muted">
                   Popular searches
                 </p>
                 <ul className="mt-3 flex flex-wrap gap-2">
@@ -109,7 +114,7 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
                     <li key={term}>
                       <a
                         href={`/search?q=${encodeURIComponent(term)}`}
-                        className="inline-flex border border-hairline px-3 py-1.5 text-[12px] text-cream-muted transition-colors duration-hover ease-apple hover:border-cream-subtle hover:text-cream"
+                        className="inline-flex min-h-11 items-center bg-base px-4 text-[13px] text-ink transition-colors duration-hover ease-apple hover:bg-sunken"
                       >
                         {term}
                       </a>
@@ -123,9 +128,9 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
               type="button"
               onClick={onClose}
               aria-label="Close search"
-              className="absolute right-4 top-4 p-2 text-cream-muted transition-colors duration-hover ease-apple hover:text-cream"
+              className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center text-ink-muted transition-colors duration-hover ease-apple hover:text-ink"
             >
-              <X aria-hidden size={18} strokeWidth={1.4} />
+              <X aria-hidden size={19} strokeWidth={1.5} />
             </button>
           </motion.div>
         </div>

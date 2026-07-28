@@ -25,25 +25,26 @@ export function Pagination({ page, totalPages, hrefFor }: PaginationProps) {
   const atStart = page <= 1
   const atEnd = page >= totalPages
 
+  // 44px on every control — pagination on a phone is thumbed, not clicked.
   const arrow =
-    'inline-flex h-9 items-center gap-1.5 px-2 text-[11px] label transition-colors duration-hover ease-apple'
+    'inline-flex min-h-11 items-center gap-1.5 px-2 text-[12px] label transition-colors duration-hover ease-apple motion-reduce:transition-none'
 
   return (
     <nav
       aria-label="Pagination"
-      className="mt-12 flex items-center justify-between gap-4 border-t border-hairline pt-6 md:mt-16"
+      className="mt-12 flex items-center justify-between gap-4 border-t border-hairline pt-5 md:mt-16"
     >
       {atStart ? (
-        <span aria-disabled="true" className={`${arrow} text-cream-subtle/40`}>
-          <ChevronLeft aria-hidden size={14} strokeWidth={1.5} /> Prev
+        <span aria-disabled="true" className={`${arrow} text-ink-subtle`}>
+          <ChevronLeft aria-hidden size={15} strokeWidth={1.6} /> Prev
         </span>
       ) : (
         <a
           href={hrefFor(page - 1)}
           rel="prev"
-          className={`${arrow} text-cream-muted hover:text-cream`}
+          className={`${arrow} text-ink-muted hover:text-ink`}
         >
-          <ChevronLeft aria-hidden size={14} strokeWidth={1.5} /> Prev
+          <ChevronLeft aria-hidden size={15} strokeWidth={1.6} /> Prev
         </a>
       )}
 
@@ -53,7 +54,7 @@ export function Pagination({ page, totalPages, hrefFor }: PaginationProps) {
             <li key={n}>
               <span
                 aria-current="page"
-                className="inline-flex h-9 w-9 items-center justify-center bg-brand text-[12px] tabular-nums text-cream"
+                className="inline-flex h-11 w-11 items-center justify-center bg-brand text-[13px] tabular-nums text-cream"
               >
                 {n}
               </span>
@@ -63,7 +64,7 @@ export function Pagination({ page, totalPages, hrefFor }: PaginationProps) {
               <a
                 href={hrefFor(n)}
                 aria-label={`Page ${n}`}
-                className="inline-flex h-9 w-9 items-center justify-center border border-hairline text-[12px] tabular-nums text-cream-muted transition-colors duration-hover ease-apple hover:border-cream-subtle hover:text-cream"
+                className="inline-flex h-11 w-11 items-center justify-center bg-raised text-[13px] tabular-nums text-ink-muted shadow-sm transition-[box-shadow,color] duration-hover ease-apple hover:text-ink hover:shadow-md motion-reduce:transition-none"
               >
                 {n}
               </a>
@@ -73,16 +74,16 @@ export function Pagination({ page, totalPages, hrefFor }: PaginationProps) {
       </ol>
 
       {atEnd ? (
-        <span aria-disabled="true" className={`${arrow} text-cream-subtle/40`}>
-          Next <ChevronRight aria-hidden size={14} strokeWidth={1.5} />
+        <span aria-disabled="true" className={`${arrow} text-ink-subtle`}>
+          Next <ChevronRight aria-hidden size={15} strokeWidth={1.6} />
         </span>
       ) : (
         <a
           href={hrefFor(page + 1)}
           rel="next"
-          className={`${arrow} text-cream-muted hover:text-cream`}
+          className={`${arrow} text-ink-muted hover:text-ink`}
         >
-          Next <ChevronRight aria-hidden size={14} strokeWidth={1.5} />
+          Next <ChevronRight aria-hidden size={15} strokeWidth={1.6} />
         </a>
       )}
     </nav>

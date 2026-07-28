@@ -66,6 +66,10 @@ export function Reveal({
   return (
     <MotionTag
       className={className}
+      // Framer writes the hidden variant into the SSR markup, so without
+      // this hook the section ships as opacity:0 and never comes back when
+      // JavaScript is off. See NO_JS_REVEAL_CSS in routes/__root.tsx.
+      data-reveal
       variants={variants}
       initial="hidden"
       whileInView="visible"

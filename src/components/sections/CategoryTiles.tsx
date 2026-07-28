@@ -1,136 +1,167 @@
 /**
  * components/sections/CategoryTiles.tsx — the "I can shop here" moment.
  *
- * Sits immediately under the hero, above every rail. Five doors into
- * the catalog, close enough to the fold that a visitor sees them
- * without committing to a scroll.
+ * Sits immediately under the hero, above every rail. Two across on
+ * phones, five across on desktop, close enough to the fold that a
+ * visitor sees them without committing to a scroll.
  *
- * Photography note: the workshop's shot list covers chains, pendants
- * and custom work. It does not yet cover bracelets or rings, so those
- * two tiles render as typographic tiles rather than borrowing a pendant
- * photograph and labelling it "Rings" — a category tile is a promise
- * about what is behind it. Drop a file at the path named in the data
- * below and the tile becomes a photo tile with no code change.
+ * EVERY TILE HAS A CORRECT IMAGE OR IT DOES NOT RENDER.
+ *
+ * A category tile is a promise about what is behind it, so the previous
+ * build's two failures were both real bugs: Bracelets and Rings rendered
+ * as empty typographic panels, and the Chains tile used a photograph of
+ * a pendant. The image for a tile now resolves in one order:
+ *
+ *   1. A dedicated asset, where the workshop's shot list covers the
+ *      category (see Category.tileImage in lib/catalog.ts).
+ *   2. The collection's first in-stock product image, fetched by the
+ *      route. By definition a correct picture of the category.
+ *   3. Nothing — and the tile is dropped from the list entirely.
+ *
+ * The grid's desktop column count follows the number of tiles that
+ * survived, so three real doors read as three deliberate doors rather
+ * than five slots with two holes in them.
  */
 
 import { ArrowRight } from 'lucide-react'
+import { CATEGORIES } from '~/lib/catalog'
 
-interface Tile {
-  label: string
-  href: string
-  /** Base path without extension; avif/webp/jpg are all expected. */
-  image?: string
-  alt?: string
-  /** Shown on the typographic tiles in place of a photograph. */
-  note?: string
+/** A product image the route resolved as a category's fallback. */
+export interface TileFallbackImage {
+  src: string
+  srcSet: string
+  alt: string
 }
 
-const TILES: Tile[] = [
-  {
-    label: 'Chains',
-    href: '/collections/chains',
-    image: '/JA-image5',
-    alt: 'Custom HRG plate pendant reading “Hustle Russell The God”, fully set in white gold with a diamond globe bail.',
-  },
-  {
-    label: 'Pendants',
-    href: '/collections/pendants',
-    image: '/JA-image1',
-    alt: 'A custom white gold plate pendant set with baguette diamonds.',
-  },
-  {
-    label: 'Bracelets',
-    href: '/collections/bracelets',
-    note: 'Cuban, tennis and rope',
-  },
-  {
-    label: 'Rings',
-    href: '/collections/rings',
-    note: 'Engagement, bands and signets',
-  },
-  {
-    label: 'Custom',
-    href: '/custom',
-    image: '/JA-image2',
-    alt: 'A custom monogram pendant in white gold, fully set with round and baguette stones.',
-  },
-]
+/** Fallbacks by collection handle, supplied by the homepage loader. */
+export type TileFallbacks = Record<string, TileFallbackImage | null>
 
-export function CategoryTiles() {
+interface ResolvedTile {
+  key: string
+  label: string
+  href: string
+  /** Local asset base path (no extension) — takes precedence. */
+  asset?: string
+  /** Shopify-hosted fallback, used when there is no local asset. */
+  remote?: TileFallbackImage
+  alt: string
+}
+
+/**
+ * Custom work is a door into the catalog like any other, and the one the
+ * workshop most wants opened — so it sits in the row rather than in a
+ * separate band. Its asset is a real commission from the bench.
+ */
+const CUSTOM_TILE = {
+  key: 'custom',
+  label: 'Custom',
+  href: '/custom',
+  asset: '/JA-image2',
+  alt: 'A custom monogram pendant in white gold, fully set with round and baguette stones.',
+}
+
+/** Desktop column counts, keyed by surviving tile count. Static strings
+ *  because Tailwind cannot see a computed class name. */
+const COLUMNS: Record<number, string> = {
+  2: 'md:grid-cols-2',
+  3: 'md:grid-cols-3',
+  4: 'md:grid-cols-4',
+  5: 'md:grid-cols-5',
+}
+
+export function resolveTiles(fallbacks: TileFallbacks): ResolvedTile[] {
+  const tiles: ResolvedTile[] = []
+
+  for (const category of CATEGORIES) {
+    if (category.tileImage) {
+      tiles.push({
+        key: category.handle,
+        label: category.label,
+        href: `/collections/${category.handle}`,
+        asset: category.tileImage,
+        alt: category.tileAlt ?? `${category.label} from Jewelry Aura.`,
+      })
+      continue
+    }
+    const remote = fallbacks[category.handle]
+    if (remote) {
+      tiles.push({
+        key: category.handle,
+        label: category.label,
+        href: `/collections/${category.handle}`,
+        remote,
+        alt: remote.alt,
+      })
+    }
+    // No asset and no in-stock product: the tile is dropped.
+  }
+
+  tiles.push(CUSTOM_TILE)
+  return tiles.slice(0, 5)
+}
+
+export function CategoryTiles({ fallbacks }: { fallbacks: TileFallbacks }) {
+  const tiles = resolveTiles(fallbacks)
+
+  // One lone door is not a category row; two is a complete phone row.
+  if (tiles.length < 2) return null
+
   return (
     <section
       aria-label="Shop by category"
-      className="mx-auto max-w-[1440px] px-4 pt-8 md:px-8 md:pt-10"
+      className="mx-auto max-w-[1440px] px-4 pt-8 md:px-8 md:pt-12"
     >
-      <ul className="grid grid-cols-2 gap-2 md:grid-cols-5 md:gap-3">
-        {TILES.map((tile) => (
-          <li key={tile.href} className={tile.label === 'Custom' ? 'col-span-2 md:col-span-1' : ''}>
+      <ul
+        className={`grid grid-cols-2 gap-2 md:gap-3 ${COLUMNS[tiles.length] ?? 'md:grid-cols-5'}`}
+      >
+        {tiles.map((tile) => (
+          <li key={tile.key}>
             <a
               href={tile.href}
-              className={`group relative flex aspect-[4/5] flex-col justify-end overflow-hidden bg-raised tile-frame md:aspect-[3/4] ${
-                tile.image ? 'velvet-grade' : ''
-              }`}
+              className="group/tile relative flex aspect-[4/5] flex-col justify-end overflow-hidden bg-raised shadow-sm transition-shadow duration-hover ease-apple hover:shadow-md md:aspect-[3/4] motion-reduce:transition-none"
             >
-              {tile.image ? (
-                <>
-                  <picture>
-                    <source type="image/avif" srcSet={`${tile.image}.avif`} />
-                    <source type="image/webp" srcSet={`${tile.image}.webp`} />
-                    <img
-                      src={`${tile.image}.jpg`}
-                      alt={tile.alt ?? ''}
-                      loading="lazy"
-                      decoding="async"
-                      sizes="(min-width: 768px) 19vw, 48vw"
-                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-content ease-out-expo group-hover:scale-[1.04] motion-reduce:transition-none"
-                    />
-                  </picture>
-                  {/* Base scrim for label contrast, plus a maroon scrim
-                      that lifts in on hover — the tile's only colour. */}
-                  <span
-                    aria-hidden
-                    className="absolute inset-0"
-                    style={{
-                      background:
-                        'linear-gradient(to top, rgba(5,4,4,0.85) 0%, rgba(5,4,4,0.15) 45%, rgba(5,4,4,0) 70%)',
-                    }}
+              {tile.asset ? (
+                <picture>
+                  <source type="image/avif" srcSet={`${tile.asset}.avif`} />
+                  <source type="image/webp" srcSet={`${tile.asset}.webp`} />
+                  <img
+                    src={`${tile.asset}.jpg`}
+                    alt={tile.alt}
+                    width={1122}
+                    height={1402}
+                    loading="lazy"
+                    decoding="async"
+                    sizes="(min-width: 768px) 19vw, 48vw"
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-content ease-out-expo group-hover/tile:scale-[1.03] motion-reduce:transition-none"
                   />
-                  <span
-                    aria-hidden
-                    className="absolute inset-0 opacity-0 transition-opacity duration-micro ease-apple group-hover:opacity-100 motion-reduce:transition-none"
-                    style={{
-                      background:
-                        'linear-gradient(to top, rgba(61,15,22,0.85) 0%, rgba(61,15,22,0.25) 55%, rgba(61,15,22,0) 100%)',
-                    }}
-                  />
-                </>
+                </picture>
               ) : (
-                <span
-                  aria-hidden
-                  className="absolute inset-0 transition-colors duration-micro ease-apple group-hover:bg-brand/25"
-                  style={{
-                    background:
-                      'radial-gradient(ellipse 90% 70% at 50% 100%, rgba(196,168,117,0.09) 0%, rgba(20,17,16,0) 65%)',
-                  }}
+                <img
+                  src={tile.remote!.src}
+                  srcSet={tile.remote!.srcSet}
+                  alt={tile.alt}
+                  width={1200}
+                  height={1500}
+                  loading="lazy"
+                  decoding="async"
+                  sizes="(min-width: 768px) 19vw, 48vw"
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-content ease-out-expo group-hover/tile:scale-[1.03] motion-reduce:transition-none"
                 />
               )}
 
-              <span className="relative z-10 flex items-end justify-between gap-2 p-3 md:p-4">
-                <span>
-                  <span className="block text-[13px] label text-cream md:text-[14px]">
-                    {tile.label}
-                  </span>
-                  {tile.note && (
-                    <span className="mt-1 block text-[11px] text-cream-subtle">
-                      {tile.note}
-                    </span>
-                  )}
+              {/* The label sits in a solid cream plate at the foot of the
+                  tile rather than reversed out of a scrim over the
+                  photograph. Nothing translucent and no filter touches the
+                  image — on cream, dark velvet separates on its own. */}
+              <span className="relative z-10 m-2 flex items-center justify-between gap-2 bg-base px-3 py-2.5 md:m-2.5 md:px-3.5">
+                <span className="text-[13px] label text-ink md:text-[14px]">
+                  {tile.label}
                 </span>
                 <ArrowRight
                   aria-hidden
                   size={15}
-                  strokeWidth={1.5}
-                  className="shrink-0 text-cream transition-transform duration-hover ease-apple group-hover:translate-x-0.5"
+                  strokeWidth={1.6}
+                  className="shrink-0 text-brand transition-transform duration-hover ease-apple group-hover/tile:translate-x-0.5 motion-reduce:transition-none"
                 />
               </span>
             </a>

@@ -72,6 +72,7 @@ export function SplitText({
       as,
       { className },
       <motion.span
+        data-reveal
         initial={{ opacity: 0 }}
         animate={viewport === 'load' ? { opacity: 1 } : undefined}
         whileInView={viewport === 'scroll' ? { opacity: 1 } : undefined}
@@ -109,6 +110,10 @@ export function SplitText({
   const inner = (
     <motion.span
       aria-hidden
+      // Framer writes the hidden variant into the SSR markup, so without
+      // this hook the words ship as opacity:0 and never come back when
+      // JavaScript is off. See NO_JS_REVEAL_CSS in routes/__root.tsx.
+      data-reveal
       variants={parentVariants}
       style={{ display: 'inline' }}
       {...motionProps}

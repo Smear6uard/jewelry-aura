@@ -31,6 +31,12 @@ export const SHOP_NAME_QUERY = `#graphql
  *                        "needs a size or length chosen first". Cheaper
  *                        and more exact than counting option values.
  *   compareAtPriceRange  drives the struck was-price and the Sale badge.
+ *   reviews.rating /     the star row and review count on every tile.
+ *   reviews.rating_count Namespace/key that Judge.me, Okendo, Loox,
+ *                        Yotpo and Shopify Product Reviews all write.
+ *                        Returns null when no review app is installed —
+ *                        an undefined metafield is not an error — so the
+ *                        card renders no stars until real data arrives.
  */
 export const PRODUCT_CARD_FRAGMENT = `#graphql
   fragment ProductCard on Product {
@@ -78,6 +84,12 @@ export const PRODUCT_CARD_FRAGMENT = `#graphql
         amount
         currencyCode
       }
+    }
+    ratingMetafield: metafield(namespace: "reviews", key: "rating") {
+      value
+    }
+    ratingCountMetafield: metafield(namespace: "reviews", key: "rating_count") {
+      value
     }
   }
 `
@@ -230,10 +242,52 @@ export const PRODUCT_QUERY = `#graphql
       ) {
         ...VariantFields
       }
+      ratingMetafield: metafield(namespace: "reviews", key: "rating") {
+        value
+      }
+      ratingCountMetafield: metafield(namespace: "reviews", key: "rating_count") {
+        value
+      }
     }
   }
   ${VARIANT_FIELDS_FRAGMENT}
   ${VARIANT_AVAILABILITY_FRAGMENT}
+`
+
+/**
+ * Category-tile imagery fallback.
+ *
+ * A category tile is a promise about what is behind it, so it may never
+ * render without a correct photograph and it may never borrow another
+ * category's. Where the workshop has no dedicated asset for a category,
+ * the tile falls back to that collection's first in-stock product image
+ * — which is by definition a correct picture of the category.
+ *
+ * Aliased rather than variable-driven because the Storefront API takes
+ * one handle per `collection` field; five aliases is one round trip. An
+ * uncreated collection resolves to null, the tile is omitted, and the
+ * grid closes up.
+ */
+export const CATEGORY_TILE_IMAGES_QUERY = `#graphql
+  query CategoryTileImages {
+    chains: collection(handle: "chains") { ...TileImage }
+    pendants: collection(handle: "pendants") { ...TileImage }
+    bracelets: collection(handle: "bracelets") { ...TileImage }
+    rings: collection(handle: "rings") { ...TileImage }
+  }
+  fragment TileImage on Collection {
+    products(first: 12) {
+      nodes {
+        title
+        availableForSale
+        featuredImage {
+          altText
+          w600: url(transform: { maxWidth: 600 })
+          w1200: url(transform: { maxWidth: 1200 })
+        }
+      }
+    }
+  }
 `
 
 /**

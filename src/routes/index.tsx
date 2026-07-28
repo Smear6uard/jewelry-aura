@@ -2,12 +2,15 @@ import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 
 import { Hero } from '~/components/sections/Hero'
-import { CategoryTiles } from '~/components/sections/CategoryTiles'
+import {
+  CategoryTiles,
+  type TileFallbackImage,
+  type TileFallbacks,
+} from '~/components/sections/CategoryTiles'
 import { TrustBar } from '~/components/sections/TrustBar'
-import { CustomWork } from '~/components/sections/CustomWork'
+import { CustomPromo } from '~/components/sections/CustomPromo'
 import { ShopByPrice } from '~/components/sections/ShopByPrice'
 import { Reviews } from '~/components/sections/Reviews'
-import { Visit } from '~/components/sections/Visit'
 import { ProductRail } from '~/components/commerce/ProductRail'
 import { mapProductCard, type ProductCardModel, type ProductCardNode } from '~/lib/shopify/adapters'
 import {
@@ -25,45 +28,121 @@ import {
 // DATA
 // ═══════════════════════════════════════════
 
-interface HomeShelves {
+/** How many products a homepage rail needs before it is worth rendering. */
+const MIN_RAIL_PRODUCTS = 4
+
+interface HomeData {
   bestSellers: ProductCardModel[]
   newArrivals: ProductCardModel[]
+  tileFallbacks: TileFallbacks
 }
 
 interface ShopProductsData {
   products: { nodes: ProductCardNode[] }
 }
 
-/**
- * Both homepage shelves in one round trip pair. The homepage must never
- * break on commerce trouble (missing env, API hiccup) — it degrades to
- * empty shelves, and ProductRail renders nothing rather than a titled
- * blank space.
- */
-const getHomeShelves = createServerFn({ method: 'GET' }).handler(
-  async (): Promise<HomeShelves> => {
-    try {
-      const [{ storefrontRequest }, { getBestSellersLogic }, { SHOP_PRODUCTS_QUERY }] =
-        await Promise.all([
-          import('~/lib/shopify/client'),
-          import('~/lib/shopify/best-sellers'),
-          import('~/lib/shopify/queries'),
-        ])
+/** Shape of one aliased collection in CATEGORY_TILE_IMAGES_QUERY. */
+interface TileCollection {
+  products: {
+    nodes: Array<{
+      title: string
+      availableForSale: boolean
+      featuredImage: {
+        altText: string | null
+        w600: string
+        w1200: string
+      } | null
+    }>
+  }
+}
 
-      const [bestSellers, newest] = await Promise.all([
+type TileImagesData = Record<string, TileCollection | null>
+
+/**
+ * First in-stock product image in a collection — the fallback for a
+ * category tile with no dedicated asset. Returns null when the
+ * collection does not exist, is empty, or has nothing photographed and
+ * in stock, and the tile is then dropped rather than rendered blank.
+ */
+function firstInStockImage(
+  collection: TileCollection | null | undefined,
+  label: string,
+): TileFallbackImage | null {
+  const node = collection?.products.nodes.find(
+    (product) => product.availableForSale && product.featuredImage,
+  )
+  if (!node?.featuredImage) return null
+  const image = node.featuredImage
+  return {
+    src: image.w600,
+    srcSet: `${image.w600} 600w, ${image.w1200} 1200w`,
+    alt: image.altText || `${node.title} — ${label} from Jewelry Aura.`,
+  }
+}
+
+/**
+ * Everything the homepage needs, in one round trip pair.
+ *
+ * The homepage must never break on commerce trouble (missing env, API
+ * hiccup) — it degrades to empty shelves and no category fallbacks, and
+ * both surfaces render nothing rather than a titled blank space.
+ *
+ * Rails are deduped and filtered HERE rather than in the components, so
+ * the guarantee is a property of the page's data and not of whichever
+ * component happens to render last.
+ */
+const getHomeData = createServerFn({ method: 'GET' }).handler(
+  async (): Promise<HomeData> => {
+    try {
+      const [
+        { storefrontRequest },
+        { getBestSellersLogic },
+        { SHOP_PRODUCTS_QUERY, CATEGORY_TILE_IMAGES_QUERY },
+      ] = await Promise.all([
+        import('~/lib/shopify/client'),
+        import('~/lib/shopify/best-sellers'),
+        import('~/lib/shopify/queries'),
+      ])
+
+      const [bestSellers, newest, tiles] = await Promise.all([
         getBestSellersLogic(storefrontRequest, 8),
         storefrontRequest<ShopProductsData>(SHOP_PRODUCTS_QUERY, {
-          variables: { first: 8, sortKey: 'CREATED_AT' },
+          // Over-fetched: sold-out pieces and anything already in Best
+          // sellers come out below, and 8 must survive both filters.
+          variables: { first: 24, sortKey: 'CREATED_AT' },
         }),
+        // A missing tile fallback costs one tile; it must never cost the
+        // shelves. Resolved independently of the product queries.
+        storefrontRequest<TileImagesData>(CATEGORY_TILE_IMAGES_QUERY).catch(
+          () => ({}) as TileImagesData,
+        ),
       ])
+
+      // No product appears twice on this page. Best sellers is ranked by
+      // real sales and wins the tie; New arrivals shows what is left.
+      const alreadyShown = new Set(bestSellers.map((product) => product.handle))
+
+      const newArrivals = newest.products.nodes
+        .map(mapProductCard)
+        .filter(
+          (product) =>
+            product.availableForSale && !alreadyShown.has(product.handle),
+        )
+        .slice(0, 8)
 
       return {
         bestSellers,
-        newArrivals: newest.products.nodes.map(mapProductCard),
+        newArrivals,
+        tileFallbacks: {
+          chains: firstInStockImage(tiles.chains, 'chains'),
+          pendants: firstInStockImage(tiles.pendants, 'pendants'),
+          bracelets: firstInStockImage(tiles.bracelets, 'bracelets'),
+          rings: firstInStockImage(tiles.rings, 'rings'),
+        },
       }
     } catch (error) {
-      console.warn(`[home] shelves degrading to empty: ${String(error)}`)
-      return { bestSellers: [], newArrivals: [] }
+      console.warn(`[home] degrading to empty shelves: ${String(error)}`)
+      return { bestSellers: [], newArrivals: [], tileFallbacks: {} }
     }
   },
 )
@@ -74,7 +153,7 @@ const getHomeShelves = createServerFn({ method: 'GET' }).handler(
 
 export const Route = createFileRoute('/')({
   component: HomePage,
-  loader: () => getHomeShelves(),
+  loader: () => getHomeData(),
   staleTime: 60_000,
   gcTime: 5 * 60_000,
   headers: () => ({
@@ -100,17 +179,22 @@ export const Route = createFileRoute('/')({
       ],
       links: [
         { rel: 'canonical', href: SITE_URL },
+        // The hero breaks at 1024px, so the preload media queries have to
+        // agree with the <picture> in components/sections/Hero.tsx or the
+        // browser fetches the wrong asset at high priority.
         {
           rel: 'preload',
           href: '/hero-portrait-wide.avif',
           as: 'image',
-          media: '(min-width: 768px)',
+          media: '(min-width: 1024px)',
+          fetchPriority: 'high',
         },
         {
           rel: 'preload',
           href: '/hero-portrait-tall.avif',
           as: 'image',
-          media: '(max-width: 767px)',
+          media: '(max-width: 1023px)',
+          fetchPriority: 'high',
         },
         { rel: 'preconnect', href: 'https://cdn.shopify.com' },
       ],
@@ -138,24 +222,27 @@ export const Route = createFileRoute('/')({
 // ═══════════════════════════════════════════
 //
 // The order is a shopping funnel, not a narrative:
-//   Hero          one frame, two category CTAs, 70svh
-//   CategoryTiles the "I can shop here" moment, above the fold
-//   Best sellers  what other people bought
-//   Trust bar     the terms, before the second shelf
-//   New arrivals  what just landed
-//   Custom work   the workshop's differentiator, one shelf among many
-//   Shop by price for the visitor who knows the budget, not the piece
-//   Reviews       social proof
-//   Visit         the local close
+//   Hero           one frame, two category CTAs
+//   CategoryTiles  the "I can shop here" moment, above the fold
+//   Best sellers   what other people bought
+//   Trust bar      the terms, before the second shelf
+//   New arrivals   what just landed, deduped against the shelf above
+//   Custom promo   the workshop's differentiator, one band
+//   Shop by price  for the visitor who knows the budget, not the piece
+//   Reviews        social proof — omitted until three real ones exist
+//
+// A pinned custom-work gallery and a store-location section used to sit
+// in this list. Both read as brand-site rather than marketplace, and both
+// were removed with the sections that rendered them.
 // ═══════════════════════════════════════════
 
 function HomePage() {
-  const { bestSellers, newArrivals } = Route.useLoaderData()
+  const { bestSellers, newArrivals, tileFallbacks } = Route.useLoaderData()
 
   return (
     <main>
       <Hero />
-      <CategoryTiles />
+      <CategoryTiles fallbacks={tileFallbacks} />
 
       <ProductRail
         id="best-sellers"
@@ -163,6 +250,7 @@ function HomePage() {
         eyebrow="Most bought"
         products={bestSellers}
         link={{ href: '/shop', label: 'View all' }}
+        minProducts={MIN_RAIL_PRODUCTS}
         eager
       />
 
@@ -172,13 +260,13 @@ function HomePage() {
         title="New arrivals"
         eyebrow="Just finished"
         products={newArrivals}
-        link={{ href: '/shop?sort=featured', label: 'View all' }}
+        link={{ href: '/shop', label: 'View all' }}
+        minProducts={MIN_RAIL_PRODUCTS}
       />
 
-      <CustomWork />
+      <CustomPromo />
       <ShopByPrice />
       <Reviews />
-      <Visit />
     </main>
   )
 }

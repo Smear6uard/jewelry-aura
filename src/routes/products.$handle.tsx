@@ -12,6 +12,7 @@
  * frame the shopper spends waiting to read a price.
  */
 
+import { useRef } from 'react'
 import { createFileRoute, notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 
@@ -20,7 +21,10 @@ import { AddToCart } from '~/components/commerce/AddToCart'
 import { Breadcrumbs } from '~/components/commerce/Breadcrumbs'
 import { ProductGallery } from '~/components/commerce/ProductGallery'
 import { ProductRail } from '~/components/commerce/ProductRail'
+import { StarRating } from '~/components/commerce/StarRating'
+import { StickyBuyBar } from '~/components/commerce/StickyBuyBar'
 import { VariantSelector } from '~/components/commerce/VariantSelector'
+import { BTN_PRIMARY, BTN_SECONDARY } from '~/lib/ui'
 import { FREE_SHIPPING_THRESHOLD, STORE } from '~/lib/catalog'
 import {
   isValidHandle,
@@ -239,95 +243,134 @@ export const Route = createFileRoute('/products/$handle')({
 function ProductPage() {
   const { product, related } = Route.useLoaderData()
   const navigate = Route.useNavigate()
+  // Watched by the sticky bar: it appears once this control leaves view.
+  const inlineBuyRef = useRef<HTMLDivElement>(null)
 
   const onSelect = (search: Record<string, string>) => {
     navigate({ search, resetScroll: false })
   }
 
-  const soldOut = !product.variant || !product.variant.availableForSale
-  const onSale = Boolean(product.variant?.compareAtPrice)
+  const variant = product.variant
+  const soldOut = !variant || !variant.availableForSale
+  const unpriced = variant?.unpriced ?? false
+  const onSale = Boolean(variant?.compareAtPrice)
 
   return (
-    <main className="mx-auto max-w-[1440px] px-4 pb-16 pt-6 md:px-8 md:pb-24 md:pt-8">
-      <Breadcrumbs
-        items={productCrumbs(product.title, `/products/${product.handle}`)}
-        className="mb-5"
-      />
+    <>
+      {/* pb clears the sticky buy bar on phones so the last accordion row
+          is never trapped underneath it. */}
+      <main className="mx-auto max-w-[1440px] px-4 pb-32 pt-6 md:px-8 md:pb-24 md:pt-8">
+        <Breadcrumbs
+          items={productCrumbs(product.title, `/products/${product.handle}`)}
+          className="mb-5"
+        />
 
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-12 md:gap-10">
-        <div className="md:col-span-7">
-          <ProductGallery images={product.images} title={product.title} />
-        </div>
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-12 md:gap-10">
+          <div className="md:col-span-7">
+            <ProductGallery images={product.images} title={product.title} />
+          </div>
 
-        <div className="md:col-span-5">
-          <div className="md:sticky md:top-24">
-            {/* The display serif appears on exactly three surfaces
-                site-wide; this is one of them. */}
-            <h1 className="font-display text-[26px] leading-tight tracking-tight text-cream md:text-[32px]">
-              {product.title}
-            </h1>
+          <div className="md:col-span-5">
+            <div
+              className="md:sticky"
+              style={{ top: 'calc(var(--header-h) + 1.5rem)' }}
+            >
+              {/* The display serif appears on exactly three surfaces
+                  site-wide; this is one of them. */}
+              <h1 className="display text-[26px] leading-tight text-ink md:text-[32px]">
+                {product.title}
+              </h1>
 
-            {product.variant && (
-              <p className="mt-3 flex items-baseline gap-3">
-                <span className="text-[19px] text-cream">
-                  {product.variant.price}
-                </span>
-                {product.variant.compareAtPrice && (
-                  <s className="text-[14px] text-cream-subtle">
-                    {product.variant.compareAtPrice}
-                  </s>
-                )}
-                {onSale && (
-                  <span className="bg-brand px-2 py-1 text-[10px] label-wide text-cream">
-                    Sale
+              {/* Rating sits directly under the name, above the price —
+                  the order GLD and every review app assume. Rendered only
+                  when a review app has written real data. */}
+              {product.rating && (
+                <p className="mt-2.5 flex items-center gap-2">
+                  <StarRating value={product.rating.value} size={14} />
+                  <span className="text-[13px] text-ink-muted">
+                    {product.rating.value.toFixed(1)} ·{' '}
+                    {product.rating.count}{' '}
+                    {product.rating.count === 1 ? 'review' : 'reviews'}
                   </span>
-                )}
-                {!product.variant.availableForSale && (
-                  <span className="text-[11px] label text-cream-subtle">
-                    Sold out
-                  </span>
-                )}
+                </p>
+              )}
+
+              {variant && (
+                <p className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-2">
+                  {unpriced ? (
+                    <span className="text-[19px] font-medium text-ink">
+                      Priced on the bench
+                    </span>
+                  ) : (
+                    <span className="text-[21px] font-medium text-ink">
+                      {variant.price}
+                    </span>
+                  )}
+                  {variant.compareAtPrice && (
+                    <s className="text-[15px] text-ink-muted">
+                      {variant.compareAtPrice}
+                    </s>
+                  )}
+                  {onSale && (
+                    <span className="bg-brand px-2 py-1 text-[10px] label-wide text-cream">
+                      Sale
+                    </span>
+                  )}
+                  {!variant.availableForSale && (
+                    <span className="bg-ink-subtle px-2 py-1 text-[10px] label-wide text-cream">
+                      Sold out
+                    </span>
+                  )}
+                </p>
+              )}
+
+              <p className="mt-2 text-[13px] text-ink-muted">
+                Free shipping over ${FREE_SHIPPING_THRESHOLD} · Lifetime warranty
               </p>
-            )}
 
-            <p className="mt-2 text-[12px] text-cream-subtle">
-              Free shipping over ${FREE_SHIPPING_THRESHOLD} · Lifetime warranty
-            </p>
+              {product.options.length > 0 && (
+                <div className="mt-7">
+                  <VariantSelector
+                    options={product.options}
+                    onSelect={onSelect}
+                  />
+                </div>
+              )}
 
-            {product.options.length > 0 && (
-              <div className="mt-7">
-                <VariantSelector
-                  options={product.options}
-                  onSelect={onSelect}
+              <div ref={inlineBuyRef} className="mt-7">
+                <AddToCart
+                  merchandiseId={variant?.id ?? null}
+                  soldOut={soldOut}
+                  unpriced={unpriced}
                 />
               </div>
-            )}
 
-            <div className="mt-7">
-              <AddToCart
-                merchandiseId={product.variant?.id ?? null}
-                soldOut={soldOut}
-              />
-            </div>
-
-            <div className="mt-9">
-              <Accordion items={accordionFor(product)} />
+              <div className="mt-9">
+                <Accordion items={accordionFor(product)} />
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {related.length > 0 && (
-        <div className="mt-8 md:mt-14">
-          <ProductRail
-            title="You may also like"
-            products={related}
-            link={{ href: '/shop', label: 'Shop all' }}
-            limit={4}
-          />
-        </div>
-      )}
-    </main>
+        {related.length > 0 && (
+          <div className="mt-8 md:mt-14">
+            <ProductRail
+              title="You may also like"
+              products={related}
+              link={{ href: '/shop', label: 'Shop all' }}
+              limit={4}
+            />
+          </div>
+        )}
+      </main>
+
+      <StickyBuyBar
+        variant={variant}
+        soldOut={soldOut}
+        anchorRef={inlineBuyRef}
+        title={product.title}
+      />
+    </>
   )
 }
 
@@ -374,23 +417,15 @@ function accordionFor(product: ProductDetailModel) {
 function ProductFallback({ title, body }: { title: string; body: string }) {
   return (
     <main className="mx-auto max-w-[1440px] px-4 py-20 md:px-8 md:py-28">
-      <h1 className="font-display text-[28px] tracking-tight text-cream md:text-[38px]">
-        {title}
-      </h1>
-      <p className="mt-3 max-w-[52ch] text-[14px] leading-relaxed text-cream-muted">
+      <h1 className="display text-[28px] text-ink md:text-[38px]">{title}</h1>
+      <p className="mt-3 max-w-[52ch] text-[15px] leading-relaxed text-ink-muted">
         {body}
       </p>
-      <div className="mt-6 flex flex-wrap gap-3">
-        <a
-          href="/shop"
-          className="inline-flex items-center bg-brand px-6 py-3 text-[11px] label text-cream transition-colors duration-hover ease-apple hover:bg-brand-hover"
-        >
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+        <a href="/shop" className={BTN_PRIMARY}>
           Shop all pieces
         </a>
-        <a
-          href="/custom"
-          className="inline-flex items-center border border-hairline px-6 py-3 text-[11px] label text-cream-muted transition-colors duration-hover ease-apple hover:border-cream-subtle hover:text-cream"
-        >
+        <a href="/custom" className={BTN_SECONDARY}>
           Start a custom piece
         </a>
       </div>

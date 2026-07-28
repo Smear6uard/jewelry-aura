@@ -34,9 +34,23 @@ export interface Category {
   /** Style facets offered for this category, in menu order. */
   styles: FacetOption[]
   /**
-   * Featured piece shown at the right edge of the mega-menu panel.
-   * These are photographs of real commissions from the workshop; the
-   * card names the piece rather than implying it is stock for sale.
+   * Dedicated homepage tile photograph — base path, no extension
+   * (avif/webp/jpg all expected). Set ONLY where the workshop's shot
+   * list actually covers this category: a tile is a promise about what
+   * is behind it, and borrowing a pendant photograph for "Rings" breaks
+   * that promise more loudly than a missing tile.
+   *
+   * Where this is undefined the homepage falls back to the collection's
+   * first in-stock product image, and omits the tile entirely if the
+   * collection is empty or does not exist yet.
+   */
+  tileImage?: string
+  tileAlt?: string
+  /**
+   * Commission shown at the right edge of the mega-menu panel. These
+   * are photographs of real one-of-one pieces from the bench, labelled
+   * and linked as commissions — never presented as stock in this
+   * category, which is why the card points at /custom.
    */
   featured: {
     image: string
@@ -54,6 +68,22 @@ export const METAL_FACETS: FacetOption[] = [
   { value: 'two-tone', label: 'Two-tone' },
   { value: 'moissanite', label: 'Moissanite' },
   { value: 'silver', label: 'Silver' },
+]
+
+/**
+ * Chain and bracelet lengths, in inches.
+ *
+ * The workshop writes the length into the product title (`... Cuban Link
+ * 20"`), which is the only place the Storefront card query can see it —
+ * variant option names are not in that fetch. Values are bands rather
+ * than exact inches: a shopper filtering for a 20" chain is choosing
+ * between "sits at the collarbone" and "sits at the sternum", and half
+ * the catalog is cut to order anyway.
+ */
+export const LENGTH_FACETS: FacetOption[] = [
+  { value: 'under-18', label: 'Under 18"' },
+  { value: '18-22', label: '18" – 22"' },
+  { value: '24-plus', label: '24" and longer' },
 ]
 
 /** Price bands — the merchandising ladder used by the menu, the filter
@@ -88,6 +118,9 @@ export const CATEGORIES: Category[] = [
     handle: 'pendants',
     label: 'Pendants',
     blurb: 'Name plates, crosses, portraits and charms, set by hand.',
+    tileImage: '/JA-image1',
+    tileAlt:
+      'A custom white gold plate pendant set with round and baguette diamonds, on dark velvet.',
     styles: [
       { value: 'name', label: 'Name & initial' },
       { value: 'cross', label: 'Crosses' },
@@ -155,13 +188,18 @@ export interface NavLink {
 }
 
 /**
- * Primary nav, left to right. Chains / Pendants / Bracelets / Rings open
- * mega-menu panels; the rest are direct links.
+ * Primary nav, left to right: Chains · Pendants · Bracelets · Rings ·
+ * Watches · Custom · Sale. The four categories open mega-menu panels;
+ * the rest are direct links.
  *
  * "Watches" points at the service page rather than a collection — the
  * workshop services timepieces, it does not carry a watch catalog, and
  * a nav item that lands on an empty collection is worse than no nav
  * item at all.
+ *
+ * Moissanite is not a top-level item: it is a metal facet inside every
+ * category panel, a row in the phone drawer, and a footer link, which is
+ * three routes to it without spending a slot in a seven-item nav.
  */
 export const NAV_LINKS: NavLink[] = [
   ...CATEGORIES.map((category) => ({
@@ -169,7 +207,6 @@ export const NAV_LINKS: NavLink[] = [
     href: `/collections/${category.handle}`,
     category: MEGA_MENU_HANDLES.has(category.handle) ? category : undefined,
   })),
-  { label: 'Moissanite', href: '/collections/moissanite' },
   { label: 'Watches', href: '/pages/watch-service' },
   { label: 'Custom', href: '/custom' },
   { label: 'Sale', href: '/collections/sale', accent: true },

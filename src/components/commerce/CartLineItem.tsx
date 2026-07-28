@@ -2,10 +2,13 @@
  * components/commerce/CartLineItem.tsx — one line in the cart.
  *
  * Shared by the drawer and the full cart page so a quantity stepper
- * cannot behave differently depending on which surface you opened.
- * Mutations are optimistic in CartProvider; this component only
- * disables its controls while one is in flight and surfaces the
- * server's message on failure.
+ * cannot behave differently depending on which surface you opened. The
+ * stepper's buttons are 44px square: a cart is the one screen where a
+ * mis-tap costs money.
+ *
+ * Mutations are optimistic in CartProvider; this component only disables
+ * its controls while one is in flight and surfaces the server's message
+ * on failure.
  */
 
 import { useState } from 'react'
@@ -41,7 +44,7 @@ export function CartLineItem({ line, size = 'drawer' }: CartLineItemProps) {
     <li className="flex gap-4 py-5">
       <a
         href={`/products/${line.handle}`}
-        className={`${thumb} case-plate block shrink-0 overflow-hidden tile-frame`}
+        className={`${thumb} block shrink-0 overflow-hidden bg-base shadow-sm`}
         tabIndex={-1}
         aria-hidden
       >
@@ -61,37 +64,37 @@ export function CartLineItem({ line, size = 'drawer' }: CartLineItemProps) {
         <div className="flex items-baseline justify-between gap-4">
           <a
             href={`/products/${line.handle}`}
-            className="text-[14px] font-medium leading-snug text-cream transition-colors duration-hover ease-apple hover:text-champagne"
+            className="text-[14px] font-medium leading-snug text-ink transition-colors duration-hover ease-apple hover:text-brand motion-reduce:transition-none"
           >
             {line.title}
           </a>
-          <span className="shrink-0 text-[14px] text-cream">
+          <span className="shrink-0 text-[14px] font-medium text-ink">
             {line.lineTotal}
           </span>
         </div>
 
         {line.variantTitle && (
-          <p className="mt-1 text-[12px] text-cream-muted">{line.variantTitle}</p>
+          <p className="mt-1 text-[13px] text-ink-muted">{line.variantTitle}</p>
         )}
         {!line.availableForSale && (
-          <p className="mt-1 text-[11px] label text-champagne">
+          <p className="mt-1 text-[12px] label text-brand">
             Now sold out — remove to check out
           </p>
         )}
 
         <div className="mt-auto flex items-center justify-between gap-4 pt-3">
-          <div className="inline-flex items-center border border-hairline">
+          <div className="inline-flex items-center bg-base shadow-sm">
             <button
               type="button"
               disabled={busy}
               onClick={() => changeQuantity(line.quantity - 1)}
               aria-label={`Decrease quantity of ${line.title}`}
-              className="px-2.5 py-1.5 text-cream-muted transition-colors duration-hover ease-apple hover:text-cream disabled:opacity-40"
+              className="flex h-11 w-11 items-center justify-center text-ink-muted transition-colors duration-hover ease-apple hover:text-ink disabled:opacity-40 motion-reduce:transition-none"
             >
-              <Minus aria-hidden size={13} strokeWidth={1.5} />
+              <Minus aria-hidden size={14} strokeWidth={1.6} />
             </button>
             <span
-              className="min-w-8 text-center text-[13px] tabular-nums text-cream"
+              className="min-w-7 text-center text-[14px] tabular-nums text-ink"
               aria-live="polite"
             >
               {line.quantity}
@@ -101,9 +104,9 @@ export function CartLineItem({ line, size = 'drawer' }: CartLineItemProps) {
               disabled={busy}
               onClick={() => changeQuantity(line.quantity + 1)}
               aria-label={`Increase quantity of ${line.title}`}
-              className="px-2.5 py-1.5 text-cream-muted transition-colors duration-hover ease-apple hover:text-cream disabled:opacity-40"
+              className="flex h-11 w-11 items-center justify-center text-ink-muted transition-colors duration-hover ease-apple hover:text-ink disabled:opacity-40 motion-reduce:transition-none"
             >
-              <Plus aria-hidden size={13} strokeWidth={1.5} />
+              <Plus aria-hidden size={14} strokeWidth={1.6} />
             </button>
           </div>
 
@@ -111,14 +114,14 @@ export function CartLineItem({ line, size = 'drawer' }: CartLineItemProps) {
             type="button"
             disabled={busy}
             onClick={() => changeQuantity(0)}
-            className="text-[11px] label text-cream-subtle underline decoration-hairline underline-offset-4 transition-colors duration-hover ease-apple hover:text-cream disabled:opacity-40"
+            className="inline-flex min-h-11 items-center text-[12px] label text-ink-muted underline decoration-hairline underline-offset-4 transition-colors duration-hover ease-apple hover:text-ink disabled:opacity-40 motion-reduce:transition-none"
           >
             Remove
           </button>
         </div>
 
         {error && (
-          <p className="mt-2 text-[12px] text-champagne" role="alert">
+          <p className="mt-2 text-[13px] text-brand" role="alert">
             {error}
           </p>
         )}

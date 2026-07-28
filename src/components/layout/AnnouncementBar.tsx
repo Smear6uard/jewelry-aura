@@ -2,10 +2,10 @@
  * components/layout/AnnouncementBar.tsx — the solid maroon strip at the
  * very top of every page.
  *
- * This is the one surface on the site where the brand colour fills the
- * full width. It earns it: 36px of saturation at the top of the
- * viewport reads as a shop banner, and it makes the near-black below it
- * look deliberate rather than default.
+ * The deepest maroon on the site, and the first thing above the cream
+ * canvas. It earns the saturation: 36px of it at the top of the viewport
+ * reads as a shop banner, and it is what tells the eye the cream below
+ * is a decision rather than a default.
  *
  * Messages rotate on a slow crossfade. Under prefers-reduced-motion the
  * rotation stops and both promises are shown on one line — the content
@@ -61,11 +61,11 @@ export function AnnouncementBar() {
   return (
     <div
       data-announcement
-      className="relative z-[55] bg-brand text-cream"
+      className="relative z-[55] bg-brand-deep text-cream"
       role="region"
       aria-label="Store announcements"
     >
-      <div className="mx-auto flex h-9 max-w-[1440px] items-center justify-center px-10">
+      <div className="mx-auto flex h-9 max-w-[1440px] items-center justify-center px-12">
         {reduced ? (
           <p className="text-center text-[11px] label-wide">
             {MESSAGES[0]} · {MESSAGES[1]}
@@ -87,13 +87,15 @@ export function AnnouncementBar() {
           </div>
         )}
 
+        {/* 44px target, achieved with padding — the bar itself stays 36px
+            tall because the button overflows it symmetrically. */}
         <button
           type="button"
           onClick={dismiss}
           aria-label="Dismiss announcement"
-          className="absolute right-3 p-1.5 text-cream/70 transition-colors duration-hover ease-apple hover:text-cream"
+          className="absolute right-1 flex h-11 w-11 items-center justify-center text-cream/75 transition-colors duration-hover ease-apple hover:text-cream"
         >
-          <X aria-hidden size={14} strokeWidth={1.4} />
+          <X aria-hidden size={15} strokeWidth={1.5} />
         </button>
       </div>
     </div>

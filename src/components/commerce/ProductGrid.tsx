@@ -1,19 +1,20 @@
 /**
  * components/commerce/ProductGrid.tsx — the dense catalog grid.
  *
- * Two across on phones, four on desktop, five on very wide screens,
- * with tight gutters. Products should feel abundant: a grid that gives
- * every piece an editorial frame reads as a lookbook, and a lookbook
- * does not convert.
+ * Two across on phones, four on desktop, five on very wide screens, with
+ * tight gutters. Never one across: a single-column product list reads as
+ * a catalog page rather than a store, and it halves how much of the
+ * catalog a shopper sees per swipe.
  *
- * `density="compact"` steps down one column at each breakpoint for
- * grids that share the viewport with a filter sidebar.
+ * `density="compact"` steps down one column at each breakpoint for grids
+ * that share the viewport with a filter sidebar.
  *
  * No scroll-reveal animation here, by design. Staggered fades on a
  * product grid delay the only thing the shopper came for.
  */
 
 import { ProductCard } from '~/components/commerce/ProductCard'
+import { BTN_PRIMARY } from '~/lib/ui'
 import type { ProductCardModel } from '~/lib/shopify/adapters'
 
 interface ProductGridProps {
@@ -44,30 +45,28 @@ export function ProductGrid({
   if (products.length === 0) return <>{empty ?? <EmptyGrid />}</>
 
   return (
-    <div className={`grid gap-x-2 gap-y-8 md:gap-x-3 md:gap-y-10 ${COLUMNS[density]}`}>
+    <ul className={`grid gap-2 md:gap-3 ${COLUMNS[density]}`}>
       {products.map((product, index) => (
-        <ProductCard
-          key={product.handle}
-          product={product}
-          sizes={SIZES[density]}
-          eager={index < eagerCount}
-        />
+        <li key={product.handle}>
+          <ProductCard
+            product={product}
+            sizes={SIZES[density]}
+            eager={index < eagerCount}
+          />
+        </li>
       ))}
-    </div>
+    </ul>
   )
 }
 
 function EmptyGrid() {
   return (
-    <div className="border border-hairline px-6 py-20 text-center">
-      <p className="text-[11px] label-wide text-cream-subtle">Nothing here yet</p>
-      <p className="mx-auto mt-3 max-w-sm text-[15px] text-cream-muted">
+    <div className="bg-raised px-6 py-20 text-center shadow-sm">
+      <p className="text-[11px] label-wide text-ink-muted">Nothing here yet</p>
+      <p className="mx-auto mt-3 max-w-sm text-[15px] text-ink-muted">
         This case is being restocked. The full catalog is one step away.
       </p>
-      <a
-        href="/shop"
-        className="mt-6 inline-flex items-center bg-brand px-6 py-3 text-[11px] label text-cream transition-colors duration-hover ease-apple hover:bg-brand-hover"
-      >
+      <a href="/shop" className={`${BTN_PRIMARY} mt-6`}>
         Shop all pieces
       </a>
     </div>

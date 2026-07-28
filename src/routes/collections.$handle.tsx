@@ -19,9 +19,16 @@ import {
   type CollectionNode,
   type ProductCardNode,
 } from '~/lib/shopify/adapters'
-import { listingHref, parseFacets, type Facets } from '~/lib/shopify/facets'
+import {
+  facetsFromSearch,
+  hasActiveFacets,
+  listingHref,
+  parseFacets,
+  type Facets,
+} from '~/lib/shopify/facets'
 import { buildListing } from '~/lib/shopify/listing'
 import { COLLECTION_QUERY } from '~/lib/shopify/queries'
+import { BTN_PRIMARY } from '~/lib/ui'
 import {
   HERO_SOCIAL_IMAGE,
   SITE_URL,
@@ -93,13 +100,7 @@ export const Route = createFileRoute('/collections/$handle')({
     const collection = await getCollection({ data: { handle: params.handle } })
     if (!collection) throw notFound()
 
-    const facets: Facets = {
-      metal: deps.metal,
-      style: deps.style,
-      price: deps.price,
-      avail: deps.avail,
-      sort: deps.sort,
-    }
+    const facets: Facets = facetsFromSearch(deps)
     const listing = buildListing(
       collection.nodes,
       facets,
@@ -138,9 +139,7 @@ export const Route = createFileRoute('/collections/$handle')({
     }
     const basePath = `/collections/${params.handle}`
     const facets = loaderData.facets
-    const filtered = Boolean(
-      facets.metal || facets.style || facets.price || facets.avail,
-    )
+    const filtered = hasActiveFacets(facets)
     const canonical = `${SITE_URL}${listingHref(basePath, facets, loaderData.page)}`
     const title = `${loaderData.seoTitle} | Jewelry Aura`
     const description =
@@ -256,16 +255,11 @@ function CollectionPage() {
 function CollectionFallback({ title, body }: { title: string; body: string }) {
   return (
     <main className="mx-auto max-w-[1440px] px-4 py-20 md:px-8 md:py-28">
-      <h1 className="font-display text-[28px] tracking-tight text-cream md:text-[38px]">
-        {title}
-      </h1>
-      <p className="mt-3 max-w-[52ch] text-[14px] leading-relaxed text-cream-muted">
+      <h1 className="display text-[28px] text-ink md:text-[38px]">{title}</h1>
+      <p className="mt-3 max-w-[52ch] text-[15px] leading-relaxed text-ink-muted">
         {body}
       </p>
-      <a
-        href="/shop"
-        className="mt-6 inline-flex items-center bg-brand px-6 py-3 text-[11px] label text-cream transition-colors duration-hover ease-apple hover:bg-brand-hover"
-      >
+      <a href="/shop" className={`${BTN_PRIMARY} mt-6`}>
         Shop all pieces
       </a>
     </main>

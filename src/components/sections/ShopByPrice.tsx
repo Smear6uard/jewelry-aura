@@ -11,6 +11,7 @@
 
 import { ArrowRight } from 'lucide-react'
 import { SectionHeader } from '~/components/commerce/SectionHeader'
+import { Reveal } from '~/components/motion/Reveal'
 import { PRICE_FACETS } from '~/lib/catalog'
 
 const NOTES: Record<string, string> = {
@@ -30,31 +31,33 @@ export function ShopByPrice() {
         link={{ href: '/shop', label: 'Shop all' }}
       />
 
-      <ul className="mt-6 grid gap-2 md:mt-8 md:grid-cols-3 md:gap-3">
-        {PRICE_FACETS.map((band) => (
-          <li key={band.value}>
-            <a
-              href={`/shop?price=${band.value}`}
-              className="group flex items-center justify-between gap-4 border border-hairline px-5 py-6 transition-colors duration-hover ease-apple hover:border-brand-hover hover:bg-raised md:px-6 md:py-8"
-            >
-              <span>
-                <span className="block font-display text-[22px] leading-none tracking-tight text-cream md:text-[26px]">
-                  {band.label}
+      <Reveal>
+        <ul className="mt-6 grid gap-2 md:mt-8 md:grid-cols-3 md:gap-3">
+          {PRICE_FACETS.map((band) => (
+            <li key={band.value}>
+              <a
+                href={`/shop?price=${band.value}`}
+                className="group/band flex items-center justify-between gap-4 bg-raised px-5 py-6 shadow-sm transition-shadow duration-hover ease-apple hover:shadow-md md:px-6 md:py-8 motion-reduce:transition-none"
+              >
+                <span>
+                  <span className="display block text-[22px] leading-none text-ink md:text-[26px]">
+                    {band.label}
+                  </span>
+                  <span className="mt-2 block text-[13px] text-ink-muted">
+                    {NOTES[band.value]}
+                  </span>
                 </span>
-                <span className="mt-2 block text-[12px] text-cream-muted">
-                  {NOTES[band.value]}
-                </span>
-              </span>
-              <ArrowRight
-                aria-hidden
-                size={16}
-                strokeWidth={1.5}
-                className="shrink-0 text-cream-subtle transition-all duration-hover ease-apple group-hover:translate-x-0.5 group-hover:text-cream"
-              />
-            </a>
-          </li>
-        ))}
-      </ul>
+                <ArrowRight
+                  aria-hidden
+                  size={17}
+                  strokeWidth={1.6}
+                  className="shrink-0 text-brand transition-transform duration-hover ease-apple group-hover/band:translate-x-0.5 motion-reduce:transition-none"
+                />
+              </a>
+            </li>
+          ))}
+        </ul>
+      </Reveal>
     </section>
   )
 }

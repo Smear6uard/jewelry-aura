@@ -1,14 +1,20 @@
 import { describe, expect, it } from 'vitest'
 import {
+  FACET_GROUPS,
+  activeFacetCount,
   allFacetCounts,
   applyFacets,
+  clearedFacets,
   facetCounts,
+  facetsFromSearch,
   hasActiveFacets,
+  lengthsOf,
   listingHref,
   metalsOf,
   parseFacets,
   priceBandOf,
   stylesOf,
+  type Facets,
 } from './facets'
 import type { ProductCardNode } from './adapters'
 
@@ -146,7 +152,8 @@ describe('facetCounts', () => {
 
   it('builds every group at once', () => {
     const all = allFacetCounts(CATALOG, {})
-    expect(Object.keys(all).sort()).toEqual(['avail', 'metal', 'price', 'style'])
+    // Every declared group, so a new facet cannot ship without counts.
+    expect(Object.keys(all).sort()).toEqual([...FACET_GROUPS].sort())
     expect(all.avail['in-stock']).toBe(4)
   })
 })
@@ -159,6 +166,7 @@ describe('parseFacets', () => {
       metal: 'white-gold',
       style: undefined,
       price: undefined,
+      length: undefined,
       avail: 'in-stock',
       sort: 'price-asc',
     })
@@ -207,5 +215,88 @@ describe('hasActiveFacets', () => {
   it('ignores sort', () => {
     expect(hasActiveFacets({ sort: 'price-asc' })).toBe(false)
     expect(hasActiveFacets({ metal: 'silver' })).toBe(true)
+    expect(hasActiveFacets({ length: '18-22' })).toBe(true)
+  })
+})
+
+// ─── Length ──────────────────────────────────────────────────────────
+// The PLP's length filter, read out of the product title because the
+// card query cannot see variant option names.
+
+describe('lengthsOf', () => {
+  it('reads an inch measurement written in any of the usual ways', () => {
+    expect(lengthsOf('10K Gold Miami Cuban Link 20"')).toEqual(['18-22'])
+    expect(lengthsOf('Rope Chain 20 inch')).toEqual(['18-22'])
+    expect(lengthsOf('Franco Chain 20in')).toEqual(['18-22'])
+    expect(lengthsOf('Box Chain 20”')).toEqual(['18-22'])
+  })
+
+  it('places lengths in the right band', () => {
+    expect(lengthsOf('Tennis Chain 16"')).toEqual(['under-18'])
+    expect(lengthsOf('Cuban Link 18"')).toEqual(['18-22'])
+    expect(lengthsOf('Cuban Link 22"')).toEqual(['18-22'])
+    expect(lengthsOf('Cuban Link 24"')).toEqual(['24-plus'])
+    expect(lengthsOf('Franco Chain 30"')).toEqual(['24-plus'])
+  })
+
+  it('registers a piece offered at several lengths for every band', () => {
+    expect(lengthsOf('Cuban Link 20" / 24"').sort()).toEqual([
+      '18-22',
+      '24-plus',
+    ])
+  })
+
+  it('returns nothing for a piece with no length in its title', () => {
+    expect(lengthsOf('14K White Gold Signet Ring')).toEqual([])
+    expect(lengthsOf('Praying Hands Pendant')).toEqual([])
+  })
+
+  it('ignores numbers that are not neck measurements', () => {
+    // Karat marks, stone counts and years must not become lengths.
+    expect(lengthsOf('10K Yellow Gold Cuban Link')).toEqual([])
+    expect(lengthsOf('2 inch Charm')).toEqual([])
+    expect(lengthsOf('Chain 60 inch')).toEqual([])
+  })
+})
+
+describe('facet declaration is centralised', () => {
+  it('counts and clears every declared group, not a hand-written subset', () => {
+    for (const group of FACET_GROUPS) {
+      expect(
+        activeFacetCount({ [group]: 'x' } as Facets),
+        `${group} counts toward the active-filter badge`,
+      ).toBe(1)
+      expect(
+        Object.keys(clearedFacets()),
+        `${group} is cleared by "clear all"`,
+      ).toContain(group)
+    }
+    expect(activeFacetCount({ sort: 'price-asc' })).toBe(0)
+  })
+
+  it('lifts every declared group out of route search params', () => {
+    const search = Object.fromEntries(
+      FACET_GROUPS.map((group) => [group, `v-${group}`]),
+    ) as Facets
+    expect(facetsFromSearch({ ...search, sort: 'name' })).toEqual({
+      ...search,
+      sort: 'name',
+    })
+  })
+
+  it('counts length values in allFacetCounts', () => {
+    const counts = allFacetCounts(
+      [node('Cuban Link 20"', '900.00'), node('Rope Chain 26"', '1200.00')],
+      {},
+    )
+    expect(counts.length).toEqual({ '18-22': 1, '24-plus': 1 })
+  })
+
+  it('filters a listing down to a length band', () => {
+    const filtered = applyFacets(CATALOG, { length: '18-22' })
+    expect(filtered.map((n) => n.title)).toEqual([
+      '10K Yellow Gold Miami Cuban Link 20"',
+      '14K White Gold Rope Chain 22"',
+    ])
   })
 })

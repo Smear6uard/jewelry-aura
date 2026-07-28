@@ -1,16 +1,22 @@
 /**
  * components/commerce/VariantSelector.tsx — option controls for the PDP.
  *
- * Swatch dots for colour options, square-cornered pills otherwise.
+ * Tappable chips at 44px, never a native <select>. A length or ring size
+ * is the last decision before a purchase, and a picker that hides the
+ * other options behind a wheel makes the shopper commit blind — they
+ * cannot see that 22" exists, or that it is the one that is sold out.
+ * Colour options render as 44px swatch dots.
+ *
  * Selecting a value navigates to the same route with updated search
  * params, so every variant state is a shareable, SSR'd URL.
  *
  * Unavailable values render disabled and struck rather than
  * disappearing. Hiding them makes the option list change shape as you
- * click through it, and hides the useful fact that the length you want
+ * tap through it, and hides the useful fact that the length you want
  * exists but is out of stock.
  */
 
+import { CHIP_DISABLED, CHIP_OFF, CHIP_ON } from '~/lib/ui'
 import type { OptionModel } from '~/lib/shopify/adapters'
 
 interface VariantSelectorProps {
@@ -25,9 +31,9 @@ export function VariantSelector({ options, onSelect }: VariantSelectorProps) {
     <div className="flex flex-col gap-6">
       {options.map((option) => (
         <fieldset key={option.name}>
-          <legend className="text-[11px] label text-cream-subtle">
+          <legend className="text-[11px] label text-ink-muted">
             {option.name}
-            <span className="ml-2 normal-case tracking-normal text-cream">
+            <span className="ml-2 normal-case tracking-normal text-ink">
               {option.values.find((v) => v.selected)?.name}
             </span>
           </legend>
@@ -45,21 +51,25 @@ export function VariantSelector({ options, onSelect }: VariantSelectorProps) {
                   }`}
                   title={value.name}
                   onClick={() => onSelect(value.search)}
-                  className={`relative h-8 w-8 rounded-full transition-transform duration-hover ease-apple ${
+                  className={`relative flex h-11 w-11 items-center justify-center rounded-full transition-shadow duration-hover ease-apple motion-reduce:transition-none ${
                     value.selected
-                      ? 'ring-1 ring-champagne ring-offset-2 ring-offset-base'
-                      : 'ring-1 ring-hairline hover:ring-cream-subtle'
+                      ? 'ring-2 ring-brand ring-offset-2 ring-offset-base'
+                      : 'ring-1 ring-hairline hover:ring-ink-muted'
                   } ${
                     value.available
                       ? 'active:scale-[0.94]'
-                      : 'cursor-not-allowed opacity-35'
+                      : 'cursor-not-allowed opacity-40'
                   }`}
-                  style={{ backgroundColor: value.swatchColor }}
                 >
+                  <span
+                    aria-hidden
+                    className="h-8 w-8 rounded-full"
+                    style={{ backgroundColor: value.swatchColor }}
+                  />
                   {!value.available && (
                     <span
                       aria-hidden
-                      className="absolute inset-0 m-auto h-px w-6 rotate-45 bg-cream-muted"
+                      className="absolute h-px w-7 rotate-45 bg-ink"
                     />
                   )}
                 </button>
@@ -70,13 +80,13 @@ export function VariantSelector({ options, onSelect }: VariantSelectorProps) {
                   disabled={!value.available}
                   aria-pressed={value.selected}
                   onClick={() => onSelect(value.search)}
-                  className={`min-w-[3rem] px-3.5 py-2 text-[13px] transition-colors duration-hover ease-apple ${
+                  className={
                     value.selected
-                      ? 'bg-cream text-base'
+                      ? CHIP_ON
                       : value.available
-                        ? 'border border-hairline text-cream hover:border-cream-subtle active:scale-[0.98]'
-                        : 'cursor-not-allowed border border-hairline text-cream-subtle/50 line-through'
-                  }`}
+                        ? `${CHIP_OFF} active:scale-[0.98]`
+                        : CHIP_DISABLED
+                  }
                 >
                   {value.name}
                 </button>

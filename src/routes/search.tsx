@@ -16,7 +16,12 @@ import { createServerFn } from '@tanstack/react-start'
 
 import { ListingLayout } from '~/components/commerce/ListingLayout'
 import { type ProductCardNode } from '~/lib/shopify/adapters'
-import { listingHref, parseFacets, type Facets } from '~/lib/shopify/facets'
+import {
+  facetsFromSearch,
+  listingHref,
+  parseFacets,
+  type Facets,
+} from '~/lib/shopify/facets'
 import { buildListing } from '~/lib/shopify/listing'
 import { SHOP_PRODUCTS_QUERY } from '~/lib/shopify/queries'
 import { SITE_URL, pageMeta } from '~/lib/seo'
@@ -81,13 +86,7 @@ export const Route = createFileRoute('/search')({
   loaderDeps: ({ search }) => search,
   loader: async ({ deps }) => {
     const nodes = await searchProducts({ data: { q: deps.q } })
-    const facets: Facets = {
-      metal: deps.metal,
-      style: deps.style,
-      price: deps.price,
-      avail: deps.avail,
-      sort: deps.sort,
-    }
+    const facets: Facets = facetsFromSearch(deps)
     return {
       q: deps.q,
       facets,

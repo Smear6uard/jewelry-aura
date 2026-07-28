@@ -12,23 +12,26 @@
  * reshuffles under the cursor is disorienting, and the zero is
  * information.
  *
- * Two exports over the same panel, because the two placements sit in
- * different parts of the page: `FilterSheet` is the phone trigger and
- * its slide-over, which belongs in the toolbar row; `FilterSidebar` is
- * the desktop rail, which belongs beside the grid.
+ * Two exports over the same panel:
+ *   FilterSheet    the phone control — a bottom sheet, never a sidebar
+ *                  and never a left slide-over. Its rows are 44px.
+ *   FilterSidebar  the desktop rail beside the grid.
  */
 
-import { useEffect, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
-import { SlidersHorizontal, X } from 'lucide-react'
-import { DURATION, easeApple, easeOutExpo } from '~/lib/motion'
+import { useEffect, useRef, useState } from 'react'
+import { SlidersHorizontal } from 'lucide-react'
+import { BottomSheet } from '~/components/ui/BottomSheet'
+import { BTN_PRIMARY_BLOCK } from '~/lib/ui'
 import {
   CATEGORIES,
+  LENGTH_FACETS,
   METAL_FACETS,
   PRICE_FACETS,
   type FacetOption,
 } from '~/lib/catalog'
 import {
+  activeFacetCount,
+  clearedFacets,
   hasActiveFacets,
   type FacetCounts,
   type Facets,
@@ -56,109 +59,65 @@ export function FilterSidebar(props: FilterProps) {
       aria-label="Filters"
       className="hidden w-[190px] shrink-0 md:block lg:w-[210px]"
     >
-      <Panel {...props} />
+      <Panel {...props} touch={false} />
     </aside>
   )
 }
 
-/** Phone trigger + slide-over. Hidden from md up. */
+/** Phone trigger + bottom sheet. Hidden from md up. */
 export function FilterSheet(props: FilterProps) {
   const [open, setOpen] = useState(false)
+  const triggerRef = useRef<HTMLButtonElement>(null)
 
+  // Every facet link is a navigation, so the sheet does not need to
+  // survive one — but if the browser restores this page from the back
+  // cache with the sheet flagged open, close it.
   useEffect(() => {
-    if (!open) return
-    document.body.style.overflow = 'hidden'
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setOpen(false)
-    }
-    document.addEventListener('keydown', onKey)
-    return () => {
-      document.body.style.overflow = ''
-      document.removeEventListener('keydown', onKey)
-    }
-  }, [open])
+    const onPageShow = () => setOpen(false)
+    window.addEventListener('pageshow', onPageShow)
+    return () => window.removeEventListener('pageshow', onPageShow)
+  }, [])
 
-  const count = activeCount(props.facets)
+  const count = activeFacetCount(props.facets)
+
+  const close = () => {
+    setOpen(false)
+    triggerRef.current?.focus()
+  }
 
   return (
     <div className="md:hidden">
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
         aria-expanded={open}
-        className="inline-flex items-center gap-2 border border-hairline px-3.5 py-2 text-[11px] label text-cream transition-colors duration-hover ease-apple hover:border-cream-subtle"
+        className="inline-flex min-h-11 items-center gap-2 bg-raised px-4 text-[12px] label text-ink shadow-sm transition-shadow duration-hover ease-apple hover:shadow-md motion-reduce:transition-none"
       >
-        <SlidersHorizontal aria-hidden size={14} strokeWidth={1.4} />
+        <SlidersHorizontal aria-hidden size={15} strokeWidth={1.5} />
         Filter
         {count > 0 && (
-          <span className="ml-0.5 inline-flex h-4 min-w-4 items-center justify-center bg-brand px-1 text-[10px] leading-none text-cream">
+          <span className="ml-0.5 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-brand px-1 text-[10px] font-semibold leading-none text-cream">
             {count}
           </span>
         )}
       </button>
 
-      <AnimatePresence>
-        {open && (
-          <div className="fixed inset-0 z-[65]">
-            <motion.button
-              type="button"
-              aria-label="Close filters"
-              tabIndex={-1}
-              className="absolute inset-0 h-full w-full cursor-default bg-sunken/80"
-              onClick={() => setOpen(false)}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: DURATION.micro, ease: easeApple }}
-            />
-            <motion.div
-              role="dialog"
-              aria-modal="true"
-              aria-label="Filters"
-              className="absolute left-0 top-0 flex h-full w-full max-w-[20rem] flex-col border-r border-hairline bg-raised"
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              transition={{ duration: DURATION.content, ease: easeOutExpo }}
-            >
-              <header className="flex items-center justify-between border-b border-hairline px-5 py-4">
-                <h2 className="text-[12px] label text-cream">Filter</h2>
-                <button
-                  type="button"
-                  onClick={() => setOpen(false)}
-                  aria-label="Close filters"
-                  className="p-1.5 text-cream-muted transition-colors duration-hover ease-apple hover:text-cream"
-                >
-                  <X aria-hidden size={17} strokeWidth={1.4} />
-                </button>
-              </header>
-              <div
-                className="flex-1 overflow-y-auto px-5 py-5"
-                data-lenis-prevent
-              >
-                <Panel {...props} />
-              </div>
-              <footer className="border-t border-hairline px-5 py-4">
-                <button
-                  type="button"
-                  onClick={() => setOpen(false)}
-                  className="w-full bg-brand px-6 py-3 text-[11px] label text-cream transition-colors duration-hover ease-apple hover:bg-brand-hover"
-                >
-                  Show {props.total} {props.total === 1 ? 'piece' : 'pieces'}
-                </button>
-              </footer>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      <BottomSheet
+        open={open}
+        onClose={close}
+        title="Filter"
+        footer={
+          <button type="button" onClick={close} className={BTN_PRIMARY_BLOCK}>
+            Show {props.total} {props.total === 1 ? 'piece' : 'pieces'}
+          </button>
+        }
+      >
+        <Panel {...props} touch />
+      </BottomSheet>
     </div>
   )
-}
-
-function activeCount(facets: Facets): number {
-  return [facets.metal, facets.style, facets.price, facets.avail].filter(Boolean)
-    .length
 }
 
 function Panel({
@@ -167,33 +126,31 @@ function Panel({
   styles,
   hrefFor,
   activeCategory,
-}: FilterProps) {
+  touch,
+}: FilterProps & { touch: boolean }) {
   return (
     <div className="flex flex-col gap-7">
       {hasActiveFacets(facets) && (
         <a
-          href={hrefFor({
-            metal: undefined,
-            style: undefined,
-            price: undefined,
-            avail: undefined,
-          })}
-          className="inline-flex w-fit items-center text-[11px] label text-champagne underline decoration-champagne/40 underline-offset-4 transition-colors duration-hover ease-apple hover:text-cream"
+          href={hrefFor(clearedFacets())}
+          className="inline-flex w-fit items-center text-[12px] label text-brand underline decoration-brand/40 underline-offset-4 transition-colors duration-hover ease-apple hover:text-brand-hover motion-reduce:transition-none"
         >
           Clear all filters
         </a>
       )}
 
       <Group title="Category">
-        <ul className="flex flex-col gap-1.5">
+        <ul className="flex flex-col">
           {CATEGORIES.map((category) => (
             <li key={category.handle}>
               <a
                 href={`/collections/${category.handle}`}
-                className={`text-[13px] transition-colors duration-hover ease-apple hover:text-cream ${
+                className={`flex items-center text-[13px] transition-colors duration-hover ease-apple hover:text-ink motion-reduce:transition-none ${
+                  touch ? 'min-h-11' : 'py-1'
+                } ${
                   activeCategory === category.handle
-                    ? 'text-cream'
-                    : 'text-cream-muted'
+                    ? 'font-medium text-ink'
+                    : 'text-ink-muted'
                 }`}
               >
                 {category.label}
@@ -203,7 +160,9 @@ function Panel({
           <li>
             <a
               href="/shop"
-              className="text-[13px] text-cream-muted transition-colors duration-hover ease-apple hover:text-cream"
+              className={`flex items-center text-[13px] text-ink-muted transition-colors duration-hover ease-apple hover:text-ink motion-reduce:transition-none ${
+                touch ? 'min-h-11' : 'py-1'
+              }`}
             >
               Shop all
             </a>
@@ -218,6 +177,7 @@ function Panel({
             counts={counts.style}
             active={facets.style}
             hrefFor={(value) => hrefFor({ style: value })}
+            touch={touch}
           />
         </Group>
       )}
@@ -228,8 +188,24 @@ function Panel({
           counts={counts.metal}
           active={facets.metal}
           hrefFor={(value) => hrefFor({ metal: value })}
+          touch={touch}
         />
       </Group>
+
+      {/* Length is hidden where nothing in the listing has one — rings
+          and pendants carry no inch measurement, and a group of three
+          zeroes is noise rather than information. */}
+      {Object.keys(counts.length).length > 0 && (
+        <Group title="Length">
+          <FacetList
+            options={LENGTH_FACETS}
+            counts={counts.length}
+            active={facets.length}
+            hrefFor={(value) => hrefFor({ length: value })}
+            touch={touch}
+          />
+        </Group>
+      )}
 
       <Group title="Price">
         <FacetList
@@ -237,6 +213,7 @@ function Panel({
           counts={counts.price}
           active={facets.price}
           hrefFor={(value) => hrefFor({ price: value })}
+          touch={touch}
         />
       </Group>
 
@@ -246,6 +223,7 @@ function Panel({
           counts={counts.avail}
           active={facets.avail}
           hrefFor={(value) => hrefFor({ avail: value })}
+          touch={touch}
         />
       </Group>
     </div>
@@ -261,7 +239,7 @@ function Group({
 }) {
   return (
     <section>
-      <h3 className="mb-3 border-b border-hairline pb-2 text-[11px] label-wide text-cream-subtle">
+      <h3 className="mb-2 border-b border-hairline pb-2 text-[11px] label-wide text-ink-muted">
         {title}
       </h3>
       {children}
@@ -274,15 +252,19 @@ function FacetList({
   counts,
   active,
   hrefFor,
+  touch,
 }: {
   options: ReadonlyArray<FacetOption>
   counts: Record<string, number>
   active: string | undefined
   /** Passing undefined clears this facet — used to toggle the active one off. */
   hrefFor: (value: string | undefined) => string
+  touch: boolean
 }) {
+  const row = touch ? 'min-h-11' : 'py-1'
+
   return (
-    <ul className="flex flex-col gap-1.5">
+    <ul className="flex flex-col">
       {options.map((option) => {
         const count = counts[option.value] ?? 0
         const selected = active === option.value
@@ -291,16 +273,16 @@ function FacetList({
           return (
             <li
               key={option.value}
-              className="flex items-baseline justify-between gap-2 text-[13px] text-cream-subtle/50"
+              className={`flex items-center justify-between gap-2 text-[13px] text-ink-subtle ${row}`}
             >
-              <span className="flex items-center gap-2">
+              <span className="flex items-center gap-2.5">
                 <span
                   aria-hidden
-                  className="inline-block h-[9px] w-[9px] shrink-0 border border-hairline"
+                  className="inline-block h-[11px] w-[11px] shrink-0 border border-hairline"
                 />
                 {option.label}
               </span>
-              <span className="text-[11px] tabular-nums">0</span>
+              <span className="text-[12px] tabular-nums">0</span>
             </li>
           )
         }
@@ -310,22 +292,20 @@ function FacetList({
             <a
               href={hrefFor(selected ? undefined : option.value)}
               aria-pressed={selected}
-              className={`flex items-baseline justify-between gap-2 text-[13px] transition-colors duration-hover ease-apple hover:text-cream ${
-                selected ? 'text-cream' : 'text-cream-muted'
+              className={`flex items-center justify-between gap-2 text-[13px] transition-colors duration-hover ease-apple hover:text-ink motion-reduce:transition-none ${row} ${
+                selected ? 'font-medium text-ink' : 'text-ink-muted'
               }`}
             >
-              <span className="flex items-center gap-2">
+              <span className="flex items-center gap-2.5">
                 <span
                   aria-hidden
-                  className={`inline-block h-[9px] w-[9px] shrink-0 border ${
-                    selected
-                      ? 'border-brand-hover bg-brand-hover'
-                      : 'border-hairline'
+                  className={`inline-block h-[11px] w-[11px] shrink-0 border ${
+                    selected ? 'border-brand bg-brand' : 'border-hairline'
                   }`}
                 />
                 {option.label}
               </span>
-              <span className="text-[11px] tabular-nums text-cream-subtle">
+              <span className="text-[12px] tabular-nums text-ink-muted">
                 {count}
               </span>
             </a>

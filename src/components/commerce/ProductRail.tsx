@@ -1,13 +1,21 @@
 /**
  * components/commerce/ProductRail.tsx — a merchandised shelf.
  *
- * Horizontal scroll on phones (cards sized so the next one peeks in,
- * which is the whole affordance), a level four-across grid from md up.
- * Same ProductCard as the catalog grid — a rail is a different layout,
- * not a different product.
+ * Phones: a native scroll-snap carousel. Cards are 40vw so two fit with
+ * roughly 15% of the viewport showing the third — the peeking card IS the
+ * swipe affordance, which is why there are no arrows and no dots. Every
+ * product is rendered exactly once; nothing here duplicates DOM nodes to
+ * fake an infinite loop, because a crawler reads the duplicates as real
+ * products and the shopper pays for them in page weight.
  *
- * Renders nothing at all when it has no products. A titled shelf with
- * an empty space under it is worse than no shelf.
+ * Desktop: a level four-across grid. Same ProductCard as the catalog
+ * grid — a rail is a different layout, not a different product.
+ *
+ * `minProducts` is the merchandising guard. A homepage rail passes 4: a
+ * shelf with two pieces on it advertises a thin catalog, and a missing
+ * section is invisible where a half-empty one is conspicuous. The PDP's
+ * recommendation strip passes the default 1, where a short list is still
+ * useful.
  */
 
 import { ProductCard } from '~/components/commerce/ProductCard'
@@ -21,7 +29,9 @@ interface ProductRailProps {
   link?: { href: string; label: string }
   /** Cap on how many cards the rail shows. */
   limit?: number
-  /** First card loads eagerly — set on the topmost rail only. */
+  /** Below this many products the rail renders nothing at all. */
+  minProducts?: number
+  /** First cards load eagerly — set on the topmost rail only. */
   eager?: boolean
   id?: string
 }
@@ -32,44 +42,52 @@ export function ProductRail({
   products,
   link,
   limit = 8,
+  minProducts = 1,
   eager = false,
   id,
 }: ProductRailProps) {
   const shown = products.slice(0, limit)
-  if (shown.length === 0) return null
+  if (shown.length < minProducts) return null
 
   return (
-    <section id={id} aria-label={title} className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
+    <section
+      id={id}
+      aria-label={title}
+      className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16"
+    >
       <SectionHeader title={title} eyebrow={eyebrow} link={link} />
 
-      {/* Phones: one scroll track, cards at 46vw so a third edge shows.
-          The negative margin lets the track bleed to the viewport edge
-          while the header keeps its gutter. */}
-      <div className="mt-6 md:hidden">
-        <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 pb-1">
+      {/* Phones: one snap track. The negative margin lets it bleed to the
+          viewport edge while the header keeps its gutter. */}
+      <div className="mt-5 md:hidden">
+        <ul className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-4 pb-1">
           {shown.map((product, index) => (
-            <div key={product.handle} className="w-[46vw] shrink-0 snap-start">
+            <li
+              key={product.handle}
+              className="w-[40vw] min-w-[140px] shrink-0 snap-start"
+            >
               <ProductCard
                 product={product}
-                sizes="46vw"
-                eager={eager && index === 0}
+                sizes="40vw"
+                eager={eager && index < 2}
               />
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
 
       {/* md and up: a level grid. Four across, tight gutters. */}
-      <div className="mt-8 hidden gap-x-3 gap-y-10 md:grid md:grid-cols-4">
-        {shown.slice(0, 8).map((product, index) => (
-          <ProductCard
-            key={product.handle}
-            product={product}
-            sizes="(min-width: 1440px) 340px, 24vw"
-            eager={eager && index < 4}
-          />
+      <ul className="mt-8 hidden gap-3 md:grid md:grid-cols-4">
+        {shown.map((product, index) => (
+          <li key={product.handle}>
+            <ProductCard
+              product={product}
+              sizes="(min-width: 1440px) 340px, 24vw"
+              eager={eager && index < 4}
+            />
+          </li>
         ))}
-      </div>
+      </ul>
     </section>
   )
 }

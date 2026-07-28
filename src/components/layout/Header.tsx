@@ -7,7 +7,7 @@
  * route so search, categories and the cart are one movement away from
  * anywhere on the site.
  *
- * Desktop: wordmark left, category nav centre, search / orders / cart
+ * Desktop: wordmark left, category nav centre, search / account / cart
  * right. Chains, Pendants, Bracelets and Rings open a mega-menu panel.
  *
  * Phones: burger left, wordmark centre, cart right, plus a persistent
@@ -15,81 +15,60 @@
  * way people navigate a catalog, and burying it behind an icon costs
  * more than the 44px it saves.
  *
- * Hover intent: the panel opens after a short delay and closes after a
- * longer one, so dragging the pointer across the nav row does not fire
- * four panels, and moving diagonally from a nav item down into the
- * panel does not close it mid-travel.
+ * SSR completeness
+ * ----------------
+ * Every navigational link in this component is in the server-rendered
+ * HTML, including all four mega-menu panels. The panels open on CSS
+ * hover/focus-within rather than React state, so a crawler (and a
+ * keyboard) sees the full taxonomy without executing a line of
+ * JavaScript. The transition-delay on the panel is the hover intent that
+ * a JS timer used to provide: dragging the pointer across the nav row no
+ * longer fires four panels in sequence.
+ *
+ * The phone drawer is still a JS dialog — focus trapping and body scroll
+ * lock have no CSS equivalent — so a <noscript> row of category links
+ * sits under the bar for the no-JavaScript case. Without it a phone with
+ * JS disabled has a burger that does nothing and no way into the
+ * catalog.
  */
 
 import { useEffect, useRef, useState } from 'react'
-import { AnimatePresence } from 'framer-motion'
 import { Menu, Search, ShoppingBag, User } from 'lucide-react'
 import { NAV_LINKS } from '~/lib/catalog'
 import { useCart } from '~/components/commerce/CartProvider'
-import { MegaMenu } from '~/components/layout/MegaMenu'
+import { MegaMenuPanel } from '~/components/layout/MegaMenu'
 import { MobileNav } from '~/components/layout/MobileNav'
 import { SearchOverlay } from '~/components/layout/SearchOverlay'
 
-const OPEN_DELAY_MS = 90
-const CLOSE_DELAY_MS = 160
-
 export function Header() {
-  const [openHandle, setOpenHandle] = useState<string | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
+  const [lifted, setLifted] = useState(false)
   const burgerRef = useRef<HTMLButtonElement>(null)
   const searchTriggerRef = useRef<HTMLButtonElement>(null)
-  const timerRef = useRef<number | null>(null)
 
-  const clearTimer = () => {
-    if (timerRef.current !== null) {
-      window.clearTimeout(timerRef.current)
-      timerRef.current = null
-    }
-  }
-
-  const scheduleOpen = (handle: string) => {
-    clearTimer()
-    timerRef.current = window.setTimeout(
-      () => setOpenHandle(handle),
-      OPEN_DELAY_MS,
-    )
-  }
-
-  const scheduleClose = () => {
-    clearTimer()
-    timerRef.current = window.setTimeout(
-      () => setOpenHandle(null),
-      CLOSE_DELAY_MS,
-    )
-  }
-
-  const closeNow = () => {
-    clearTimer()
-    setOpenHandle(null)
-  }
-
-  useEffect(() => clearTimer, [])
-
-  // Escape closes the panel wherever focus happens to be.
+  // The header earns a shadow only once the page has moved under it. At
+  // rest it sits flush on the cream canvas with a hairline, which is
+  // quieter and truer — nothing is floating yet.
   useEffect(() => {
-    if (!openHandle) return
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') closeNow()
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [openHandle])
-
-  const active = NAV_LINKS.find(
-    (link) => link.category && link.category.handle === openHandle,
-  )?.category
+    const onScroll = () => setLifted(window.scrollY > 8)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-hairline bg-base">
-        <div className="relative mx-auto flex h-14 max-w-[1440px] items-center gap-4 px-4 md:h-16 md:px-8">
-          {/* Burger — phones only; the desktop nav is the menu. */}
+      <header
+        className={`sticky top-0 z-50 border-b border-hairline bg-base transition-shadow duration-micro ease-apple motion-reduce:transition-none ${
+          lifted ? 'shadow-sm' : ''
+        }`}
+      >
+        {/* `relative` on phones so the wordmark can centre against this
+            row; `static` from md up so the mega-menu panels resolve
+            against the <header> and span the full viewport width. */}
+        <div className="relative mx-auto flex h-14 max-w-[1440px] items-center gap-4 px-4 md:static md:h-16 md:px-8">
+          {/* Burger — phones only; the desktop nav is the menu. 44px. */}
           <button
             ref={burgerRef}
             type="button"
@@ -97,9 +76,9 @@ export function Header() {
             aria-label="Open menu"
             aria-haspopup="dialog"
             aria-expanded={menuOpen}
-            className="-ml-1.5 p-1.5 text-cream transition-colors duration-hover ease-apple hover:text-champagne md:hidden"
+            className="-ml-2.5 flex h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-brand md:hidden"
           >
-            <Menu aria-hidden size={20} strokeWidth={1.4} />
+            <Menu aria-hidden size={21} strokeWidth={1.5} />
           </button>
 
           <a
@@ -107,106 +86,117 @@ export function Header() {
             // Centred between the burger and the cart on phones — the
             // standard mobile store header — and back on the left rail
             // from md up, where the nav owns the centre.
-            className="absolute left-1/2 -translate-x-1/2 font-display text-[17px] leading-none tracking-tight text-cream md:static md:translate-x-0 md:text-[19px]"
+            className="display absolute left-1/2 -translate-x-1/2 text-[18px] leading-none text-ink md:static md:translate-x-0 md:text-[20px]"
           >
             Jewelry Aura
           </a>
 
-          {/* Centre nav — the store's spine. */}
+          {/* Centre nav — the store's spine. Each category item owns its
+              own panel so hover state is local to the item. */}
           <nav
             aria-label="Primary"
-            className="mx-auto hidden items-center gap-6 md:flex lg:gap-7"
-            onPointerLeave={scheduleClose}
+            className="mx-auto hidden items-center md:flex"
           >
-            {NAV_LINKS.map((link) => {
-              const isOpen = link.category?.handle === openHandle
-              return (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  onPointerEnter={() =>
-                    link.category ? scheduleOpen(link.category.handle) : closeNow()
-                  }
-                  onFocus={() =>
-                    link.category ? setOpenHandle(link.category.handle) : closeNow()
-                  }
-                  aria-expanded={link.category ? isOpen : undefined}
-                  className={`relative py-5 text-[11px] label transition-colors duration-hover ease-apple lg:text-[12px] ${
-                    link.accent
-                      ? 'text-champagne hover:text-cream'
-                      : 'text-cream-muted hover:text-cream'
-                  }`}
-                >
-                  {link.label}
-                  {/* Active-panel underline — the one place maroon
-                      marks navigation state. */}
-                  <span
-                    aria-hidden
-                    className={`pointer-events-none absolute inset-x-0 bottom-0 h-[2px] origin-center bg-brand-hover transition-transform duration-hover ease-apple ${
-                      isOpen ? 'scale-x-100' : 'scale-x-0'
+            <ul className="flex items-center">
+              {NAV_LINKS.map((link) => (
+                <li key={link.label} className="group/nav static">
+                  <a
+                    href={link.href}
+                    className={`relative flex h-16 items-center px-3 text-[12px] label transition-colors duration-hover ease-apple lg:px-3.5 ${
+                      link.accent
+                        ? 'text-brand hover:text-brand-hover'
+                        : 'text-ink-muted hover:text-ink'
                     }`}
-                  />
-                </a>
-              )
-            })}
+                  >
+                    {link.label}
+                    {/* The one place maroon marks navigation state. Draws
+                        in from the left rather than out from the centre. */}
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute inset-x-2 bottom-0 h-[2px] origin-left scale-x-0 bg-brand transition-transform duration-hover ease-apple group-hover/nav:scale-x-100 group-focus-within/nav:scale-x-100 motion-reduce:transition-none"
+                    />
+                  </a>
+
+                  {link.category && <MegaMenuPanel category={link.category} />}
+                </li>
+              ))}
+            </ul>
           </nav>
 
-          <div className="ml-auto flex items-center gap-0.5 md:ml-0 md:gap-1">
+          <div className="ml-auto flex items-center md:ml-0">
             <button
               ref={searchTriggerRef}
               type="button"
               onClick={() => setSearchOpen(true)}
               aria-label="Search"
-              className="hidden p-2 text-cream transition-colors duration-hover ease-apple hover:text-champagne md:block"
+              className="hidden h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-brand md:flex"
             >
-              <Search aria-hidden size={18} strokeWidth={1.4} />
+              <Search aria-hidden size={19} strokeWidth={1.5} />
             </button>
 
             <a
               href="/pages/orders"
-              aria-label="Orders and account"
-              className="hidden p-2 text-cream transition-colors duration-hover ease-apple hover:text-champagne md:block"
+              aria-label="Account and orders"
+              className="hidden h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-brand md:flex"
             >
-              <User aria-hidden size={18} strokeWidth={1.4} />
+              <User aria-hidden size={19} strokeWidth={1.5} />
             </a>
 
             <CartButton />
           </div>
         </div>
 
-        {/* Phones: persistent search field under the bar. */}
+        {/* Phones: persistent search field under the bar, on the sunken
+            surface so it reads as an input without a heavy border. The
+            row is 44px so --header-h stays predictable. */}
         <form
           action="/search"
           method="get"
-          className="flex items-center gap-2 border-t border-hairline px-4 py-2 md:hidden"
+          className="flex h-11 items-center gap-2 bg-sunken px-4 md:hidden"
         >
           <Search
             aria-hidden
-            size={15}
-            strokeWidth={1.4}
-            className="shrink-0 text-cream-subtle"
+            size={16}
+            strokeWidth={1.5}
+            className="shrink-0 text-ink-muted"
           />
+          <label className="sr-only" htmlFor="header-search">
+            Search products
+          </label>
           <input
+            id="header-search"
             type="search"
             name="q"
             placeholder="Search chains, pendants, moissanite…"
-            aria-label="Search products"
             autoComplete="off"
-            className="w-full bg-transparent text-[13px] text-cream placeholder:text-cream-subtle focus:outline-none"
+            className="w-full bg-transparent text-[16px] text-ink placeholder:text-ink-muted focus:outline-none"
           />
         </form>
 
-        <AnimatePresence>
-          {active && (
-            <MegaMenu
-              key={active.handle}
-              category={active}
-              onPointerEnter={clearTimer}
-              onPointerLeave={scheduleClose}
-              onNavigate={closeNow}
-            />
-          )}
-        </AnimatePresence>
+        {/* No-JavaScript path into the catalog on a phone: the burger
+            below opens a JS dialog, so without this there is none. */}
+        <noscript>
+          <ul className="flex flex-wrap gap-1.5 border-t border-hairline px-4 py-3 md:hidden">
+            {NAV_LINKS.map((link) => (
+              <li key={link.label}>
+                <a
+                  href={link.href}
+                  className="inline-flex bg-raised px-3 py-2 text-[12px] label text-ink shadow-sm"
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+            <li>
+              <a
+                href="/shop"
+                className="inline-flex bg-raised px-3 py-2 text-[12px] label text-ink shadow-sm"
+              >
+                Shop all
+              </a>
+            </li>
+          </ul>
+        </noscript>
       </header>
 
       <MobileNav
@@ -246,19 +236,19 @@ function CartButton() {
           ? 'Open cart'
           : `Open cart, ${count} ${count === 1 ? 'item' : 'items'}`
       }
-      className="relative p-2 text-cream transition-colors duration-hover ease-apple hover:text-champagne"
+      className="relative -mr-2.5 flex h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-brand md:mr-0"
     >
-      <ShoppingBag aria-hidden size={18} strokeWidth={1.4} />
+      <ShoppingBag aria-hidden size={19} strokeWidth={1.5} />
       {count === null && (
         <span
           aria-hidden
-          className="absolute right-1 top-1 h-2 w-2 animate-pulse rounded-full bg-cream-subtle"
+          className="absolute right-2 top-2 h-2 w-2 animate-pulse rounded-full bg-ink-subtle"
         />
       )}
       {count !== null && count > 0 && (
         <span
           aria-hidden
-          className="absolute right-0 top-0 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-brand px-1 text-[10px] font-medium leading-none text-cream"
+          className="absolute right-1 top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-brand px-1 text-[10px] font-semibold leading-none text-cream"
         >
           {count > 99 ? '99+' : count}
         </span>

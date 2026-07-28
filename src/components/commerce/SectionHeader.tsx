@@ -13,6 +13,7 @@
  */
 
 import { ArrowRight } from 'lucide-react'
+import { BTN_TERTIARY, LINK_UNDERLINE } from '~/lib/ui'
 
 interface SectionHeaderProps {
   title: string
@@ -30,30 +31,32 @@ export function SectionHeader({
 }: SectionHeaderProps) {
   return (
     <div
-      className={`flex flex-wrap items-end justify-between gap-x-8 gap-y-3 border-b border-hairline pb-4 ${className}`}
+      className={`flex flex-wrap items-end justify-between gap-x-8 gap-y-2 border-b border-hairline pb-4 ${className}`}
     >
       <div>
         {eyebrow && (
-          <p className="mb-1.5 text-[11px] label-wide text-champagne">
-            {eyebrow}
-          </p>
+          <p className="mb-1.5 text-[11px] label-wide text-brand">{eyebrow}</p>
         )}
-        <h2 className="font-display text-[26px] leading-none tracking-tight text-cream md:text-[34px]">
+        <h2 className="display text-[26px] leading-none text-ink md:text-[34px]">
           {title}
         </h2>
       </div>
 
+      {/* The site's tertiary button shape: maroon text with an underline
+          that draws in from the left. The arrow is the store idiom on top
+          of it — it says "more of this", where the underline says "this is
+          a link". */}
       {link && (
-        <a
-          href={link.href}
-          className="group inline-flex shrink-0 items-center gap-1.5 pb-1 text-[11px] label text-cream-muted transition-colors duration-hover ease-apple hover:text-cream md:text-[12px]"
-        >
-          {link.label}
+        <a href={link.href} className={`${BTN_TERTIARY} min-h-11 shrink-0`}>
+          <span className="relative">
+            {link.label}
+            <span aria-hidden className={LINK_UNDERLINE} />
+          </span>
           <ArrowRight
             aria-hidden
-            size={13}
-            strokeWidth={1.5}
-            className="transition-transform duration-hover ease-apple group-hover:translate-x-0.5"
+            size={14}
+            strokeWidth={1.6}
+            className="transition-transform duration-hover ease-apple group-hover/link:translate-x-0.5 motion-reduce:transition-none"
           />
         </a>
       )}

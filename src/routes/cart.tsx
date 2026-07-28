@@ -18,6 +18,7 @@ import { useCart } from '~/components/commerce/CartProvider'
 import { FREE_SHIPPING_THRESHOLD } from '~/lib/catalog'
 import { parseFormattedMoney } from '~/lib/shopify/adapters'
 import { SITE_URL, pageMeta } from '~/lib/seo'
+import { BTN_PRIMARY, BTN_PRIMARY_BLOCK, BTN_SECONDARY } from '~/lib/ui'
 
 export const Route = createFileRoute('/cart')({
   component: CartPage,
@@ -43,10 +44,10 @@ function CartPage() {
 
   return (
     <main className="mx-auto max-w-[1440px] px-4 pb-16 pt-8 md:px-8 md:pb-24 md:pt-10">
-      <h1 className="font-display text-[30px] leading-none tracking-tight text-cream md:text-[40px]">
+      <h1 className="display text-[30px] leading-none text-ink md:text-[40px]">
         Your cart
         {cart && cart.totalQuantity > 0 && (
-          <span className="ml-3 text-[18px] text-cream-muted">
+          <span className="ml-3 text-[18px] text-ink-muted">
             {cart.totalQuantity} {cart.totalQuantity === 1 ? 'item' : 'items'}
           </span>
         )}
@@ -59,22 +60,25 @@ function CartPage() {
       {lines.length > 0 && cart && (
         <div className="mt-8 grid gap-8 md:grid-cols-12 md:gap-10">
           <div className="md:col-span-7 lg:col-span-8">
-            <ul className="divide-y divide-hairline border-y border-hairline">
+            <ul className="divide-y divide-hairline bg-raised px-4 shadow-sm">
               {lines.map((line) => (
                 <CartLineItem key={line.id} line={line} size="page" />
               ))}
             </ul>
             <a
               href="/shop"
-              className="mt-5 inline-block text-[12px] label text-cream-muted underline decoration-hairline underline-offset-4 transition-colors duration-hover ease-apple hover:text-cream"
+              className="mt-4 inline-flex min-h-11 items-center text-[12px] label text-ink-muted underline decoration-hairline underline-offset-4 transition-colors duration-hover ease-apple hover:text-ink motion-reduce:transition-none"
             >
               Continue shopping
             </a>
           </div>
 
           <aside className="md:col-span-5 lg:col-span-4">
-            <div className="border border-hairline p-5 md:sticky md:top-24">
-              <h2 className="text-[12px] label text-cream">Summary</h2>
+            <div
+              className="bg-raised p-5 shadow-sm md:sticky"
+              style={{ top: 'calc(var(--header-h) + 1.5rem)' }}
+            >
+              <h2 className="text-[12px] label text-ink">Summary</h2>
 
               <div className="mt-4">
                 <FreeShippingMeter
@@ -83,21 +87,23 @@ function CartPage() {
               </div>
 
               <div className="mt-5 flex items-baseline justify-between border-t border-hairline pt-4">
-                <span className="text-[13px] text-cream-muted">Subtotal</span>
-                <span className="text-[19px] text-cream">{cart.subtotal}</span>
+                <span className="text-[14px] text-ink-muted">Subtotal</span>
+                <span className="text-[20px] font-medium text-ink">
+                  {cart.subtotal}
+                </span>
               </div>
-              <p className="mt-1.5 text-[12px] text-cream-subtle">
+              <p className="mt-1.5 text-[13px] text-ink-muted">
                 Shipping and tax calculated at checkout.
               </p>
 
               <a
                 href={cart.checkoutUrl}
-                className="mt-5 block w-full bg-brand px-6 py-4 text-center text-[12px] label text-cream transition-colors duration-hover ease-apple hover:bg-brand-hover active:scale-[0.99]"
+                className={`${BTN_PRIMARY_BLOCK} mt-5 min-h-[52px]`}
               >
                 Check out
               </a>
 
-              <ul className="mt-5 flex flex-col gap-2 border-t border-hairline pt-4 text-[12px] text-cream-muted">
+              <ul className="mt-5 flex flex-col gap-2 border-t border-hairline pt-4 text-[13px] text-ink-muted">
                 <li>Free insured shipping over ${FREE_SHIPPING_THRESHOLD}</li>
                 <li>30-day returns on unworn stock pieces</li>
                 <li>Lifetime warranty on everything we make</li>
@@ -115,10 +121,10 @@ function CartSkeleton() {
     <div className="mt-8 flex flex-col gap-6" aria-hidden>
       {[0, 1].map((i) => (
         <div key={i} className="flex animate-pulse gap-4">
-          <div className="h-28 w-24 bg-hairline/60" />
+          <div className="h-28 w-24 bg-sunken" />
           <div className="flex-1 space-y-3 pt-2">
-            <div className="h-3 w-1/2 bg-hairline/60" />
-            <div className="h-3 w-1/4 bg-hairline/60" />
+            <div className="h-3 w-1/2 bg-sunken" />
+            <div className="h-3 w-1/4 bg-sunken" />
           </div>
         </div>
       ))}
@@ -128,24 +134,18 @@ function CartSkeleton() {
 
 function EmptyCart() {
   return (
-    <div className="mt-8 border border-hairline px-6 py-20 text-center">
-      <p className="text-[11px] label-wide text-cream-subtle">
+    <div className="mt-8 bg-raised px-6 py-20 text-center shadow-sm">
+      <p className="text-[11px] label-wide text-ink-muted">
         Your cart is empty
       </p>
-      <p className="mx-auto mt-3 max-w-sm text-[15px] text-cream-muted">
+      <p className="mx-auto mt-3 max-w-sm text-[15px] text-ink-muted">
         Chains, pendants and one-of-one commissions are all a tap away.
       </p>
-      <div className="mt-6 flex flex-wrap justify-center gap-3">
-        <a
-          href="/shop"
-          className="inline-flex items-center bg-brand px-6 py-3 text-[11px] label text-cream transition-colors duration-hover ease-apple hover:bg-brand-hover"
-        >
+      <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+        <a href="/shop" className={BTN_PRIMARY}>
           Start shopping
         </a>
-        <a
-          href="/custom"
-          className="inline-flex items-center border border-hairline px-6 py-3 text-[11px] label text-cream-muted transition-colors duration-hover ease-apple hover:border-cream-subtle hover:text-cream"
-        >
+        <a href="/custom" className={BTN_SECONDARY}>
           Start a custom piece
         </a>
       </div>
