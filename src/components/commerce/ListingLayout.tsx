@@ -91,12 +91,12 @@ export function ListingLayout({
           <Breadcrumbs items={breadcrumbs} className="mb-4" />
         )}
 
-        <header className="border-b border-hairline pb-5">
+        <header className="border-b border-hairline-light pb-5">
           <h1 className="display text-[28px] leading-none text-ink md:text-[38px]">
             {title}
           </h1>
           {description && (
-            <p className="mt-3 max-w-[62ch] text-[15px] leading-relaxed text-ink-muted">
+            <p className="mt-3 max-w-[62ch] text-[15px] leading-relaxed text-ink">
               {description}
             </p>
           )}
@@ -116,10 +116,10 @@ export function ListingLayout({
        * this bar. (They are portalled out for the same reason.)
        */}
       <div
-        className="sticky z-40 bg-base md:hidden"
+        className="sticky z-40 bg-paper md:hidden"
         style={{ top: 'var(--header-h)' }}
       >
-        <div className="flex items-center justify-between gap-3 border-b border-hairline px-4 py-2.5">
+        <div className="flex items-center justify-between gap-3 border-b border-hairline-light px-4 py-2.5">
           <ResultCount total={total} page={page} totalPages={totalPages} />
           <div className="flex items-center gap-2">
             <FilterSheet
@@ -183,7 +183,7 @@ function ResultCount({
   totalPages: number
 }) {
   return (
-    <p className="text-[13px] text-ink-muted">
+    <p className="text-[13px] text-ink">
       <span className="font-medium text-ink tabular-nums">{total}</span>{' '}
       {total === 1 ? 'piece' : 'pieces'}
       {totalPages > 1 && (
@@ -209,11 +209,11 @@ function EmptyListing({
 }) {
   if (!filtered) {
     return (
-      <div className="bg-raised px-6 py-20 text-center shadow-sm">
-        <p className="text-[11px] label-wide text-ink-muted">
+      <div className="bg-bone px-6 py-20 text-center border border-hairline-light">
+        <p className="text-[11px] label-wide text-ink">
           Nothing in this case yet
         </p>
-        <p className="mx-auto mt-3 max-w-sm text-[15px] text-ink-muted">
+        <p className="mx-auto mt-3 max-w-sm text-[15px] text-ink">
           {body ??
             'Pieces are being finished on the bench. The full catalog is one step away.'}
         </p>
@@ -225,9 +225,9 @@ function EmptyListing({
   }
 
   return (
-    <div className="bg-raised px-6 py-20 text-center shadow-sm">
-      <p className="text-[11px] label-wide text-ink-muted">No matches</p>
-      <p className="mx-auto mt-3 max-w-sm text-[15px] text-ink-muted">
+    <div className="bg-bone px-6 py-20 text-center border border-hairline-light">
+      <p className="text-[11px] label-wide text-ink">No matches</p>
+      <p className="mx-auto mt-3 max-w-sm text-[15px] text-ink">
         Nothing matches every filter at once. Clearing one usually opens it back
         up.
       </p>

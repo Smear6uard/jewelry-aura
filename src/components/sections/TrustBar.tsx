@@ -1,7 +1,7 @@
 /**
- * components/sections/TrustBar.tsx — one of three full-maroon bands.
+ * components/sections/TrustBar.tsx — one of three velvet bands.
  *
- * Four promises, cream hairlines between them, nothing else. No icons: a
+ * Four promises, hairlines between them, nothing else. No icons: a
  * truck glyph next to "Free shipping" adds nothing a shopper did not
  * already read, and a row of pictograms is exactly the kind of
  * decoration that makes a trust band look like a template. No counters,
@@ -26,22 +26,26 @@ const PROMISES = [
 
 export function TrustBar() {
   return (
-    <section aria-label="Store promises" className="bg-brand">
+    <section
+      aria-label="Store promises"
+      data-ground="velvet"
+      className="bg-velvet text-bone"
+    >
       <ul className="mx-auto grid max-w-[1440px] grid-cols-2 md:grid-cols-4">
         {PROMISES.map((promise, index) => (
           <li
             key={promise.href}
             className={[
               'flex items-center justify-center',
-              // Cream hairlines between cells, never around the band.
-              index % 2 === 1 ? 'border-l border-cream/20' : '',
-              index >= 2 ? 'border-t border-cream/20 md:border-t-0' : '',
-              index === 2 ? 'md:border-l md:border-cream/20' : '',
+              // Hairlines between cells, never around the band.
+              index % 2 === 1 ? 'border-l border-hairline-dark' : '',
+              index >= 2 ? 'border-t border-hairline-dark md:border-t-0' : '',
+              index === 2 ? 'md:border-l md:border-hairline-dark' : '',
             ].join(' ')}
           >
             <a
               href={promise.href}
-              className="flex min-h-11 w-full items-center justify-center px-3 py-3 text-center text-[10px] label-wide text-cream/90 transition-colors duration-hover ease-apple hover:text-cream md:text-[11px] motion-reduce:transition-none"
+              className="flex min-h-11 w-full items-center justify-center px-3 py-3 text-center text-[10px] label-wide text-bone transition-colors duration-hover ease-apple hover:text-gold md:text-[11px] motion-reduce:transition-none"
             >
               {promise.label}
             </a>

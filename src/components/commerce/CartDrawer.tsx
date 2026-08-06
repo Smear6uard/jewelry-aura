@@ -95,7 +95,7 @@ export function CartDrawer() {
             type="button"
             aria-label="Close cart"
             tabIndex={-1}
-            className="absolute inset-0 h-full w-full cursor-default bg-ink/35"
+            className="absolute inset-0 h-full w-full cursor-default bg-velvet/40"
             onClick={closeCart}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -108,21 +108,21 @@ export function CartDrawer() {
             aria-modal="true"
             aria-label="Shopping cart"
             tabIndex={-1}
-            className={`${shell} flex flex-col bg-raised text-ink shadow-lg outline-none`}
+            className={`${shell} flex flex-col bg-bone text-ink border border-hairline-light outline-none`}
             {...slide}
             transition={{ duration: DURATION.content, ease: easeOutExpo }}
           >
-            <header className="relative flex items-center justify-between border-b border-hairline pl-5 pr-1">
+            <header className="relative flex items-center justify-between border-b border-hairline-light pl-5 pr-1">
               {!isDesktop && (
                 <span
                   aria-hidden
-                  className="absolute left-1/2 top-2 h-1 w-10 -translate-x-1/2 rounded-full bg-hairline"
+                  className="absolute left-1/2 top-2 h-1 w-10 -translate-x-1/2 rounded-full bg-hairline-light"
                 />
               )}
               <h2 className="py-4 text-[12px] label text-ink">
                 Cart
                 {cart && cart.totalQuantity > 0 && (
-                  <span className="ml-2 text-ink-muted">
+                  <span className="ml-2 text-ink">
                     ({cart.totalQuantity})
                   </span>
                 )}
@@ -131,7 +131,7 @@ export function CartDrawer() {
                 type="button"
                 onClick={closeCart}
                 aria-label="Close cart"
-                className="flex h-11 w-11 items-center justify-center text-ink-muted transition-colors duration-hover ease-apple hover:text-ink motion-reduce:transition-none"
+                className="flex h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-maroon motion-reduce:transition-none"
               >
                 <X aria-hidden size={19} strokeWidth={1.5} />
               </button>
@@ -146,7 +146,7 @@ export function CartDrawer() {
               {status === 'loading' && <CartSkeleton />}
               {isEmpty && <EmptyCart onClose={closeCart} />}
               {lines.length > 0 && (
-                <ul className="divide-y divide-hairline">
+                <ul className="divide-y divide-hairline-light">
                   {lines.map((line) => (
                     <CartLineItem key={line.id} line={line} />
                   ))}
@@ -155,20 +155,20 @@ export function CartDrawer() {
             </div>
 
             {cart && lines.length > 0 && (
-              <footer className="safe-bottom border-t border-hairline bg-base px-5 pt-4">
+              <footer className="safe-bottom border-t border-hairline-light bg-paper px-5 pt-4">
                 <FreeShippingMeter
                   subtotal={parseFormattedMoney(cart.subtotal)}
                 />
 
                 <div className="mt-4 flex items-baseline justify-between">
-                  <span className="text-[12px] label text-ink-muted">
+                  <span className="text-[12px] label text-ink">
                     Subtotal
                   </span>
                   <span className="text-[18px] font-medium text-ink">
                     {cart.subtotal}
                   </span>
                 </div>
-                <p className="mt-1 text-[12px] text-ink-muted">
+                <p className="mt-1 text-[12px] text-ink">
                   Shipping and tax calculated at checkout.
                 </p>
 
@@ -181,7 +181,7 @@ export function CartDrawer() {
                 <a
                   href="/cart"
                   onClick={closeCart}
-                  className="mt-1 flex min-h-11 items-center justify-center text-[12px] label text-ink-muted underline decoration-hairline underline-offset-4 transition-colors duration-hover ease-apple hover:text-ink motion-reduce:transition-none"
+                  className="mt-1 flex min-h-11 items-center justify-center text-[12px] label text-ink underline decoration-hairline-light underline-offset-4 transition-colors duration-hover ease-apple hover:text-maroon motion-reduce:transition-none"
                 >
                   View full cart
                 </a>
@@ -199,10 +199,10 @@ function CartSkeleton() {
     <div className="flex flex-col gap-5 py-6" aria-hidden>
       {[0, 1].map((i) => (
         <div key={i} className="flex animate-pulse gap-4">
-          <div className="h-24 w-20 bg-sunken" />
+          <div className="h-24 w-20 bg-bone" />
           <div className="flex-1 space-y-3 pt-2">
-            <div className="h-3 w-2/3 bg-sunken" />
-            <div className="h-3 w-1/3 bg-sunken" />
+            <div className="h-3 w-2/3 bg-bone" />
+            <div className="h-3 w-1/3 bg-bone" />
           </div>
         </div>
       ))}
@@ -213,8 +213,8 @@ function CartSkeleton() {
 function EmptyCart({ onClose }: { onClose: () => void }) {
   return (
     <div className="flex h-full flex-col items-center justify-center py-20 text-center">
-      <p className="text-[11px] label-wide text-ink-muted">Your cart is empty</p>
-      <p className="mt-3 max-w-[26ch] text-[15px] text-ink-muted">
+      <p className="text-[11px] label-wide text-ink">Your cart is empty</p>
+      <p className="mt-3 max-w-[26ch] text-[15px] text-ink">
         Chains, pendants and one-of-one commissions are all a tap away.
       </p>
       <a href="/shop" onClick={onClose} className={`${BTN_PRIMARY_BLOCK} mt-6 max-w-[16rem]`}>

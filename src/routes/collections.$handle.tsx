@@ -300,7 +300,7 @@ function CollectionFallback({ title, body }: { title: string; body: string }) {
   return (
     <main className="mx-auto max-w-[1440px] px-4 py-20 md:px-8 md:py-28">
       <h1 className="display text-[28px] text-ink md:text-[38px]">{title}</h1>
-      <p className="mt-3 max-w-[52ch] text-[15px] leading-relaxed text-ink-muted">
+      <p className="mt-3 max-w-[52ch] text-[15px] leading-relaxed text-ink">
         {body}
       </p>
       <a href="/shop" className={`${BTN_PRIMARY} mt-6`}>

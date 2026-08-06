@@ -42,7 +42,7 @@ const OVERLAY_REVEAL =
 
 const BUTTON =
   'flex w-full min-h-11 items-center justify-center px-3 text-[12px] label ' +
-  'bg-brand text-cream hover:bg-brand-hover active:scale-[0.99] ' +
+  'bg-maroon text-bone hover:bg-ink active:scale-[0.99] ' +
   'transition-colors duration-hover ease-apple disabled:opacity-70 motion-reduce:transition-none'
 
 interface QuickAddProps {

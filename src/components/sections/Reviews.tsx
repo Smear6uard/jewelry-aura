@@ -1,7 +1,7 @@
 /**
  * components/sections/Reviews.tsx — customer quotes.
  *
- * White cards on the cream canvas, maroon stars, name and piece under
+ * Bone cards on the paper canvas, maroon stars, name and piece under
  * each quote. Naming the piece is what separates a review from a
  * testimonial: it tells the reader which part of the catalog the opinion
  * applies to.
@@ -41,16 +41,16 @@ export function Reviews() {
               {/* figure/blockquote/figcaption is the markup for an
                   attributed quotation. A bare <footer> inside the <li>
                   would associate with the page's own footer. */}
-              <figure className="flex h-full flex-col bg-raised p-5 shadow-sm">
+              <figure className="flex h-full flex-col bg-bone p-5 border border-hairline-light">
                 <StarRating value={review.stars} size={14} />
-                <blockquote className="mt-3 flex-1 text-[14px] leading-relaxed text-ink-muted">
+                <blockquote className="mt-3 flex-1 text-[14px] leading-relaxed text-ink">
                   {review.quote}
                 </blockquote>
-                <figcaption className="mt-4 border-t border-hairline pt-3">
+                <figcaption className="mt-4 border-t border-hairline-light pt-3">
                   <span className="block text-[13px] font-medium text-ink">
                     {review.name}
                   </span>
-                  <span className="mt-0.5 block text-[12px] text-ink-muted">
+                  <span className="mt-0.5 block text-[12px] text-ink">
                     {review.piece}
                   </span>
                 </figcaption>

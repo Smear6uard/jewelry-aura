@@ -58,7 +58,7 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
             type="button"
             aria-label="Close search"
             tabIndex={-1}
-            className="absolute inset-0 h-full w-full cursor-default bg-ink/35"
+            className="absolute inset-0 h-full w-full cursor-default bg-velvet/40"
             onClick={onClose}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -70,7 +70,7 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
             role="dialog"
             aria-modal="true"
             aria-label="Search"
-            className="absolute inset-x-0 top-0 bg-raised shadow-lg"
+            className="absolute inset-x-0 top-0 border-b border-hairline-light bg-bone"
             initial={{ y: '-100%' }}
             animate={{ y: 0 }}
             exit={{ y: '-100%' }}
@@ -80,13 +80,13 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
               <form
                 action="/search"
                 method="get"
-                className="flex items-center gap-3 border-b border-ink-muted/40 pb-3"
+                className="flex items-center gap-3 border-b border-ink pb-3"
               >
                 <Search
                   aria-hidden
                   size={19}
                   strokeWidth={1.5}
-                  className="shrink-0 text-ink-muted"
+                  className="shrink-0 text-ink"
                 />
                 <label className="sr-only" htmlFor="overlay-search">
                   Search products
@@ -98,7 +98,7 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
                   name="q"
                   placeholder="Search chains, pendants, moissanite…"
                   autoComplete="off"
-                  className="w-full bg-transparent text-[18px] text-ink placeholder:text-ink-subtle focus:outline-none md:text-[20px]"
+                  className="w-full bg-transparent text-[18px] text-ink placeholder:text-ink focus:outline-none md:text-[20px]"
                 />
                 <button type="submit" className={`${BTN_PRIMARY} shrink-0`}>
                   Search
@@ -106,7 +106,7 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
               </form>
 
               <div className="mt-6">
-                <p className="text-[11px] label-wide text-ink-muted">
+                <p className="text-[11px] label-wide text-ink">
                   Popular searches
                 </p>
                 <ul className="mt-3 flex flex-wrap gap-2">
@@ -114,7 +114,7 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
                     <li key={term}>
                       <a
                         href={`/search?q=${encodeURIComponent(term)}`}
-                        className="inline-flex min-h-11 items-center bg-base px-4 text-[13px] text-ink transition-colors duration-hover ease-apple hover:bg-sunken"
+                        className="inline-flex min-h-11 items-center bg-paper px-4 text-[13px] text-ink transition-colors duration-hover ease-apple hover:bg-bone"
                       >
                         {term}
                       </a>
@@ -128,7 +128,7 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
               type="button"
               onClick={onClose}
               aria-label="Close search"
-              className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center text-ink-muted transition-colors duration-hover ease-apple hover:text-ink"
+              className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-maroon"
             >
               <X aria-hidden size={19} strokeWidth={1.5} />
             </button>

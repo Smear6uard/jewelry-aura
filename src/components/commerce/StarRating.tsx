@@ -22,7 +22,12 @@ interface StarRatingProps {
 const STAR_PATH =
   'M8 1.4l1.9 4 4.4.6-3.2 3 .8 4.3L8 11.3 3.9 13.4l.8-4.3-3.2-3 4.4-.6z'
 
-const BRAND = '#6B1622'
+/**
+ * Read from the token rather than hard-coded, so a retune of the brand
+ * accent reaches the stars too. Custom properties resolve in inline SVG
+ * presentation attributes.
+ */
+const MAROON = 'var(--color-maroon)'
 
 export function StarRating({ value, size = 12, className }: StarRatingProps) {
   const clamped = Math.max(0, Math.min(5, value))
@@ -48,14 +53,14 @@ export function StarRating({ value, size = 12, className }: StarRatingProps) {
           >
             <defs>
               <linearGradient id={gradientId}>
-                <stop offset={`${fill * 100}%`} stopColor={BRAND} />
+                <stop offset={`${fill * 100}%`} stopColor={MAROON} />
                 <stop offset={`${fill * 100}%`} stopColor="transparent" />
               </linearGradient>
             </defs>
             <path
               d={STAR_PATH}
               fill={`url(#${gradientId})`}
-              stroke={BRAND}
+              stroke={MAROON}
               strokeWidth="0.9"
               strokeLinejoin="round"
               opacity={fill > 0 ? 1 : 0.3}

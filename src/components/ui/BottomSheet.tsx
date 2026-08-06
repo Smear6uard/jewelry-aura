@@ -2,7 +2,7 @@
  * components/ui/BottomSheet.tsx — the phone modal.
  *
  * Slides up from the bottom edge, white on a dimmed canvas at
- * --shadow-lg, with a drag handle at the top and the confirming action
+ * a hairline at its top edge, with a drag handle at the top and the confirming action
  * fixed at the foot. Used by the PLP's Filter and Sort controls.
  *
  * Why a sheet rather than the side drawer this replaced: a phone's
@@ -108,7 +108,7 @@ export function BottomSheet({
             type="button"
             aria-label={`Close ${title.toLowerCase()}`}
             tabIndex={-1}
-            className="absolute inset-0 h-full w-full cursor-default bg-ink/35"
+            className="absolute inset-0 h-full w-full cursor-default bg-velvet/40"
             onClick={onClose}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -122,23 +122,23 @@ export function BottomSheet({
             aria-modal="true"
             aria-label={title}
             tabIndex={-1}
-            className="absolute inset-x-0 bottom-0 flex max-h-[85dvh] flex-col bg-raised shadow-lg outline-none"
+            className="absolute inset-x-0 bottom-0 flex max-h-[85dvh] flex-col border-t border-hairline-light bg-bone outline-none"
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ duration: DURATION.content, ease: easeOutExpo }}
           >
-            <div className="relative flex items-center justify-between border-b border-hairline pl-5 pr-1">
+            <div className="relative flex items-center justify-between border-b border-hairline-light pl-5 pr-1">
               <span
                 aria-hidden
-                className="absolute left-1/2 top-2 h-1 w-10 -translate-x-1/2 rounded-full bg-hairline"
+                className="absolute left-1/2 top-2 h-1 w-10 -translate-x-1/2 rounded-full bg-hairline-light"
               />
               <h2 className="py-4 text-[12px] label text-ink">{title}</h2>
               <button
                 type="button"
                 onClick={onClose}
                 aria-label={`Close ${title.toLowerCase()}`}
-                className="flex h-11 w-11 items-center justify-center text-ink-muted transition-colors duration-hover ease-apple hover:text-ink"
+                className="flex h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-maroon"
               >
                 <X aria-hidden size={19} strokeWidth={1.5} />
               </button>
@@ -152,7 +152,7 @@ export function BottomSheet({
             </div>
 
             {footer && (
-              <div className="safe-bottom border-t border-hairline px-5 pt-4">
+              <div className="safe-bottom border-t border-hairline-light px-5 pt-4">
                 {footer}
               </div>
             )}

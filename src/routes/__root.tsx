@@ -45,9 +45,9 @@ export const Route = createRootRoute({
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       { title: SITE_TITLE },
       { name: 'description', content: SITE_DESCRIPTION },
-      // Matches --surface-base: the phone's browser chrome continues the
-      // cream canvas instead of capping it with a near-black bar.
-      { name: 'theme-color', content: '#F2EDE4' },
+      // Matches --color-paper: the phone's browser chrome continues the
+      // canvas instead of capping it with a near-black bar.
+      { name: 'theme-color', content: '#F7F3EC' },
       {
         name: 'robots',
         content:

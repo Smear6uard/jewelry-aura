@@ -61,9 +61,9 @@ export function ProductGrid({
 
 function EmptyGrid() {
   return (
-    <div className="bg-raised px-6 py-20 text-center shadow-sm">
-      <p className="text-[11px] label-wide text-ink-muted">Nothing here yet</p>
-      <p className="mx-auto mt-3 max-w-sm text-[15px] text-ink-muted">
+    <div className="bg-bone px-6 py-20 text-center border border-hairline-light">
+      <p className="text-[11px] label-wide text-ink">Nothing here yet</p>
+      <p className="mx-auto mt-3 max-w-sm text-[15px] text-ink">
         This case is being restocked. The full catalog is one step away.
       </p>
       <a href="/shop" className={`${BTN_PRIMARY} mt-6`}>

@@ -51,9 +51,10 @@ export function Header() {
   const burgerRef = useRef<HTMLButtonElement>(null)
   const searchTriggerRef = useRef<HTMLButtonElement>(null)
 
-  // The header earns a shadow only once the page has moved under it. At
-  // rest it sits flush on the cream canvas with a hairline, which is
-  // quieter and truer — nothing is floating yet.
+  // The header earns its rule only once the page has moved under it. At
+  // rest it sits flush on the paper canvas with no edge at all, which is
+  // truer than a permanent hairline — there is nothing to separate from
+  // yet, and the palette has no shadow to fall back on.
   useEffect(() => {
     const onScroll = () => setLifted(window.scrollY > 8)
     onScroll()
@@ -64,8 +65,8 @@ export function Header() {
   return (
     <>
       <header
-        className={`sticky top-0 z-50 border-b border-hairline bg-base transition-shadow duration-micro ease-apple motion-reduce:transition-none ${
-          lifted ? 'shadow-sm' : ''
+        className={`sticky top-0 z-50 border-b bg-paper transition-colors duration-micro ease-apple motion-reduce:transition-none ${
+          lifted ? 'border-hairline-light' : 'border-transparent'
         }`}
       >
         {/* `relative` on phones so the wordmark can centre against this
@@ -102,8 +103,8 @@ export function Header() {
                     href={link.href}
                     className={`relative flex h-16 items-center px-2.5 text-[12px] label transition-colors duration-hover ease-apple xl:px-3.5 ${
                       link.accent
-                        ? 'text-brand hover:text-brand-hover'
-                        : 'text-ink-muted hover:text-ink'
+                        ? 'text-maroon hover:text-ink'
+                        : 'text-ink hover:text-maroon'
                     }`}
                   >
                     {link.label}
@@ -111,7 +112,7 @@ export function Header() {
                         in from the left rather than out from the centre. */}
                     <span
                       aria-hidden
-                      className="pointer-events-none absolute inset-x-2 bottom-0 h-[2px] origin-left scale-x-0 bg-brand transition-transform duration-hover ease-apple group-hover/nav:scale-x-100 group-focus-within/nav:scale-x-100 motion-reduce:transition-none"
+                      className="pointer-events-none absolute inset-x-2 bottom-0 h-[2px] origin-left scale-x-0 bg-maroon transition-transform duration-hover ease-apple group-hover/nav:scale-x-100 group-focus-within/nav:scale-x-100 motion-reduce:transition-none"
                     />
                   </a>
 
@@ -128,7 +129,7 @@ export function Header() {
               type="button"
               onClick={() => setSearchOpen(true)}
               aria-label="Search"
-              className="hidden h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-brand md:flex"
+              className="hidden h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-maroon md:flex"
             >
               <Search aria-hidden size={19} strokeWidth={1.5} />
             </button>
@@ -136,7 +137,7 @@ export function Header() {
             <a
               href="/pages/orders"
               aria-label="Account and orders"
-              className="hidden h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-brand md:flex"
+              className="hidden h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-maroon md:flex"
             >
               <User aria-hidden size={19} strokeWidth={1.5} />
             </a>
@@ -151,13 +152,13 @@ export function Header() {
         <form
           action="/search"
           method="get"
-          className="flex h-11 items-center gap-2 bg-sunken px-4 md:hidden"
+          className="flex h-11 items-center gap-2 bg-bone px-4 md:hidden"
         >
           <Search
             aria-hidden
             size={16}
             strokeWidth={1.5}
-            className="shrink-0 text-ink-muted"
+            className="shrink-0 text-ink"
           />
           <label className="sr-only" htmlFor="header-search">
             Search products
@@ -168,19 +169,19 @@ export function Header() {
             name="q"
             placeholder="Search chains, earrings, moissanite…"
             autoComplete="off"
-            className="w-full bg-transparent text-[16px] text-ink placeholder:text-ink-muted focus:outline-none"
+            className="w-full bg-transparent text-[16px] text-ink placeholder:text-ink focus:outline-none"
           />
         </form>
 
         {/* No-JavaScript path into the catalog: the burger opens a JS
             dialog, so without this there is none below lg. */}
         <noscript>
-          <ul className="flex flex-wrap gap-1.5 border-t border-hairline px-4 py-3 lg:hidden">
+          <ul className="flex flex-wrap gap-1.5 border-t border-hairline-light px-4 py-3 lg:hidden">
             {CATEGORIES.map((category) => (
               <li key={category.handle}>
                 <a
                   href={`/collections/${category.handle}`}
-                  className="inline-flex bg-raised px-3 py-2 text-[12px] label text-ink shadow-sm"
+                  className="inline-flex bg-bone px-3 py-2 text-[12px] label text-ink border border-hairline-light"
                 >
                   {category.label}
                 </a>
@@ -193,7 +194,7 @@ export function Header() {
               <li key={link.href}>
                 <a
                   href={link.href}
-                  className="inline-flex bg-raised px-3 py-2 text-[12px] label text-ink shadow-sm"
+                  className="inline-flex bg-bone px-3 py-2 text-[12px] label text-ink border border-hairline-light"
                 >
                   {link.label}
                 </a>
@@ -254,7 +255,7 @@ function BurgerButton({
         <span
           key={line}
           aria-hidden
-          className={`block h-[1.5px] w-[18px] origin-left bg-ink transition-[background-color,transform] duration-hover ease-apple group-hover/burger:bg-brand motion-reduce:transition-none ${
+          className={`block h-[1.5px] w-[18px] origin-left bg-ink transition-[background-color,transform] duration-hover ease-apple group-hover/burger:bg-maroon motion-reduce:transition-none ${
             line === 1 ? 'group-hover/burger:scale-x-[0.62]' : ''
           }`}
         />
@@ -282,19 +283,19 @@ function CartButton() {
           ? 'Open cart'
           : `Open cart, ${count} ${count === 1 ? 'item' : 'items'}`
       }
-      className="relative -mr-2.5 flex h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-brand md:mr-0"
+      className="relative -mr-2.5 flex h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-maroon md:mr-0"
     >
       <ShoppingBag aria-hidden size={19} strokeWidth={1.5} />
       {count === null && (
         <span
           aria-hidden
-          className="absolute right-2 top-2 h-2 w-2 animate-pulse rounded-full bg-ink-subtle"
+          className="absolute right-2 top-2 h-2 w-2 animate-pulse rounded-full bg-hairline-light"
         />
       )}
       {count !== null && count > 0 && (
         <span
           aria-hidden
-          className="absolute right-1 top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-brand px-1 text-[10px] font-semibold leading-none text-cream"
+          className="absolute right-1 top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-maroon px-1 text-[10px] font-semibold leading-none text-bone"
         >
           {count > 99 ? '99+' : count}
         </span>

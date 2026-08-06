@@ -287,7 +287,7 @@ function ProductPage() {
               {product.rating && (
                 <p className="mt-2.5 flex items-center gap-2">
                   <StarRating value={product.rating.value} size={14} />
-                  <span className="text-[13px] text-ink-muted">
+                  <span className="text-[13px] text-ink">
                     {product.rating.value.toFixed(1)} ·{' '}
                     {product.rating.count}{' '}
                     {product.rating.count === 1 ? 'review' : 'reviews'}
@@ -307,24 +307,24 @@ function ProductPage() {
                     </span>
                   )}
                   {variant.compareAtPrice && (
-                    <s className="text-[15px] text-ink-muted">
+                    <s className="text-[15px] text-ink">
                       {variant.compareAtPrice}
                     </s>
                   )}
                   {onSale && (
-                    <span className="bg-brand px-2 py-1 text-[10px] label-wide text-cream">
+                    <span className="bg-ink px-2 py-1 text-[10px] label-wide text-bone">
                       Sale
                     </span>
                   )}
                   {!variant.availableForSale && (
-                    <span className="bg-ink-subtle px-2 py-1 text-[10px] label-wide text-cream">
+                    <span className="bg-hairline-light px-2 py-1 text-[10px] label-wide text-ink">
                       Sold out
                     </span>
                   )}
                 </p>
               )}
 
-              <p className="mt-2 text-[13px] text-ink-muted">
+              <p className="mt-2 text-[13px] text-ink">
                 Free shipping over ${FREE_SHIPPING_THRESHOLD} · Lifetime warranty
               </p>
 
@@ -418,7 +418,7 @@ function ProductFallback({ title, body }: { title: string; body: string }) {
   return (
     <main className="mx-auto max-w-[1440px] px-4 py-20 md:px-8 md:py-28">
       <h1 className="display text-[28px] text-ink md:text-[38px]">{title}</h1>
-      <p className="mt-3 max-w-[52ch] text-[15px] leading-relaxed text-ink-muted">
+      <p className="mt-3 max-w-[52ch] text-[15px] leading-relaxed text-ink">
         {body}
       </p>
       <div className="mt-6 flex flex-col gap-3 sm:flex-row">

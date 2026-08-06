@@ -17,7 +17,7 @@
  * desynchronise, and the hover-intent delay is a `transition-delay`
  * rather than a pair of timers.
  *
- * White panel on the cream canvas at --shadow-lg. Always solid — a
+ * Bone panel on the paper canvas, held by a hairline. Always solid — a
  * translucent menu over product photography is unreadable on both.
  *
  * Every link resolves. Rather than inventing twenty Shopify collection
@@ -55,7 +55,7 @@ const PANEL_STATE =
 function Panel({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className={`absolute inset-x-0 top-full hidden border-t border-hairline bg-raised shadow-lg lg:block ${PANEL_STATE}`}
+      className={`absolute inset-x-0 top-full hidden border-y border-hairline-light bg-bone lg:block ${PANEL_STATE}`}
     >
       <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-8 px-8 py-9">
         {children}
@@ -70,7 +70,7 @@ export function MegaMenuPanel({ category }: { category: Category }) {
   return (
     <Panel>
       <div className="col-span-5">
-        <p className="max-w-[36ch] text-[14px] leading-relaxed text-ink-muted">
+        <p className="max-w-[36ch] text-[14px] leading-relaxed text-ink">
           {category.blurb}
         </p>
 
@@ -92,7 +92,7 @@ export function MegaMenuPanel({ category }: { category: Category }) {
 
         <a
           href={base}
-          className="group/all mt-7 inline-flex items-center gap-1.5 text-[12px] label text-brand transition-colors duration-hover ease-apple hover:text-brand-hover"
+          className="group/all mt-7 inline-flex items-center gap-1.5 text-[12px] label text-maroon transition-colors duration-hover ease-apple hover:text-ink"
         >
           All {category.label.toLowerCase()}
           <ArrowRight
@@ -121,7 +121,7 @@ export function WomensMenuPanel() {
   return (
     <Panel>
       <div className="col-span-5">
-        <p className="max-w-[36ch] text-[14px] leading-relaxed text-ink-muted">
+        <p className="max-w-[36ch] text-[14px] leading-relaxed text-ink">
           {WOMENS.blurb}
         </p>
 
@@ -132,7 +132,7 @@ export function WomensMenuPanel() {
               <li key={link.href}>
                 <a
                   href={link.href}
-                  className="text-[13px] text-ink-muted transition-colors duration-hover ease-apple hover:text-ink"
+                  className="text-[13px] text-ink transition-colors duration-hover ease-apple hover:text-maroon"
                 >
                   {link.label}
                 </a>
@@ -148,7 +148,7 @@ export function WomensMenuPanel() {
 
         <a
           href={WOMENS.href}
-          className="group/all mt-7 inline-flex items-center gap-1.5 text-[12px] label text-brand transition-colors duration-hover ease-apple hover:text-brand-hover"
+          className="group/all mt-7 inline-flex items-center gap-1.5 text-[12px] label text-maroon transition-colors duration-hover ease-apple hover:text-ink"
         >
           All women’s
           <ArrowRight
@@ -185,7 +185,7 @@ function FeaturedCommission({
 }) {
   return (
     <a href="/custom" className="group/piece col-span-4 block">
-      <div className="relative aspect-[4/3] overflow-hidden bg-raised shadow-sm">
+      <div className="relative aspect-[4/3] overflow-hidden bg-bone border border-hairline-light">
         <picture>
           <source type="image/avif" srcSet={`${featured.image}.avif`} />
           <source type="image/webp" srcSet={`${featured.image}.webp`} />
@@ -200,12 +200,12 @@ function FeaturedCommission({
             className="h-full w-full object-cover transition-transform duration-content ease-out-expo group-hover/piece:scale-[1.03] motion-reduce:transition-none"
           />
         </picture>
-        <span className="absolute left-0 top-0 bg-raised px-2 py-1 text-[10px] label-wide text-ink shadow-sm">
+        <span className="absolute left-0 top-0 bg-bone px-2 py-1 text-[10px] label-wide text-ink border border-hairline-light">
           One of one
         </span>
       </div>
       <p className="mt-2.5 text-[13px] font-medium text-ink">{featured.name}</p>
-      <p className="mt-0.5 text-[12px] text-ink-muted">
+      <p className="mt-0.5 text-[12px] text-ink">
         {featured.meta} · Commission yours
       </p>
     </a>
@@ -214,7 +214,7 @@ function FeaturedCommission({
 
 function ColumnHeading({ children }: { children: React.ReactNode }) {
   return (
-    <p className="mb-3 border-b border-hairline pb-2 text-[11px] label-wide text-ink-muted">
+    <p className="mb-3 border-b border-hairline-light pb-2 text-[11px] label-wide text-ink">
       {children}
     </p>
   )
@@ -235,7 +235,7 @@ function FacetLinks({
         <li key={option.value}>
           <a
             href={`${base}?${param}=${option.value}`}
-            className="text-[13px] text-ink-muted transition-colors duration-hover ease-apple hover:text-ink"
+            className="text-[13px] text-ink transition-colors duration-hover ease-apple hover:text-maroon"
           >
             {option.label}
           </a>

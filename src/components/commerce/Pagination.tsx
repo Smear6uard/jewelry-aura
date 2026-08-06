@@ -32,17 +32,17 @@ export function Pagination({ page, totalPages, hrefFor }: PaginationProps) {
   return (
     <nav
       aria-label="Pagination"
-      className="mt-12 flex items-center justify-between gap-4 border-t border-hairline pt-5 md:mt-16"
+      className="mt-12 flex items-center justify-between gap-4 border-t border-hairline-light pt-5 md:mt-16"
     >
       {atStart ? (
-        <span aria-disabled="true" className={`${arrow} text-ink-subtle`}>
+        <span aria-disabled="true" className={`${arrow}${arrow} text-ink opacity-25`}>
           <ChevronLeft aria-hidden size={15} strokeWidth={1.6} /> Prev
         </span>
       ) : (
         <a
           href={hrefFor(page - 1)}
           rel="prev"
-          className={`${arrow} text-ink-muted hover:text-ink`}
+          className={`${arrow} text-ink hover:text-maroon`}
         >
           <ChevronLeft aria-hidden size={15} strokeWidth={1.6} /> Prev
         </a>
@@ -54,7 +54,7 @@ export function Pagination({ page, totalPages, hrefFor }: PaginationProps) {
             <li key={n}>
               <span
                 aria-current="page"
-                className="inline-flex h-11 w-11 items-center justify-center bg-brand text-[13px] tabular-nums text-cream"
+                className="inline-flex h-11 w-11 items-center justify-center bg-maroon text-[13px] tabular-nums text-bone"
               >
                 {n}
               </span>
@@ -64,7 +64,7 @@ export function Pagination({ page, totalPages, hrefFor }: PaginationProps) {
               <a
                 href={hrefFor(n)}
                 aria-label={`Page ${n}`}
-                className="inline-flex h-11 w-11 items-center justify-center bg-raised text-[13px] tabular-nums text-ink-muted shadow-sm transition-[box-shadow,color] duration-hover ease-apple hover:text-ink hover:shadow-md motion-reduce:transition-none"
+                className="inline-flex h-11 w-11 items-center justify-center bg-bone text-[13px] tabular-nums text-ink border border-hairline-light transition-colors duration-hover ease-apple hover:text-maroon motion-reduce:transition-none"
               >
                 {n}
               </a>
@@ -74,14 +74,14 @@ export function Pagination({ page, totalPages, hrefFor }: PaginationProps) {
       </ol>
 
       {atEnd ? (
-        <span aria-disabled="true" className={`${arrow} text-ink-subtle`}>
+        <span aria-disabled="true" className={`${arrow}${arrow} text-ink opacity-25`}>
           Next <ChevronRight aria-hidden size={15} strokeWidth={1.6} />
         </span>
       ) : (
         <a
           href={hrefFor(page + 1)}
           rel="next"
-          className={`${arrow} text-ink-muted hover:text-ink`}
+          className={`${arrow} text-ink hover:text-maroon`}
         >
           Next <ChevronRight aria-hidden size={15} strokeWidth={1.6} />
         </a>

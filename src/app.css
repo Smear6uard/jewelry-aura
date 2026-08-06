@@ -4,57 +4,49 @@
    JEWELRY AURA — STOREFRONT DESIGN TOKENS
    ═══════════════════════════════════════════════════════════════════
 
-   Color budget (the whole discipline of this palette in three lines):
-     ~80% of pixels  warm cream canvas    base / raised / sunken
-     ~ 8% of pixels  near-black type      ink / ink-muted / ink-subtle
-     ~12% of pixels  maroon               chrome: announcement bar, trust
-                                          band, footer band, button fills,
-                                          badges, nav underline, stars
+   Eight colours. Nothing else ships. The full rule set lives in
+   CLAUDE.md; the short version is the ratio:
 
-   Maroon is CHROME. It is never a page background and never body copy.
-   The announcement bar, the trust band and the footer are the only
-   full-maroon surfaces on the site. If a section wants to feel branded,
-   the answer is a white tile on cream with a maroon accent inside it.
+     ~60% paper    the canvas — every light page ground
+     ~30% velvet   dark scenes: announcement bar, vitrines, footer
+     ~10% accents  maroon (interactive brand) + gold (material)
 
-   Separation on a light canvas comes from LUMINANCE plus SHADOW, not
-   from borders. A white tile on cream with --shadow-sm is the pattern;
-   a darker border is the failure mode.
+   Two grounds, and each has exactly one text colour: ink on paper,
+   bone on velvet. There is no muted step. Hierarchy is carried by
+   size, weight and case — not by fading type toward the background.
+
+   maroon is the INTERACTIVE accent and lives on paper only: primary
+   button fills, selected states, link hover, the ONE OF ONE stamp.
+   Never a section background, never on velvet.
+
+   gold is the MATERIAL accent: hairlines anywhere, and on velvet it
+   also carries the mono spec type and prices. On paper it is a
+   hairline and nothing else — 2.2:1 against paper is a rule, not type.
+
+   Structure comes from HAIRLINES, not shadows. There is no shadow
+   scale in this file, which is deliberate: a raised bone panel is
+   defined by its 1px rule, not by a drop shadow.
    ═══════════════════════════════════════════════════════════════════ */
 
 @theme {
-  /* ─── Canvas ──────────────────────────────────────────────────── */
-  --color-base: #f2ede4; /* page background — warm cream          */
-  --color-raised: #ffffff; /* product tiles, cards, sheets, panels  */
-  --color-sunken: #e8e0d4; /* banded sections, input fields         */
-  --color-hairline: #ddd3c4; /* 1px dividers — never darkened         */
-
-  /* ─── Type ────────────────────────────────────────────────────────
-     ink         15.4:1 on cream
-     ink-muted    5.1:1 on cream — the floor for body copy (AA)
-     ink-subtle   2.7:1 on cream — NON-TEXT ONLY (dots, dividers,
-                  disabled marks). Anything a shopper has to read uses
-                  ink-muted or better. See docs/PALETTE-NOTES.md.
-     ─────────────────────────────────────────────────────────────── */
-  --color-ink: #1a1614;
-  --color-ink-muted: #6b625a;
-  --color-ink-subtle: #9a9088;
-
-  /* ─── Brand maroon (chrome only) ──────────────────────────────── */
-  --color-brand: #6b1622;
-  --color-brand-hover: #8b2231;
-  --color-brand-deep: #4a0f18;
-
-  /* Type and hairlines that sit ON a maroon band. 13.1:1 on
-     brand-deep, 10.2:1 on brand. */
-  --color-cream: #f2ede4;
-
-  /* ─── Elevation ───────────────────────────────────────────────────
-     Warm-tinted toward the near-black ink, never pure black and never
-     blue-grey — a cool shadow on a warm canvas reads as dirt.
-     ─────────────────────────────────────────────────────────────── */
-  --shadow-sm: 0 1px 2px rgba(26, 22, 20, 0.04), 0 1px 3px rgba(26, 22, 20, 0.06);
-  --shadow-md: 0 2px 4px rgba(26, 22, 20, 0.04), 0 4px 12px rgba(26, 22, 20, 0.08);
-  --shadow-lg: 0 4px 8px rgba(26, 22, 20, 0.05), 0 12px 32px rgba(26, 22, 20, 0.1);
+  /* ─── The eight ──────────────────────────────────────────────────
+     Measured, so a retune has to re-check rather than guess:
+       ink    on paper   16.5:1
+       maroon on paper   11.8:1
+       bone   on velvet  15.4:1
+       gold   on velvet   7.6:1
+       bone   on maroon  10.8:1
+       gold   on paper    2.2:1  ← hairline only, never type
+     src/lib/palette.test.ts fails if any of these drop.
+     ────────────────────────────────────────────────────────────── */
+  --color-paper: #f7f3ec; /* canvas: all light backgrounds (~60%)   */
+  --color-ink: #191410; /* all text on light ground; 2° buttons   */
+  --color-velvet: #171209; /* dark scenes, vitrines, photo ground    */
+  --color-bone: #efe9de; /* text on velvet; raised panels on paper */
+  --color-maroon: #5a1b22; /* BRAND accent — light ground only       */
+  --color-gold: #c2a15e; /* MATERIAL accent — hairlines, spec type */
+  --color-hairline-dark: #352b1f; /* rules on velvet  */
+  --color-hairline-light: #ddd5c7; /* rules on paper   */
 
   /* ─── Typefaces ───────────────────────────────────────────────────
      Fraunces is the display serif and is used with restraint: the
@@ -63,12 +55,11 @@
      rather than 144 (poster drawing) — commerce headings sit at
      26-44px, where the poster cut looks bloated.
 
-     Weight runs LIGHTER than the old dark-canvas setting. Type gains
-     apparent weight when it inverts to dark-on-light, so display
-     headings step down to 380 rather than shrinking.
-
      Manrope carries everything else: nav, product names, prices,
      buttons, filters, forms, body copy.
+
+     The mono is spec type: stone facts, carat weights, prices set on
+     velvet. It only ever appears in gold on a dark ground.
      ─────────────────────────────────────────────────────────────── */
   --font-display: "Fraunces", "Georgia", serif;
   --font-serif: "Fraunces", "Georgia", serif;
@@ -131,7 +122,7 @@
 @layer base {
   html {
     font-family: var(--font-sans);
-    background-color: var(--color-base);
+    background-color: var(--color-paper);
     color: var(--color-ink);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -160,9 +151,18 @@
     font-size: 16px;
   }
 
+  /*
+   * With no muted ink, a placeholder is the same colour as a typed
+   * value. Italic is what tells the two apart — a change of shape
+   * rather than an invented shade.
+   */
+  ::placeholder {
+    font-style: italic;
+  }
+
   ::selection {
-    background: var(--color-brand);
-    color: var(--color-cream);
+    background: var(--color-maroon);
+    color: var(--color-bone);
   }
 
   ::-webkit-scrollbar {
@@ -170,21 +170,33 @@
     height: 10px;
   }
   ::-webkit-scrollbar-track {
-    background: var(--color-sunken);
+    background: var(--color-bone);
   }
   ::-webkit-scrollbar-thumb {
-    background: var(--color-hairline);
+    background: var(--color-hairline-light);
     border-radius: 0;
   }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #cbbfad;
-  }
 
-  /* Keyboard focus is a maroon ring everywhere. Mouse users never see
+  /* Keyboard focus is a maroon ring on paper. Mouse users never see
      it; keyboard users always do. */
   :focus-visible {
-    outline: 2px solid var(--color-brand);
+    outline: 2px solid var(--color-maroon);
     outline-offset: 2px;
+  }
+
+  /*
+   * Maroon is not allowed to touch velvet, and a maroon ring on a
+   * near-black ground is illegible anyway (1.4:1). Dark scenes mark
+   * themselves with data-ground="velvet" and the ring, the selection
+   * highlight and the autofill patch all switch to gold underneath.
+   */
+  [data-ground="velvet"] :focus-visible,
+  [data-ground="velvet"]:focus-visible {
+    outline-color: var(--color-gold);
+  }
+  [data-ground="velvet"] ::selection {
+    background: var(--color-gold);
+    color: var(--color-velvet);
   }
 }
 
@@ -219,6 +231,30 @@
     font-weight: 400;
     font-variation-settings: "opsz" 72, "wght" 380;
     letter-spacing: -0.02em;
+  }
+
+  /*
+   * Spec type: the mono cut that carries stone facts, carat weights
+   * and prices inside a vitrine. Pair it with text-gold, and only on
+   * velvet — on paper gold is a hairline, so .spec belongs to the
+   * dark ground exclusively.
+   */
+  .spec {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+
+  /*
+   * With no muted ink, secondary copy on paper steps down by size and
+   * case rather than by fading toward the canvas. This is that step,
+   * named so it stays consistent instead of being re-invented per
+   * component.
+   */
+  .quiet {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    letter-spacing: 0.01em;
   }
 
   /* Horizontal rails hide their scrollbar — the peeking next card is

@@ -13,15 +13,26 @@
  * sparkle image would undercut exactly the credibility the copy is
  * trying to build. Numbers on hairlines do the opposite.
  *
+ * The spec branch is the site's vitrine: the whole band goes velvet and
+ * the spec values are set in gold mono, which is the one use gold has
+ * for type. That works precisely because the band then carries no
+ * maroon — the two accents are never allowed to sit beside each other.
+ *
  * When the case has moissanite pieces in it, they take over the right
  * column and the spec card steps aside — at that point the products are
- * the better argument.
+ * the better argument. The band reverts to paper with it, because a
+ * product card is a paper object and its badges are maroon.
  */
 
 import { ArrowRight } from 'lucide-react'
 import { ProductCard } from '~/components/commerce/ProductCard'
 import { Reveal } from '~/components/motion/Reveal'
-import { BTN_PRIMARY, BTN_SECONDARY } from '~/lib/ui'
+import {
+  BTN_PRIMARY,
+  BTN_PRIMARY_ON_VELVET,
+  BTN_SECONDARY,
+  BTN_SECONDARY_ON_VELVET,
+} from '~/lib/ui'
 import { MOISSANITE } from '~/lib/catalog'
 import type { ProductCardModel } from '~/lib/shopify/adapters'
 
@@ -43,6 +54,7 @@ export function MoissaniteBand({
   products?: ReadonlyArray<ProductCardModel>
 }) {
   const shown = products.slice(0, 2)
+  const vitrine = shown.length === 0
 
   return (
     <section
@@ -50,13 +62,38 @@ export function MoissaniteBand({
       className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16"
     >
       <Reveal>
-        <div className="grid gap-px overflow-hidden bg-hairline shadow-sm md:grid-cols-2">
-          <div className="flex flex-col justify-center bg-raised px-5 py-8 md:px-10 md:py-12">
-            <p className="text-[11px] label-wide text-brand">The stone</p>
-            <h2 className="display mt-2 text-[28px] leading-tight text-ink md:text-[36px]">
+        <div
+          data-ground={vitrine ? 'velvet' : undefined}
+          className={`grid overflow-hidden md:grid-cols-2 ${
+            vitrine
+              ? 'bg-velvet text-bone'
+              : 'gap-px border border-hairline-light bg-hairline-light'
+          }`}
+        >
+          <div
+            className={`flex flex-col justify-center px-5 py-8 md:px-10 md:py-12 ${
+              vitrine ? '' : 'bg-bone'
+            }`}
+          >
+            <p
+              className={`text-[11px] label-wide ${
+                vitrine ? 'text-bone' : 'text-maroon'
+              }`}
+            >
+              The stone
+            </p>
+            <h2
+              className={`display mt-2 text-[28px] leading-tight md:text-[36px] ${
+                vitrine ? 'text-bone' : 'text-ink'
+              }`}
+            >
               Moissanite
             </h2>
-            <p className="mt-3 max-w-[46ch] text-[15px] leading-relaxed text-ink-muted">
+            <p
+              className={`mt-3 max-w-[46ch] text-[15px] leading-relaxed ${
+                vitrine ? 'text-bone' : 'text-ink'
+              }`}
+            >
               Harder to scratch than anything but diamond, and it throws more
               colour in direct light. It buys size: the same budget sets a
               stone two or three times larger. What it does not buy is resale
@@ -64,18 +101,45 @@ export function MoissaniteBand({
             </p>
 
             <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
-              <a href={MOISSANITE.href} className={BTN_PRIMARY}>
+              <a
+                href={MOISSANITE.href}
+                className={vitrine ? BTN_PRIMARY_ON_VELVET : BTN_PRIMARY}
+              >
                 Shop moissanite
                 <ArrowRight aria-hidden size={15} strokeWidth={1.6} />
               </a>
-              <a href="/custom" className={BTN_SECONDARY}>
+              <a
+                href="/custom"
+                className={vitrine ? BTN_SECONDARY_ON_VELVET : BTN_SECONDARY}
+              >
                 Commission a setting
               </a>
             </div>
           </div>
 
-          {shown.length > 0 ? (
-            <div className="bg-raised px-5 py-8 md:px-10 md:py-12">
+          {vitrine ? (
+            <dl className="flex flex-col justify-center border-t border-hairline-dark px-5 py-8 md:border-l md:border-t-0 md:px-10 md:py-12">
+              {SPECS.map((spec, index) => (
+                <div
+                  key={spec.label}
+                  className={`flex items-baseline justify-between gap-4 py-3.5 ${
+                    index > 0 ? 'border-t border-hairline-dark' : ''
+                  }`}
+                >
+                  <dt className="text-[11px] label-wide text-bone">
+                    {spec.label}
+                  </dt>
+                  {/* The one place gold carries type: spec values inside a
+                      vitrine. 7.6:1 on velvet, and no maroon in this
+                      component for it to sit next to. */}
+                  <dd className="spec text-[15px] leading-none text-gold md:text-[16px]">
+                    {spec.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          ) : (
+            <div className="bg-bone px-5 py-8 md:px-10 md:py-12">
               <ul className="grid grid-cols-2 gap-2 md:gap-3">
                 {shown.map((product) => (
                   <li key={product.handle}>
@@ -87,24 +151,6 @@ export function MoissaniteBand({
                 ))}
               </ul>
             </div>
-          ) : (
-            <dl className="flex flex-col justify-center bg-sunken px-5 py-8 md:px-10 md:py-12">
-              {SPECS.map((spec, index) => (
-                <div
-                  key={spec.label}
-                  className={`flex items-baseline justify-between gap-4 py-3.5 ${
-                    index > 0 ? 'border-t border-hairline' : ''
-                  }`}
-                >
-                  <dt className="text-[11px] label-wide text-ink-muted">
-                    {spec.label}
-                  </dt>
-                  <dd className="display text-[18px] leading-none text-ink md:text-[20px]">
-                    {spec.value}
-                  </dd>
-                </div>
-              ))}
-            </dl>
           )}
         </div>
       </Reveal>

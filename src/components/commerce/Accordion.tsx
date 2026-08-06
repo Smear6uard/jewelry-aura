@@ -24,19 +24,19 @@ interface AccordionProps {
 
 export function Accordion({ items }: AccordionProps) {
   return (
-    <div className="border-t border-hairline">
+    <div className="border-t border-hairline-light">
       {items.map((item, index) => (
         <details
           key={item.title}
           open={index === 0}
-          className="group border-b border-hairline"
+          className="group border-b border-hairline-light"
         >
           {/* 52px row: a summary is a tap target on a phone. */}
           <summary className="flex min-h-[52px] cursor-pointer list-none items-center justify-between gap-4 text-[12px] label text-ink marker:content-none [&::-webkit-details-marker]:hidden">
             {item.title}
             <span
               aria-hidden
-              className="relative h-3 w-3 shrink-0 text-ink-muted"
+              className="relative h-3 w-3 shrink-0 text-ink"
             >
               <span className="absolute left-0 top-1/2 h-px w-3 -translate-y-1/2 bg-current" />
               <span className="absolute left-1/2 top-0 h-3 w-px -translate-x-1/2 bg-current transition-transform duration-hover ease-apple group-open:scale-y-0 motion-reduce:transition-none" />
@@ -47,7 +47,7 @@ export function Accordion({ items }: AccordionProps) {
             {item.body.map((paragraph) => (
               <p
                 key={paragraph}
-                className="mb-2.5 max-w-[62ch] text-[15px] leading-relaxed text-ink-muted last:mb-0"
+                className="mb-2.5 max-w-[62ch] text-[15px] leading-relaxed text-ink last:mb-0"
               >
                 {paragraph}
               </p>
@@ -57,9 +57,9 @@ export function Accordion({ items }: AccordionProps) {
                 {item.list.map((entry) => (
                   <li
                     key={entry}
-                    className="flex gap-2.5 text-[15px] leading-relaxed text-ink-muted"
+                    className="flex gap-2.5 text-[15px] leading-relaxed text-ink"
                   >
-                    <span aria-hidden className="mt-2.5 h-px w-3 shrink-0 bg-brand" />
+                    <span aria-hidden className="mt-2.5 h-px w-3 shrink-0 bg-maroon" />
                     {entry}
                   </li>
                 ))}

@@ -30,14 +30,14 @@ interface SortProps {
 export function SortSelect({ value, hrefFor }: SortProps) {
   return (
     <label className="relative hidden items-center gap-2 md:inline-flex">
-      <span className="text-[11px] label text-ink-muted">Sort</span>
+      <span className="text-[11px] label text-ink">Sort</span>
       <span className="relative">
         <select
           value={value}
           onChange={(event) => {
             window.location.assign(hrefFor(event.target.value as SortKey))
           }}
-          className="cursor-pointer appearance-none bg-raised py-2.5 pl-3.5 pr-9 text-[14px] text-ink shadow-sm transition-shadow duration-hover ease-apple hover:shadow-md focus:outline-none motion-reduce:transition-none"
+          className="cursor-pointer appearance-none bg-bone py-2.5 pl-3.5 pr-9 text-[14px] text-ink border border-hairline-light transition-colors duration-hover ease-apple focus:outline-none motion-reduce:transition-none"
         >
           {SORT_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
@@ -49,7 +49,7 @@ export function SortSelect({ value, hrefFor }: SortProps) {
           aria-hidden
           size={14}
           strokeWidth={1.6}
-          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted"
+          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink"
         />
       </span>
     </label>
@@ -70,7 +70,7 @@ export function SortSheet({ value, hrefFor }: SortProps) {
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
         aria-expanded={open}
-        className="inline-flex min-h-11 items-center gap-2 bg-raised px-4 text-[12px] label text-ink shadow-sm transition-shadow duration-hover ease-apple hover:shadow-md motion-reduce:transition-none"
+        className="inline-flex min-h-11 items-center gap-2 bg-bone px-4 text-[12px] label text-ink border border-hairline-light transition-colors duration-hover ease-apple motion-reduce:transition-none"
       >
         <ArrowDownUp aria-hidden size={15} strokeWidth={1.5} />
         Sort
@@ -88,12 +88,12 @@ export function SortSheet({ value, hrefFor }: SortProps) {
           {SORT_OPTIONS.map((option) => {
             const selected = option.value === value
             return (
-              <li key={option.value} className="border-b border-hairline last:border-b-0">
+              <li key={option.value} className="border-b border-hairline-light last:border-b-0">
                 <a
                   href={hrefFor(option.value)}
                   aria-current={selected ? 'true' : undefined}
                   className={`flex min-h-12 items-center justify-between gap-3 text-[15px] ${
-                    selected ? 'font-medium text-ink' : 'text-ink-muted'
+                    selected ? 'font-medium text-ink' : 'text-ink'
                   }`}
                 >
                   {option.label}
@@ -102,7 +102,7 @@ export function SortSheet({ value, hrefFor }: SortProps) {
                       aria-hidden
                       size={17}
                       strokeWidth={1.8}
-                      className="shrink-0 text-brand"
+                      className="shrink-0 text-maroon"
                     />
                   )}
                 </a>
@@ -110,7 +110,7 @@ export function SortSheet({ value, hrefFor }: SortProps) {
             )
           })}
         </ul>
-        <p className="mt-4 text-[12px] text-ink-muted">
+        <p className="mt-4 text-[12px] text-ink">
           Currently sorted by {active?.label.toLowerCase() ?? 'featured'}.
         </p>
       </BottomSheet>

@@ -7,8 +7,8 @@
  * who already know what they want, not a second, differently-worded
  * taxonomy.
  *
- * Slides in from the left, full height, white on the cream canvas at
- * --shadow-lg.
+ * Slides in from the left, full height, bone on the paper canvas behind
+ * a hairline right edge.
  *
  * THE SIX DOORS
  * -------------
@@ -69,8 +69,8 @@ const ROW_LABEL =
 // not by class-string order, and ink-muted wins that race.
 const SUB_LINK_BASE =
   'flex min-h-11 items-center text-[14px] transition-colors duration-hover ease-apple motion-reduce:transition-none'
-const SUB_LINK = `${SUB_LINK_BASE} text-ink-muted hover:text-ink`
-const SUB_LINK_BRAND = `${SUB_LINK_BASE} text-brand hover:text-brand-hover`
+const SUB_LINK = `${SUB_LINK_BASE} text-ink hover:text-maroon`
+const SUB_LINK_BRAND = `${SUB_LINK_BASE} text-maroon hover:text-ink`
 
 interface MenuDrawerProps {
   open: boolean
@@ -131,7 +131,7 @@ export function MenuDrawer({ open, onClose }: MenuDrawerProps) {
             type="button"
             aria-label="Close menu"
             tabIndex={-1}
-            className="absolute inset-0 h-full w-full cursor-default bg-ink/35"
+            className="absolute inset-0 h-full w-full cursor-default bg-velvet/40"
             onClick={onClose}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -144,19 +144,19 @@ export function MenuDrawer({ open, onClose }: MenuDrawerProps) {
             aria-modal="true"
             aria-label="Shop menu"
             tabIndex={-1}
-            className="absolute left-0 top-0 flex h-full w-full max-w-[21rem] flex-col bg-raised text-ink shadow-lg outline-none sm:max-w-[23rem]"
+            className="absolute left-0 top-0 flex h-full w-full max-w-[21rem] flex-col border-r border-hairline-light bg-bone text-ink outline-none sm:max-w-[23rem]"
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{ duration: DURATION.content, ease: easeOutExpo }}
           >
-            <header className="flex items-center justify-between border-b border-hairline px-5 py-3">
+            <header className="flex items-center justify-between border-b border-hairline-light px-5 py-3">
               <span className="display text-[18px] text-ink">Jewelry Aura</span>
               <button
                 type="button"
                 onClick={onClose}
                 aria-label="Close menu"
-                className="-mr-2.5 flex h-11 w-11 items-center justify-center text-ink-muted transition-colors duration-hover ease-apple hover:text-ink"
+                className="-mr-2.5 flex h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-maroon"
               >
                 <X aria-hidden size={19} strokeWidth={1.5} />
               </button>
@@ -169,7 +169,7 @@ export function MenuDrawer({ open, onClose }: MenuDrawerProps) {
             >
               <ul>
                 {CATEGORIES.map((category) => (
-                  <li key={category.handle} className="border-b border-hairline">
+                  <li key={category.handle} className="border-b border-hairline-light">
                     <div className="flex items-stretch">
                       <a
                         href={`/collections/${category.handle}`}
@@ -216,7 +216,7 @@ export function MenuDrawer({ open, onClose }: MenuDrawerProps) {
                  * answer to "what's in Women's" is the five rows above
                  * this one, and offering them again is the answer.
                  */}
-                <li className="border-b border-hairline">
+                <li className="border-b border-hairline-light">
                   <button
                     type="button"
                     onClick={() => toggle(WOMENS.handle)}
@@ -224,7 +224,7 @@ export function MenuDrawer({ open, onClose }: MenuDrawerProps) {
                     className="flex w-full items-stretch text-left"
                   >
                     <span className={ROW_LABEL}>{WOMENS.label}</span>
-                    <span className="flex w-12 items-center justify-center text-ink-muted">
+                    <span className="flex w-12 items-center justify-center text-ink">
                       <Chevron open={expanded === WOMENS.handle} />
                     </span>
                   </button>
@@ -248,17 +248,17 @@ export function MenuDrawer({ open, onClose }: MenuDrawerProps) {
                 </li>
 
                 {FLAT_ROWS.map((row) => (
-                  <li key={row.href} className="border-b border-hairline">
+                  <li key={row.href} className="border-b border-hairline-light">
                     <a href={row.href} className={ROW_LABEL}>
                       {row.label}
                     </a>
                   </li>
                 ))}
 
-                <li className="border-b border-hairline">
+                <li className="border-b border-hairline-light">
                   <a
                     href="/collections/sale"
-                    className="flex min-h-12 items-center px-5 text-[15px] font-medium text-brand"
+                    className="flex min-h-12 items-center px-5 text-[15px] font-medium text-maroon"
                   >
                     Sale
                   </a>
@@ -266,7 +266,7 @@ export function MenuDrawer({ open, onClose }: MenuDrawerProps) {
               </ul>
 
               <div className="px-5 py-6">
-                <p className="text-[11px] label-wide text-ink-muted">Services</p>
+                <p className="text-[11px] label-wide text-ink">Services</p>
                 <ul className="mt-2 flex flex-col">
                   {FOOTER_SERVICE_LINKS.map((link) => (
                     <li key={link.href}>
@@ -281,7 +281,7 @@ export function MenuDrawer({ open, onClose }: MenuDrawerProps) {
 
             {/* Account and orders sit at the bottom, in the thumb's reach
                 and out of the way of the categories people came for. */}
-            <footer className="safe-bottom border-t border-hairline px-5 pt-3">
+            <footer className="safe-bottom border-t border-hairline-light px-5 pt-3">
               <a
                 href="/pages/orders"
                 className="flex min-h-11 items-center gap-2.5 text-[14px] font-medium text-ink"
@@ -291,7 +291,7 @@ export function MenuDrawer({ open, onClose }: MenuDrawerProps) {
               </a>
               <a
                 href={STORE.phoneHref}
-                className="flex min-h-11 items-center gap-2.5 text-[14px] text-ink-muted"
+                className="flex min-h-11 items-center gap-2.5 text-[14px] text-ink"
               >
                 <Phone aria-hidden size={16} strokeWidth={1.5} />
                 {STORE.phone}
@@ -332,7 +332,7 @@ function DisclosureButton({
       onClick={onClick}
       aria-expanded={expanded}
       aria-label={label}
-      className="flex w-12 items-center justify-center text-ink-muted transition-colors duration-hover ease-apple hover:text-ink"
+      className="flex w-12 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-maroon"
     >
       <Chevron open={expanded} />
     </button>
@@ -354,7 +354,7 @@ function Disclosure({
           animate={{ height: 'auto', opacity: 1 }}
           exit={{ height: 0, opacity: 0 }}
           transition={{ duration: DURATION.micro, ease: easeOutExpo }}
-          className="overflow-hidden bg-sunken"
+          className="overflow-hidden bg-bone"
         >
           {children}
         </motion.div>

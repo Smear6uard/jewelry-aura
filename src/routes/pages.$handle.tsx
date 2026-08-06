@@ -64,7 +64,7 @@ export const Route = createFileRoute('/pages/$handle')({
       <h1 className="display text-[28px] text-ink md:text-[38px]">
         That page doesn’t exist
       </h1>
-      <p className="mt-3 max-w-[52ch] text-[15px] text-ink-muted">
+      <p className="mt-3 max-w-[52ch] text-[15px] text-ink">
         The links below cover most of what people come here looking for.
       </p>
       <ul className="mt-6 flex flex-wrap gap-2">
@@ -72,7 +72,7 @@ export const Route = createFileRoute('/pages/$handle')({
           <li key={link.href}>
             <a
               href={link.href}
-              className="inline-flex min-h-11 items-center bg-raised px-4 text-[13px] text-ink shadow-sm transition-shadow duration-hover ease-apple hover:shadow-md motion-reduce:transition-none"
+              className="inline-flex min-h-11 items-center bg-bone px-4 text-[13px] text-ink border border-hairline-light transition-colors duration-hover ease-apple motion-reduce:transition-none"
             >
               {link.label}
             </a>
@@ -101,19 +101,19 @@ function StaticPage() {
           <h1 className="display text-[30px] leading-tight text-ink md:text-[40px]">
             {page.title}
           </h1>
-          <p className="mt-3 max-w-[44ch] text-[15px] leading-relaxed text-ink-muted">
+          <p className="mt-3 max-w-[44ch] text-[15px] leading-relaxed text-ink">
             {page.summary}
           </p>
 
-          <div className="mt-6 border-t border-hairline pt-5">
-            <p className="text-[11px] label-wide text-ink-muted">Still stuck?</p>
+          <div className="mt-6 border-t border-hairline-light pt-5">
+            <p className="text-[11px] label-wide text-ink">Still stuck?</p>
             <a
               href={STORE.phoneHref}
-              className="mt-2 inline-flex min-h-11 items-center text-[16px] font-medium text-brand transition-colors duration-hover ease-apple hover:text-brand-hover motion-reduce:transition-none"
+              className="mt-2 inline-flex min-h-11 items-center text-[16px] font-medium text-maroon transition-colors duration-hover ease-apple hover:text-ink motion-reduce:transition-none"
             >
               {STORE.phone}
             </a>
-            <p className="text-[13px] text-ink-muted">{STORE.replyWindow}</p>
+            <p className="text-[13px] text-ink">{STORE.replyWindow}</p>
           </div>
         </header>
 
@@ -121,7 +121,7 @@ function StaticPage() {
           {page.blocks.map((block, index) => (
             <section
               key={index}
-              className="border-t border-hairline py-6 first:border-t-0 first:pt-0"
+              className="border-t border-hairline-light py-6 first:border-t-0 first:pt-0"
             >
               {block.heading && (
                 <h2 className="text-[17px] font-medium text-ink">
@@ -131,7 +131,7 @@ function StaticPage() {
               {block.body?.map((paragraph) => (
                 <p
                   key={paragraph}
-                  className="mt-3 max-w-[68ch] text-[16px] leading-relaxed text-ink-muted first:mt-2"
+                  className="mt-3 max-w-[68ch] text-[16px] leading-relaxed text-ink first:mt-2"
                 >
                   {paragraph}
                 </p>
@@ -141,11 +141,11 @@ function StaticPage() {
                   {block.list.map((entry) => (
                     <li
                       key={entry}
-                      className="flex gap-3 text-[16px] leading-relaxed text-ink-muted"
+                      className="flex gap-3 text-[16px] leading-relaxed text-ink"
                     >
                       <span
                         aria-hidden
-                        className="mt-3 h-px w-3.5 shrink-0 bg-brand"
+                        className="mt-3 h-px w-3.5 shrink-0 bg-maroon"
                       />
                       {entry}
                     </li>

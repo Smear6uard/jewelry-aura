@@ -47,7 +47,7 @@ function CartPage() {
       <h1 className="display text-[30px] leading-none text-ink md:text-[40px]">
         Your cart
         {cart && cart.totalQuantity > 0 && (
-          <span className="ml-3 text-[18px] text-ink-muted">
+          <span className="ml-3 text-[18px] text-ink">
             {cart.totalQuantity} {cart.totalQuantity === 1 ? 'item' : 'items'}
           </span>
         )}
@@ -60,14 +60,14 @@ function CartPage() {
       {lines.length > 0 && cart && (
         <div className="mt-8 grid gap-8 md:grid-cols-12 md:gap-10">
           <div className="md:col-span-7 lg:col-span-8">
-            <ul className="divide-y divide-hairline bg-raised px-4 shadow-sm">
+            <ul className="divide-y divide-hairline-light bg-bone px-4 border border-hairline-light">
               {lines.map((line) => (
                 <CartLineItem key={line.id} line={line} size="page" />
               ))}
             </ul>
             <a
               href="/shop"
-              className="mt-4 inline-flex min-h-11 items-center text-[12px] label text-ink-muted underline decoration-hairline underline-offset-4 transition-colors duration-hover ease-apple hover:text-ink motion-reduce:transition-none"
+              className="mt-4 inline-flex min-h-11 items-center text-[12px] label text-ink underline decoration-hairline-light underline-offset-4 transition-colors duration-hover ease-apple hover:text-maroon motion-reduce:transition-none"
             >
               Continue shopping
             </a>
@@ -75,7 +75,7 @@ function CartPage() {
 
           <aside className="md:col-span-5 lg:col-span-4">
             <div
-              className="bg-raised p-5 shadow-sm md:sticky"
+              className="bg-bone p-5 border border-hairline-light md:sticky"
               style={{ top: 'calc(var(--header-h) + 1.5rem)' }}
             >
               <h2 className="text-[12px] label text-ink">Summary</h2>
@@ -86,13 +86,13 @@ function CartPage() {
                 />
               </div>
 
-              <div className="mt-5 flex items-baseline justify-between border-t border-hairline pt-4">
-                <span className="text-[14px] text-ink-muted">Subtotal</span>
+              <div className="mt-5 flex items-baseline justify-between border-t border-hairline-light pt-4">
+                <span className="text-[14px] text-ink">Subtotal</span>
                 <span className="text-[20px] font-medium text-ink">
                   {cart.subtotal}
                 </span>
               </div>
-              <p className="mt-1.5 text-[13px] text-ink-muted">
+              <p className="mt-1.5 text-[13px] text-ink">
                 Shipping and tax calculated at checkout.
               </p>
 
@@ -103,7 +103,7 @@ function CartPage() {
                 Check out
               </a>
 
-              <ul className="mt-5 flex flex-col gap-2 border-t border-hairline pt-4 text-[13px] text-ink-muted">
+              <ul className="mt-5 flex flex-col gap-2 border-t border-hairline-light pt-4 text-[13px] text-ink">
                 <li>Free insured shipping over ${FREE_SHIPPING_THRESHOLD}</li>
                 <li>30-day returns on unworn stock pieces</li>
                 <li>Lifetime warranty on everything we make</li>
@@ -121,10 +121,10 @@ function CartSkeleton() {
     <div className="mt-8 flex flex-col gap-6" aria-hidden>
       {[0, 1].map((i) => (
         <div key={i} className="flex animate-pulse gap-4">
-          <div className="h-28 w-24 bg-sunken" />
+          <div className="h-28 w-24 bg-bone" />
           <div className="flex-1 space-y-3 pt-2">
-            <div className="h-3 w-1/2 bg-sunken" />
-            <div className="h-3 w-1/4 bg-sunken" />
+            <div className="h-3 w-1/2 bg-bone" />
+            <div className="h-3 w-1/4 bg-bone" />
           </div>
         </div>
       ))}
@@ -134,11 +134,11 @@ function CartSkeleton() {
 
 function EmptyCart() {
   return (
-    <div className="mt-8 bg-raised px-6 py-20 text-center shadow-sm">
-      <p className="text-[11px] label-wide text-ink-muted">
+    <div className="mt-8 bg-bone px-6 py-20 text-center border border-hairline-light">
+      <p className="text-[11px] label-wide text-ink">
         Your cart is empty
       </p>
-      <p className="mx-auto mt-3 max-w-sm text-[15px] text-ink-muted">
+      <p className="mx-auto mt-3 max-w-sm text-[15px] text-ink">
         Chains, pendants and one-of-one commissions are all a tap away.
       </p>
       <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">

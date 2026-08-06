@@ -5,8 +5,9 @@
  * "you may also like" strip all render this component. Built once so a
  * change to card density or buy behaviour lands on every surface.
  *
- * Anatomy — a white tile on the cream canvas, separated by a luminance
- * step and --shadow-sm rather than by a border:
+ * Anatomy — a bone tile on the paper canvas. Bone is only 1.09:1 against
+ * paper, so the hairline is what defines the card; there is no shadow in
+ * this palette to lean on:
  *
  *   image      edge-to-edge at the top, locked 4:5, no padding, no frame
  *   badge      top-left; Sale is a maroon fill, New and One of one are
@@ -56,7 +57,7 @@ export function ProductCard({
   const soldOut = !product.availableForSale
 
   return (
-    <article className="group/card relative flex h-full flex-col bg-raised shadow-sm transition-[box-shadow,transform] duration-hover ease-apple md:hover:-translate-y-0.5 md:hover:shadow-md motion-reduce:transition-none">
+    <article className="group/card relative flex h-full flex-col bg-bone border border-hairline-light transition-transform duration-hover ease-apple md:hover:-translate-y-0.5 motion-reduce:transition-none">
       <div className="relative aspect-[4/5] w-full overflow-hidden">
         {product.image ? (
           <>
@@ -93,11 +94,11 @@ export function ProductCard({
         ) : (
           <div
             aria-hidden
-            className="flex h-full w-full items-center justify-center bg-sunken"
+            className="flex h-full w-full items-center justify-center bg-bone"
           >
             {/* A piece awaiting photography leaves a gap in the grid's
                 content, not in its rhythm. */}
-            <span className="display text-3xl text-ink-subtle">JA</span>
+            <span className="display text-3xl text-hairline-light">JA</span>
           </div>
         )}
 
@@ -114,7 +115,7 @@ export function ProductCard({
           <Link
             to="/products/$handle"
             params={{ handle: product.handle }}
-            className="transition-colors duration-hover ease-apple after:absolute after:inset-0 after:content-[''] hover:text-brand focus-visible:text-brand motion-reduce:transition-none"
+            className="transition-colors duration-hover ease-apple after:absolute after:inset-0 after:content-[''] hover:text-maroon focus-visible:text-maroon motion-reduce:transition-none"
           >
             {product.title}
           </Link>
@@ -127,7 +128,7 @@ export function ProductCard({
         {product.rating && (
           <p className="mt-1.5 flex items-center gap-1.5">
             <StarRating value={product.rating.value} />
-            <span className="text-[12px] text-ink-muted">
+            <span className="text-[12px] text-ink">
               ({product.rating.count})
             </span>
           </p>
@@ -157,7 +158,7 @@ function Price({ product }: { product: ProductCardModel }) {
             z-index to be the thing that gets tapped. */}
         <a
           href="/custom"
-          className="relative z-20 inline-flex min-h-[24px] items-center text-[13px] font-medium text-brand underline decoration-brand/40 underline-offset-4 transition-colors duration-hover ease-apple hover:text-brand-hover md:text-[14px] motion-reduce:transition-none"
+          className="relative z-20 inline-flex min-h-[24px] items-center text-[13px] font-medium text-maroon underline decoration-maroon underline-offset-4 transition-colors duration-hover ease-apple hover:text-ink md:text-[14px] motion-reduce:transition-none"
         >
           Enquire
         </a>
@@ -171,7 +172,7 @@ function Price({ product }: { product: ProductCardModel }) {
         {product.priceFrom ? `From ${product.price}` : product.price}
       </span>
       {product.compareAtPrice && (
-        <s className="text-[12px] text-ink-muted">{product.compareAtPrice}</s>
+        <s className="text-[12px] text-ink">{product.compareAtPrice}</s>
       )}
     </p>
   )
@@ -193,16 +194,17 @@ const BADGE_LABEL: Record<ProductBadge, string> = {
 }
 
 /**
- * Sale takes the maroon fill — it is the only badge making a claim about
- * money. New and One of one are white plates with ink type: they mark a
- * piece as recent or unrepeatable, not as discounted, and sharing the
- * sale colour would blur that. Sold out is the quietest of the four.
+ * One of one takes the maroon fill, because that stamp is the one badge
+ * maroon is reserved for. Sale is an ink plate: it makes a claim about
+ * money, which is worth a solid fill, but it is not the brand mark. New
+ * is a bone plate on a hairline, and Sold out is the same plate filled
+ * to the hairline — present, legible at 12.6:1, and clearly spent.
  */
 const BADGE_STYLE: Record<ProductBadge, string> = {
-  sale: 'bg-brand text-cream',
-  new: 'bg-raised text-ink shadow-sm',
-  'one-of-one': 'bg-raised text-ink shadow-sm',
-  'sold-out': 'bg-ink-subtle text-cream',
+  sale: 'bg-ink text-bone',
+  new: 'bg-bone text-ink border border-hairline-light',
+  'one-of-one': 'bg-maroon text-bone',
+  'sold-out': 'bg-hairline-light text-ink',
 }
 
 function Badge({ kind }: { kind: ProductBadge }) {

@@ -93,12 +93,12 @@ export function FilterSheet(props: FilterProps) {
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
         aria-expanded={open}
-        className="inline-flex min-h-11 items-center gap-2 bg-raised px-4 text-[12px] label text-ink shadow-sm transition-shadow duration-hover ease-apple hover:shadow-md motion-reduce:transition-none"
+        className="inline-flex min-h-11 items-center gap-2 bg-bone px-4 text-[12px] label text-ink border border-hairline-light transition-colors duration-hover ease-apple motion-reduce:transition-none"
       >
         <SlidersHorizontal aria-hidden size={15} strokeWidth={1.5} />
         Filter
         {count > 0 && (
-          <span className="ml-0.5 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-brand px-1 text-[10px] font-semibold leading-none text-cream">
+          <span className="ml-0.5 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-maroon px-1 text-[10px] font-semibold leading-none text-bone">
             {count}
           </span>
         )}
@@ -133,7 +133,7 @@ function Panel({
       {hasActiveFacets(facets) && (
         <a
           href={hrefFor(clearedFacets())}
-          className="inline-flex w-fit items-center text-[12px] label text-brand underline decoration-brand/40 underline-offset-4 transition-colors duration-hover ease-apple hover:text-brand-hover motion-reduce:transition-none"
+          className="inline-flex w-fit items-center text-[12px] label text-maroon underline decoration-maroon underline-offset-4 transition-colors duration-hover ease-apple hover:text-ink motion-reduce:transition-none"
         >
           Clear all filters
         </a>
@@ -145,12 +145,12 @@ function Panel({
             <li key={category.handle}>
               <a
                 href={`/collections/${category.handle}`}
-                className={`flex items-center text-[13px] transition-colors duration-hover ease-apple hover:text-ink motion-reduce:transition-none ${
+                className={`flex items-center text-[13px] transition-colors duration-hover ease-apple hover:text-maroon motion-reduce:transition-none ${
                   touch ? 'min-h-11' : 'py-1'
                 } ${
                   activeCategory === category.handle
                     ? 'font-medium text-ink'
-                    : 'text-ink-muted'
+                    : 'text-ink'
                 }`}
               >
                 {category.label}
@@ -160,7 +160,7 @@ function Panel({
           <li>
             <a
               href="/shop"
-              className={`flex items-center text-[13px] text-ink-muted transition-colors duration-hover ease-apple hover:text-ink motion-reduce:transition-none ${
+              className={`flex items-center text-[13px] text-ink transition-colors duration-hover ease-apple hover:text-maroon motion-reduce:transition-none ${
                 touch ? 'min-h-11' : 'py-1'
               }`}
             >
@@ -239,7 +239,7 @@ function Group({
 }) {
   return (
     <section>
-      <h3 className="mb-2 border-b border-hairline pb-2 text-[11px] label-wide text-ink-muted">
+      <h3 className="mb-2 border-b border-hairline-light pb-2 text-[11px] label-wide text-ink">
         {title}
       </h3>
       {children}
@@ -273,12 +273,12 @@ function FacetList({
           return (
             <li
               key={option.value}
-              className={`flex items-center justify-between gap-2 text-[13px] text-ink-subtle ${row}`}
+              className={`flex items-center justify-between gap-2 text-[13px] text-ink opacity-40 ${row}`}
             >
               <span className="flex items-center gap-2.5">
                 <span
                   aria-hidden
-                  className="inline-block h-[11px] w-[11px] shrink-0 border border-hairline"
+                  className="inline-block h-[11px] w-[11px] shrink-0 border border-hairline-light"
                 />
                 {option.label}
               </span>
@@ -292,20 +292,20 @@ function FacetList({
             <a
               href={hrefFor(selected ? undefined : option.value)}
               aria-pressed={selected}
-              className={`flex items-center justify-between gap-2 text-[13px] transition-colors duration-hover ease-apple hover:text-ink motion-reduce:transition-none ${row} ${
-                selected ? 'font-medium text-ink' : 'text-ink-muted'
+              className={`flex items-center justify-between gap-2 text-[13px] transition-colors duration-hover ease-apple hover:text-maroon motion-reduce:transition-none ${row} ${
+                selected ? 'font-medium text-ink' : 'text-ink'
               }`}
             >
               <span className="flex items-center gap-2.5">
                 <span
                   aria-hidden
                   className={`inline-block h-[11px] w-[11px] shrink-0 border ${
-                    selected ? 'border-brand bg-brand' : 'border-hairline'
+                    selected ? 'border-maroon bg-maroon' : 'border-hairline-light'
                   }`}
                 />
                 {option.label}
               </span>
-              <span className="text-[12px] tabular-nums text-ink-muted">
+              <span className="text-[12px] tabular-nums text-ink">
                 {count}
               </span>
             </a>

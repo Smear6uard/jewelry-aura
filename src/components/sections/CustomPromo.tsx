@@ -29,10 +29,10 @@ export function CustomPromo() {
       className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16"
     >
       <Reveal>
-        <div className="grid overflow-hidden shadow-sm md:grid-cols-2">
+        <div className="grid overflow-hidden border border-hairline-light md:grid-cols-2">
           {/* 4:3 on phones, a full half-band on desktop. Locked ratio on
               both so nothing reflows as the photograph decodes. */}
-          <div className="aspect-[4/3] w-full overflow-hidden bg-raised md:aspect-auto md:h-full md:min-h-[380px]">
+          <div className="aspect-[4/3] w-full overflow-hidden bg-bone md:aspect-auto md:h-full md:min-h-[380px]">
             <picture>
               <source type="image/avif" srcSet={`${IMAGE}.avif`} />
               <source type="image/webp" srcSet={`${IMAGE}.webp`} />
@@ -50,12 +50,12 @@ export function CustomPromo() {
             </picture>
           </div>
 
-          <div className="flex flex-col justify-center bg-sunken px-5 py-8 md:px-10 md:py-12">
-            <p className="text-[11px] label-wide text-brand">Custom work</p>
+          <div className="flex flex-col justify-center bg-bone px-5 py-8 md:px-10 md:py-12">
+            <p className="text-[11px] label-wide text-maroon">Custom work</p>
             <h2 className="display mt-2 text-[28px] leading-tight text-ink md:text-[36px]">
               One of one
             </h2>
-            <p className="mt-3 max-w-[44ch] text-[15px] leading-relaxed text-ink-muted">
+            <p className="mt-3 max-w-[44ch] text-[15px] leading-relaxed text-ink">
               Bring a sketch, a reference or a name. We design it with you, quote
               it firmly, and set it by hand — most commissions take three to five
               weeks.

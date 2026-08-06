@@ -127,7 +127,7 @@ export function CategoryTiles({ fallbacks }: { fallbacks: TileFallbacks }) {
           <li key={tile.key}>
             <a
               href={tile.href}
-              className="group/tile relative flex aspect-[4/5] flex-col justify-end overflow-hidden bg-raised shadow-sm transition-shadow duration-hover ease-apple hover:shadow-md md:aspect-[3/4] motion-reduce:transition-none"
+              className="group/tile relative flex aspect-[4/5] flex-col justify-end overflow-hidden bg-bone border border-hairline-light transition-colors duration-hover ease-apple md:aspect-[3/4] motion-reduce:transition-none"
             >
               {tile.asset ? (
                 <picture>
@@ -162,7 +162,7 @@ export function CategoryTiles({ fallbacks }: { fallbacks: TileFallbacks }) {
                   tile rather than reversed out of a scrim over the
                   photograph. Nothing translucent and no filter touches the
                   image — on cream, dark velvet separates on its own. */}
-              <span className="relative z-10 m-2 flex items-center justify-between gap-2 bg-base px-3 py-2.5 md:m-2.5 md:px-3.5">
+              <span className="relative z-10 m-2 flex items-center justify-between gap-2 bg-paper px-3 py-2.5 md:m-2.5 md:px-3.5">
                 <span className="text-[13px] label text-ink md:text-[14px]">
                   {tile.label}
                 </span>
@@ -170,7 +170,7 @@ export function CategoryTiles({ fallbacks }: { fallbacks: TileFallbacks }) {
                   aria-hidden
                   size={15}
                   strokeWidth={1.6}
-                  className="shrink-0 text-brand transition-transform duration-hover ease-apple group-hover/tile:translate-x-0.5 motion-reduce:transition-none"
+                  className="shrink-0 text-maroon transition-transform duration-hover ease-apple group-hover/tile:translate-x-0.5 motion-reduce:transition-none"
                 />
               </span>
             </a>

@@ -27,7 +27,7 @@ export function FreeShippingMeter({ subtotal }: FreeShippingMeterProps) {
 
   return (
     <div>
-      <p className="text-[13px] text-ink-muted">
+      <p className="text-[13px] text-ink">
         {reached ? (
           <span className="font-medium text-ink">Free shipping unlocked.</span>
         ) : (
@@ -40,7 +40,7 @@ export function FreeShippingMeter({ subtotal }: FreeShippingMeterProps) {
         )}
       </p>
       <div
-        className="mt-2 h-[4px] w-full overflow-hidden bg-hairline"
+        className="mt-2 h-[4px] w-full overflow-hidden bg-hairline-light"
         role="progressbar"
         aria-valuemin={0}
         aria-valuemax={FREE_SHIPPING_THRESHOLD}
@@ -55,8 +55,8 @@ export function FreeShippingMeter({ subtotal }: FreeShippingMeterProps) {
           style={{
             width: `${percent}%`,
             backgroundColor: reached
-              ? 'var(--color-brand-deep)'
-              : 'var(--color-brand)',
+              ? 'var(--color-ink)'
+              : 'var(--color-maroon)',
           }}
         />
       </div>

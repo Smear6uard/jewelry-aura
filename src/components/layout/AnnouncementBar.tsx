@@ -1,11 +1,13 @@
 /**
- * components/layout/AnnouncementBar.tsx — the solid maroon strip at the
- * very top of every page.
+ * components/layout/AnnouncementBar.tsx — the velvet strip at the very
+ * top of every page.
  *
- * The deepest maroon on the site, and the first thing above the cream
- * canvas. It earns the saturation: 36px of it at the top of the viewport
- * reads as a shop banner, and it is what tells the eye the cream below
- * is a decision rather than a default.
+ * The first thing above the paper canvas, and the smallest of the three
+ * velvet surfaces. It does not need saturation to work: 36px of near-
+ * black at the top of the viewport reads as a shop banner, and it is
+ * what tells the eye the paper below is a decision rather than a
+ * default. Maroon is deliberately absent — it is the interactive accent,
+ * and nothing in this bar is a purchase.
  *
  * Messages rotate on a slow crossfade. Under prefers-reduced-motion the
  * rotation stops and both promises are shown on one line — the content
@@ -61,7 +63,8 @@ export function AnnouncementBar() {
   return (
     <div
       data-announcement
-      className="relative z-[55] bg-brand-deep text-cream"
+      data-ground="velvet"
+      className="relative z-[55] bg-velvet text-bone"
       role="region"
       aria-label="Store announcements"
     >
@@ -93,7 +96,7 @@ export function AnnouncementBar() {
           type="button"
           onClick={dismiss}
           aria-label="Dismiss announcement"
-          className="absolute right-1 flex h-11 w-11 items-center justify-center text-cream/75 transition-colors duration-hover ease-apple hover:text-cream"
+          className="absolute right-1 flex h-11 w-11 items-center justify-center text-bone transition-colors duration-hover ease-apple hover:text-gold"
         >
           <X aria-hidden size={15} strokeWidth={1.5} />
         </button>

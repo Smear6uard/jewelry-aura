@@ -31,11 +31,11 @@ export function SectionHeader({
 }: SectionHeaderProps) {
   return (
     <div
-      className={`flex flex-wrap items-end justify-between gap-x-8 gap-y-2 border-b border-hairline pb-4 ${className}`}
+      className={`flex flex-wrap items-end justify-between gap-x-8 gap-y-2 border-b border-hairline-light pb-4 ${className}`}
     >
       <div>
         {eyebrow && (
-          <p className="mb-1.5 text-[11px] label-wide text-brand">{eyebrow}</p>
+          <p className="mb-1.5 text-[11px] label-wide text-maroon">{eyebrow}</p>
         )}
         <h2 className="display text-[26px] leading-none text-ink md:text-[34px]">
           {title}

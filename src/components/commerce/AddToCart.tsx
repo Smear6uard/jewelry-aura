@@ -62,7 +62,7 @@ export function AddToCart({
         <a href="/custom" className={BTN_PRIMARY_BLOCK}>
           Get a price for this piece
         </a>
-        <p className="mt-3 text-[14px] leading-relaxed text-ink-muted">
+        <p className="mt-3 text-[14px] leading-relaxed text-ink">
           This one is quoted rather than listed — weight, stones and length all
           move the number. Tell us what you want and we will price it firmly.
         </p>
@@ -73,13 +73,13 @@ export function AddToCart({
   return (
     <div>
       <div className="flex gap-2">
-        <div className="flex shrink-0 items-center bg-raised shadow-sm">
+        <div className="flex shrink-0 items-center bg-bone border border-hairline-light">
           <button
             type="button"
             disabled={unavailable || quantity <= 1}
             onClick={() => setQuantity((q) => Math.max(1, q - 1))}
             aria-label="Decrease quantity"
-            className="flex h-12 w-11 items-center justify-center text-ink-muted transition-colors duration-hover ease-apple hover:text-ink disabled:opacity-30 motion-reduce:transition-none"
+            className="flex h-12 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-maroon disabled:opacity-30 motion-reduce:transition-none"
           >
             <Minus aria-hidden size={15} strokeWidth={1.6} />
           </button>
@@ -94,7 +94,7 @@ export function AddToCart({
             disabled={unavailable || quantity >= MAX_QUANTITY}
             onClick={() => setQuantity((q) => Math.min(MAX_QUANTITY, q + 1))}
             aria-label="Increase quantity"
-            className="flex h-12 w-11 items-center justify-center text-ink-muted transition-colors duration-hover ease-apple hover:text-ink disabled:opacity-30 motion-reduce:transition-none"
+            className="flex h-12 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-maroon disabled:opacity-30 motion-reduce:transition-none"
           >
             <Plus aria-hidden size={15} strokeWidth={1.6} />
           </button>
@@ -107,7 +107,7 @@ export function AddToCart({
           onClick={onClick}
           className={
             unavailable
-              ? 'flex min-h-12 flex-1 cursor-not-allowed items-center justify-center bg-sunken px-6 text-[12px] label text-ink-muted'
+              ? 'flex min-h-12 flex-1 cursor-not-allowed items-center justify-center bg-bone px-6 text-[12px] label text-ink'
               : `${BTN_PRIMARY} min-h-12 flex-1`
           }
         >
@@ -116,17 +116,17 @@ export function AddToCart({
       </div>
 
       {error && (
-        <p className="mt-3 text-[13px] text-brand" role="alert">
+        <p className="mt-3 text-[13px] text-maroon" role="alert">
           {error}
         </p>
       )}
 
       {soldOut && (
-        <p className="mt-3 text-[14px] text-ink-muted">
+        <p className="mt-3 text-[14px] text-ink">
           This one is gone, but we make them.{' '}
           <a
             href="/custom"
-            className="text-brand underline decoration-brand/40 underline-offset-4 transition-colors duration-hover ease-apple hover:text-brand-hover motion-reduce:transition-none"
+            className="text-maroon underline decoration-maroon underline-offset-4 transition-colors duration-hover ease-apple hover:text-ink motion-reduce:transition-none"
           >
             Commission the same piece
           </a>

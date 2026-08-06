@@ -105,11 +105,11 @@ function CustomPage() {
   return (
     <main>
       <section className="mx-auto max-w-[1440px] px-4 pb-4 pt-10 md:px-8 md:pt-14">
-        <p className="text-[11px] label-wide text-brand">One of one</p>
+        <p className="text-[11px] label-wide text-maroon">One of one</p>
         <h1 className="display mt-3 max-w-[18ch] text-[32px] leading-[1.05] text-ink md:text-[48px]">
           Commission a piece nobody else owns
         </h1>
-        <p className="mt-4 max-w-[58ch] text-[16px] leading-relaxed text-ink-muted">
+        <p className="mt-4 max-w-[58ch] text-[16px] leading-relaxed text-ink">
           Bring a sketch, a reference or a name. We design it with you, quote it
           firmly, and set it by hand at our bench. Most commissions take three
           to five weeks.
@@ -139,16 +139,16 @@ function CustomPage() {
         <SectionHeader title="How a commission runs" eyebrow="The process" />
         <ol className="mt-6 grid gap-x-6 gap-y-8 md:mt-8 md:grid-cols-4">
           {STEPS.map((step) => (
-            <li key={step.n} className="border-t border-hairline pt-4">
+            <li key={step.n} className="border-t border-hairline-light pt-4">
               {/* Numbered because these genuinely happen in order — the
                   quote precedes the build, the build precedes the fit. */}
-              <span className="text-[11px] label-wide text-brand">
+              <span className="text-[11px] label-wide text-maroon">
                 {step.n}
               </span>
               <h3 className="mt-2 text-[16px] font-medium text-ink">
                 {step.title}
               </h3>
-              <p className="mt-2 text-[14px] leading-relaxed text-ink-muted">
+              <p className="mt-2 text-[14px] leading-relaxed text-ink">
                 {step.body}
               </p>
             </li>
@@ -219,7 +219,7 @@ function InquiryForm() {
             <div className="sm:col-span-2">
               <label
                 htmlFor="inquiry-message"
-                className="block text-[11px] label text-ink-muted"
+                className="block text-[11px] label text-ink"
               >
                 Tell us about the piece
               </label>
@@ -246,24 +246,24 @@ function InquiryForm() {
             <p
               role="status"
               className={`mt-3 max-w-[52ch] text-[14px] ${
-                outcome.ok ? 'font-medium text-brand' : 'text-ink-muted'
+                outcome.ok ? 'font-medium text-maroon' : 'text-ink'
               }`}
             >
               {outcome.message}
             </p>
           )}
 
-          <p className="mt-4 max-w-[52ch] text-[13px] text-ink-muted">
+          <p className="mt-4 max-w-[52ch] text-[13px] text-ink">
             We use what you send here to quote your piece and nothing else.
           </p>
         </form>
 
         <aside className="md:col-span-5">
-          <div className="bg-raised p-5 shadow-sm md:p-6">
+          <div className="bg-bone p-5 border border-hairline-light md:p-6">
             <h3 className="display text-[22px] leading-tight text-ink">
               Rather just talk?
             </h3>
-            <p className="mt-2 text-[15px] leading-relaxed text-ink-muted">
+            <p className="mt-2 text-[15px] leading-relaxed text-ink">
               Most commissions start with a five-minute phone call. You will
               reach the person who does the work, not a queue.
             </p>
@@ -275,13 +275,13 @@ function InquiryForm() {
               Call {STORE.phone}
             </a>
 
-            <p className="mt-6 border-t border-hairline pt-4 text-[14px] text-ink-muted">
+            <p className="mt-6 border-t border-hairline-light pt-4 text-[14px] text-ink">
               {STORE.replyWindow}
             </p>
 
             <a
               href={STORE.instagram}
-              className="mt-4 inline-flex min-h-11 items-center text-[14px] text-brand underline decoration-brand/40 underline-offset-4 transition-colors duration-hover ease-apple hover:text-brand-hover motion-reduce:transition-none"
+              className="mt-4 inline-flex min-h-11 items-center text-[14px] text-maroon underline decoration-maroon underline-offset-4 transition-colors duration-hover ease-apple hover:text-ink motion-reduce:transition-none"
             >
               See finished work on Instagram
             </a>
@@ -309,7 +309,7 @@ function Field({
     <div>
       <label
         htmlFor={`inquiry-${name}`}
-        className="block text-[11px] label text-ink-muted"
+        className="block text-[11px] label text-ink"
       >
         {label}
       </label>
@@ -338,7 +338,7 @@ function Select({
     <div>
       <label
         htmlFor={`inquiry-${name}`}
-        className="block text-[11px] label text-ink-muted"
+        className="block text-[11px] label text-ink"
       >
         {label}
       </label>

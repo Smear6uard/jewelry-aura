@@ -4,7 +4,7 @@
  * TWO COMPOSITIONS, NOT ONE RESPONSIVE SQUEEZE.
  *
  * Phones (<lg): the photograph occupies the top 55svh full-bleed with NO
- * type on it, and the type block sits below it on the cream canvas. The
+ * type on it, and the type block sits below it on the paper canvas. The
  * previous build overlaid the headline on a 4:5 portrait, which covers
  * the face at the top of the frame and the chain at the bottom — there
  * is no position on that crop where a four-line headline does not sit on
@@ -55,7 +55,7 @@ const SUPPORT =
   'Solid gold and certified stones, hand-set to order. Free shipping over $150 and a lifetime warranty on everything we make.'
 
 /**
- * Carries the cream canvas across the left of the desktop frame so the
+ * Carries the paper canvas across the left of the desktop frame so the
  * overlaid type sits on page colour, not on the photograph.
  *
  * The stops are driven by where the type actually ends, not by taste.
@@ -115,7 +115,7 @@ export function Hero() {
   )
 
   return (
-    <section aria-label="Jewelry Aura" className="bg-base">
+    <section aria-label="Jewelry Aura" className="bg-paper">
       {/* ─── Phones and tablets: stacked ───────────────────────────── */}
       <div className="lg:hidden">
         <div className="h-[55svh] max-h-[560px] min-h-[320px] w-full overflow-hidden">
@@ -130,7 +130,7 @@ export function Hero() {
             initial={fade.initial}
             animate={fade.animate}
             transition={{ duration: DURATION.content, ease: easeOutExpo }}
-            className="text-[11px] label-wide text-brand"
+            className="text-[11px] label-wide text-maroon"
           >
             {EYEBROW}
           </motion.p>
@@ -147,7 +147,7 @@ export function Hero() {
               ease: easeOutExpo,
               delay: 0.3,
             }}
-            className="mt-3 max-w-[46ch] text-[15px] leading-relaxed text-ink-muted"
+            className="mt-3 max-w-[46ch] text-[15px] leading-relaxed text-ink"
           >
             {SUPPORT}
           </motion.p>
@@ -184,7 +184,7 @@ export function Hero() {
                 initial={fade.initial}
                 animate={fade.animate}
                 transition={{ duration: DURATION.content, ease: easeOutExpo }}
-                className="text-[11px] label-wide text-brand"
+                className="text-[11px] label-wide text-maroon"
               >
                 {EYEBROW}
               </motion.p>
@@ -201,7 +201,7 @@ export function Hero() {
                   ease: easeOutExpo,
                   delay: 0.3,
                 }}
-                className="mt-4 max-w-[42ch] text-[15px] leading-relaxed text-ink-muted"
+                className="mt-4 max-w-[42ch] text-[15px] leading-relaxed text-ink"
               >
                 {SUPPORT}
               </motion.p>
@@ -244,10 +244,10 @@ export function Hero() {
           .hero-wash {
             background: linear-gradient(
               to right,
-              #f2ede4 0%,
-              #f2ede4 16%,
-              rgba(242, 237, 228, 0.74) 38%,
-              rgba(242, 237, 228, 0) 60%
+              var(--color-paper) 0%,
+              var(--color-paper) 16%,
+              color-mix(in srgb, var(--color-paper) 74%, transparent) 38%,
+              color-mix(in srgb, var(--color-paper) 0%, transparent) 60%
             );
           }
         }
@@ -258,10 +258,10 @@ export function Hero() {
           .hero-wash {
             background: linear-gradient(
               to right,
-              #f2ede4 0%,
-              #f2ede4 12%,
-              rgba(242, 237, 228, 0.74) 28%,
-              rgba(242, 237, 228, 0) 50%
+              var(--color-paper) 0%,
+              var(--color-paper) 12%,
+              color-mix(in srgb, var(--color-paper) 74%, transparent) 28%,
+              color-mix(in srgb, var(--color-paper) 0%, transparent) 50%
             );
           }
         }

@@ -135,7 +135,7 @@ export const Route = createFileRoute('/shop')({
       <h1 className="display text-[28px] text-ink md:text-[38px]">
         The catalog didn’t load
       </h1>
-      <p className="mt-3 max-w-[52ch] text-[15px] text-ink-muted">
+      <p className="mt-3 max-w-[52ch] text-[15px] text-ink">
         Give it a moment and try again — or call 630-965-6464 and we’ll tell you
         what’s in the case right now.
       </p>

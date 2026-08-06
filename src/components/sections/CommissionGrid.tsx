@@ -76,7 +76,7 @@ export function CommissionGrid() {
     <ul className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-3">
       {PIECES.map((piece) => (
         <li key={piece.image}>
-          <figure className="h-full bg-raised shadow-sm">
+          <figure className="h-full bg-bone border border-hairline-light">
             <div className="aspect-[3/4] w-full overflow-hidden">
               <picture>
                 <source type="image/avif" srcSet={`${piece.image}.avif`} />
@@ -96,7 +96,7 @@ export function CommissionGrid() {
             </div>
             <figcaption className="px-3 py-3 md:px-4">
               <h3 className="text-[14px] font-medium text-ink">{piece.name}</h3>
-              <p className="mt-0.5 text-[12px] text-ink-muted">{piece.meta}</p>
+              <p className="mt-0.5 text-[12px] text-ink">{piece.meta}</p>
             </figcaption>
           </figure>
         </li>

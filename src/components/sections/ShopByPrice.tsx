@@ -37,13 +37,13 @@ export function ShopByPrice() {
             <li key={band.value}>
               <a
                 href={`/shop?price=${band.value}`}
-                className="group/band flex items-center justify-between gap-4 bg-raised px-5 py-6 shadow-sm transition-shadow duration-hover ease-apple hover:shadow-md md:px-6 md:py-8 motion-reduce:transition-none"
+                className="group/band flex items-center justify-between gap-4 bg-bone px-5 py-6 border border-hairline-light transition-colors duration-hover ease-apple md:px-6 md:py-8 motion-reduce:transition-none"
               >
                 <span>
                   <span className="display block text-[22px] leading-none text-ink md:text-[26px]">
                     {band.label}
                   </span>
-                  <span className="mt-2 block text-[13px] text-ink-muted">
+                  <span className="mt-2 block text-[13px] text-ink">
                     {NOTES[band.value]}
                   </span>
                 </span>
@@ -51,7 +51,7 @@ export function ShopByPrice() {
                   aria-hidden
                   size={17}
                   strokeWidth={1.6}
-                  className="shrink-0 text-brand transition-transform duration-hover ease-apple group-hover/band:translate-x-0.5 motion-reduce:transition-none"
+                  className="shrink-0 text-maroon transition-transform duration-hover ease-apple group-hover/band:translate-x-0.5 motion-reduce:transition-none"
                 />
               </a>
             </li>

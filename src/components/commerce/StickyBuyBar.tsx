@@ -71,7 +71,7 @@ export function StickyBuyBar({
     <AnimatePresence>
       {visible && (
         <motion.div
-          className="safe-bottom fixed inset-x-0 bottom-0 z-[60] border-t border-hairline bg-raised px-4 pt-3 shadow-lg md:hidden"
+          className="safe-bottom fixed inset-x-0 bottom-0 z-[60] border-t border-hairline-light bg-bone px-4 pt-3 md:hidden"
           initial={reduced ? { opacity: 0 } : { y: '110%' }}
           animate={reduced ? { opacity: 1 } : { y: 0 }}
           exit={reduced ? { opacity: 0 } : { y: '110%' }}
@@ -79,7 +79,7 @@ export function StickyBuyBar({
         >
           <div className="flex items-center gap-3">
             <div className="min-w-0 shrink">
-              <p className="truncate text-[12px] text-ink-muted">{title}</p>
+              <p className="truncate text-[12px] text-ink">{title}</p>
               {unpriced ? (
                 <p className="text-[15px] font-medium text-ink">Quoted</p>
               ) : (
@@ -88,7 +88,7 @@ export function StickyBuyBar({
                     {variant?.price}
                   </span>
                   {variant?.compareAtPrice && (
-                    <s className="text-[13px] text-ink-muted">
+                    <s className="text-[13px] text-ink">
                       {variant.compareAtPrice}
                     </s>
                   )}
@@ -99,7 +99,7 @@ export function StickyBuyBar({
             {unpriced ? (
               <a
                 href="/custom"
-                className="flex min-h-12 flex-1 items-center justify-center bg-brand px-5 text-[12px] label text-cream"
+                className="flex min-h-12 flex-1 items-center justify-center bg-maroon px-5 text-[12px] label text-bone"
               >
                 Get a price
               </a>
@@ -111,8 +111,8 @@ export function StickyBuyBar({
                 onClick={onClick}
                 className={
                   soldOut || !variant
-                    ? 'flex min-h-12 flex-1 cursor-not-allowed items-center justify-center bg-sunken px-5 text-[12px] label text-ink-muted'
-                    : 'flex min-h-12 flex-1 items-center justify-center bg-brand px-5 text-[12px] label text-cream transition-colors duration-hover ease-apple active:scale-[0.99] disabled:opacity-70 motion-reduce:transition-none'
+                    ? 'flex min-h-12 flex-1 cursor-not-allowed items-center justify-center bg-bone px-5 text-[12px] label text-ink'
+                    : 'flex min-h-12 flex-1 items-center justify-center bg-maroon px-5 text-[12px] label text-bone transition-colors duration-hover ease-apple active:scale-[0.99] disabled:opacity-70 motion-reduce:transition-none'
                 }
               >
                 {soldOut ? 'Sold out' : pending ? 'Adding…' : 'Add to cart'}

@@ -1,10 +1,14 @@
 /**
- * components/layout/Footer.tsx — the solid maroon foot of every page.
+ * components/layout/Footer.tsx — the velvet foot of every page.
  *
- * One of only three full-maroon surfaces on the site (with the
- * announcement bar and the trust band). The deepest maroon closes the
- * page the same way the announcement bar opens it, and it is the one
- * place a big block of brand colour is an asset rather than a shout.
+ * The largest of the three velvet surfaces (with the announcement bar
+ * and the trust band), and the one that does most of the work of getting
+ * the page to its ~30% dark. Velvet closes the page the same way the
+ * announcement bar opens it.
+ *
+ * There is no maroon anywhere below this line. Maroon is the interactive
+ * accent on paper, and a footer full of it reads as a shout rather than
+ * a place to find the returns policy.
  *
  * Four columns of real links, a newsletter row, payment methods and the
  * legal line. Link density is a store signal in itself: a two-line
@@ -43,7 +47,7 @@ import {
 } from '~/lib/catalog'
 import { subscribeEmail } from '~/lib/forms'
 import { useIsDesktop } from '~/lib/use-media-query'
-import { FIELD_ON_BRAND } from '~/lib/ui'
+import { FIELD_ON_VELVET } from '~/lib/ui'
 
 interface LinkColumn {
   title: string
@@ -58,32 +62,32 @@ const COLUMNS: LinkColumn[] = [
 
 export function Footer() {
   return (
-    <footer className="bg-brand-deep text-cream">
+    <footer data-ground="velvet" className="bg-velvet text-bone">
       <div className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
         <Newsletter />
 
-        <div className="mt-10 border-t border-cream/15 md:mt-12 md:grid md:grid-cols-4 md:gap-x-8 md:gap-y-10 md:border-t-0 md:pt-10">
+        <div className="mt-10 border-t border-hairline-dark md:mt-12 md:grid md:grid-cols-4 md:gap-x-8 md:gap-y-10 md:border-t-0 md:pt-10">
           {COLUMNS.map((column) => (
             <Column key={column.title} {...column} />
           ))}
-          <div className="border-b border-cream/15 py-5 md:border-b-0 md:py-0">
+          <div className="border-b border-hairline-dark py-5 md:border-b-0 md:py-0">
             <Contact />
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col gap-6 border-t border-cream/15 pt-6 md:mt-12 md:flex-row md:items-center md:justify-between">
+        <div className="mt-10 flex flex-col gap-6 border-t border-hairline-dark pt-6 md:mt-12 md:flex-row md:items-center md:justify-between">
           <PaymentMethods />
 
           <a
             href={STORE.instagram}
-            className="inline-flex min-h-11 items-center gap-2 text-[13px] text-cream/80 transition-colors duration-hover ease-apple hover:text-cream"
+            className="inline-flex min-h-11 items-center gap-2 text-[13px] text-bone underline-offset-4 hover:underline"
           >
             <InstagramIcon size={16} />
             {STORE.instagramHandle}
           </a>
         </div>
 
-        <div className="mt-4 flex flex-col gap-2 text-[11px] text-cream/60 md:flex-row md:items-center md:justify-between">
+        <div className="mt-4 flex flex-col gap-2 text-[11px] text-bone md:flex-row md:items-center md:justify-between">
           <p>© {new Date().getFullYear()} Jewelry Aura. All rights reserved.</p>
           <p>Shipping insured across the United States</p>
         </div>
@@ -105,9 +109,9 @@ function Column({ title, links }: LinkColumn) {
     <nav aria-label={title}>
       <details
         open={open}
-        className="group border-b border-cream/15 md:border-b-0"
+        className="group border-b border-hairline-dark md:border-b-0"
       >
-        <summary className="flex min-h-[52px] cursor-pointer list-none items-center justify-between text-[12px] label-wide text-cream marker:content-none md:mb-2 md:min-h-0 md:cursor-default md:text-[11px] [&::-webkit-details-marker]:hidden">
+        <summary className="flex min-h-[52px] cursor-pointer list-none items-center justify-between text-[12px] label-wide text-bone marker:content-none md:mb-2 md:min-h-0 md:cursor-default md:text-[11px] [&::-webkit-details-marker]:hidden">
           {title}
           <span aria-hidden className="relative h-3 w-3 shrink-0 md:hidden">
             <span className="absolute left-0 top-1/2 h-px w-3 -translate-y-1/2 bg-current" />
@@ -119,7 +123,7 @@ function Column({ title, links }: LinkColumn) {
             <li key={link.href}>
               <a
                 href={link.href}
-                className="flex min-h-11 items-center text-[14px] text-cream/75 transition-colors duration-hover ease-apple hover:text-cream md:min-h-0 md:text-[13px] motion-reduce:transition-none"
+                className="flex min-h-11 items-center text-[14px] text-bone underline-offset-4 hover:underline md:min-h-0 md:text-[13px] motion-reduce:transition-none"
               >
                 {link.label}
               </a>
@@ -135,18 +139,18 @@ function Column({ title, links }: LinkColumn) {
 function Contact() {
   return (
     <div>
-      <h2 className="mb-4 text-[11px] label-wide text-cream">Contact</h2>
-      <div className="flex flex-col gap-2.5 text-[13px] text-cream/75">
+      <h2 className="mb-4 text-[11px] label-wide text-bone">Contact</h2>
+      <div className="flex flex-col gap-2.5 text-[13px] text-bone">
         <a
           href={STORE.phoneHref}
-          className="text-cream transition-colors duration-hover ease-apple hover:text-cream/80"
+          className="text-bone underline-offset-4 hover:underline"
         >
           {STORE.phone}
         </a>
         <p className="max-w-[26ch] leading-relaxed">{STORE.replyWindow}</p>
         <a
           href={STORE.instagram}
-          className="text-cream/75 transition-colors duration-hover ease-apple hover:text-cream"
+          className="text-bone underline-offset-4 hover:underline"
         >
           {STORE.instagramHandle}
         </a>
@@ -154,6 +158,13 @@ function Contact() {
     </div>
   )
 }
+
+/**
+ * A form error is maroon on paper, but maroon may not touch velvet and
+ * is illegible on it anyway (1.4:1). Gold is the only accent left on a
+ * dark ground, and this footer carries no maroon for it to sit beside.
+ */
+const STATUS_FAILED = 'text-gold'
 
 function Newsletter() {
   const [email, setEmail] = useState('')
@@ -183,10 +194,10 @@ function Newsletter() {
   return (
     <div className="grid gap-6 md:grid-cols-12 md:items-center md:gap-8">
       <div className="md:col-span-5">
-        <h2 className="display text-[26px] leading-tight text-cream md:text-[30px]">
+        <h2 className="display text-[26px] leading-tight text-bone md:text-[30px]">
           New pieces, before they hit the case
         </h2>
-        <p className="mt-2 max-w-[42ch] text-[14px] text-cream/75">
+        <p className="mt-2 max-w-[42ch] text-[14px] text-bone">
           A short email when something is finished on the bench. No more than
           twice a month.
         </p>
@@ -208,12 +219,12 @@ function Newsletter() {
             onChange={(event) => setEmail(event.target.value)}
             placeholder="you@email.com"
             autoComplete="email"
-            className={FIELD_ON_BRAND}
+            className={FIELD_ON_VELVET}
           />
           <button
             type="submit"
             disabled={pending}
-            className="inline-flex min-h-[48px] shrink-0 items-center justify-center gap-2 bg-brand-hover px-6 text-[12px] label text-cream transition-colors duration-hover ease-apple hover:bg-brand disabled:opacity-70 motion-reduce:transition-none"
+            className="inline-flex min-h-[48px] shrink-0 items-center justify-center gap-2 bg-bone px-6 text-[12px] label text-velvet transition-colors duration-hover ease-apple hover:bg-gold disabled:opacity-70 motion-reduce:transition-none"
           >
             {pending ? 'Sending' : 'Sign up'}
             <ArrowRight aria-hidden size={14} strokeWidth={1.6} />
@@ -222,7 +233,7 @@ function Newsletter() {
         {state && (
           <p
             role="status"
-            className={`mt-2 text-[13px] ${state.ok ? 'text-cream' : 'text-cream/75'}`}
+            className={`mt-2 text-[13px] ${state.ok ? 'text-bone' : STATUS_FAILED}`}
           >
             {state.message}
           </p>
@@ -245,7 +256,7 @@ function PaymentMethods() {
       {PAYMENTS.map((method) => (
         <li
           key={method}
-          className="border border-cream/25 px-2.5 py-1.5 text-[10px] label-wide text-cream/70"
+          className="border border-hairline-dark px-2.5 py-1.5 text-[10px] label-wide text-bone"
         >
           {method}
         </li>
