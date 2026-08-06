@@ -92,7 +92,7 @@ export function MegaMenuPanel({ category }: { category: Category }) {
 
         <a
           href={base}
-          className="group/all mt-7 inline-flex items-center gap-1.5 text-[12px] label text-maroon transition-colors duration-hover ease-apple hover:text-ink"
+          className="group/all mt-7 inline-flex items-center gap-1.5 text-[12px] label text-ink transition-colors duration-hover ease-apple link-hover"
         >
           All {category.label.toLowerCase()}
           <ArrowRight
@@ -132,7 +132,7 @@ export function WomensMenuPanel() {
               <li key={link.href}>
                 <a
                   href={link.href}
-                  className="text-[13px] text-ink transition-colors duration-hover ease-apple hover:text-maroon"
+                  className="text-[13px] text-ink transition-colors duration-hover ease-apple link-hover"
                 >
                   {link.label}
                 </a>
@@ -148,7 +148,7 @@ export function WomensMenuPanel() {
 
         <a
           href={WOMENS.href}
-          className="group/all mt-7 inline-flex items-center gap-1.5 text-[12px] label text-maroon transition-colors duration-hover ease-apple hover:text-ink"
+          className="group/all mt-7 inline-flex items-center gap-1.5 text-[12px] label text-ink transition-colors duration-hover ease-apple link-hover"
         >
           All women’s
           <ArrowRight
@@ -235,7 +235,7 @@ function FacetLinks({
         <li key={option.value}>
           <a
             href={`${base}?${param}=${option.value}`}
-            className="text-[13px] text-ink transition-colors duration-hover ease-apple hover:text-maroon"
+            className="text-[13px] text-ink transition-colors duration-hover ease-apple link-hover"
           >
             {option.label}
           </a>

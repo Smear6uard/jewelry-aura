@@ -1,5 +1,5 @@
 /**
- * components/commerce/StarRating.tsx — maroon star row.
+ * components/commerce/StarRating.tsx — ink star row.
  *
  * Used on product cards, on the PDP, and in the Reviews section. Renders
  * a filled star per whole point and a partial star for a fraction — no
@@ -27,7 +27,7 @@ const STAR_PATH =
  * accent reaches the stars too. Custom properties resolve in inline SVG
  * presentation attributes.
  */
-const MAROON = 'var(--color-maroon)'
+const INK = 'var(--color-ink)'
 
 export function StarRating({ value, size = 12, className }: StarRatingProps) {
   const clamped = Math.max(0, Math.min(5, value))
@@ -53,14 +53,14 @@ export function StarRating({ value, size = 12, className }: StarRatingProps) {
           >
             <defs>
               <linearGradient id={gradientId}>
-                <stop offset={`${fill * 100}%`} stopColor={MAROON} />
+                <stop offset={`${fill * 100}%`} stopColor={INK} />
                 <stop offset={`${fill * 100}%`} stopColor="transparent" />
               </linearGradient>
             </defs>
             <path
               d={STAR_PATH}
               fill={`url(#${gradientId})`}
-              stroke={MAROON}
+              stroke={INK}
               strokeWidth="0.9"
               strokeLinejoin="round"
               opacity={fill > 0 ? 1 : 0.3}

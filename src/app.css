@@ -246,6 +246,31 @@
   }
 
   /*
+   * Link hover on paper. Maroon does not mark links — it is a signature,
+   * not a workhorse — so the text holds at ink and a gold hairline draws
+   * in underneath. That is the one thing gold is allowed to be on this
+   * ground, and an underline is literally a hairline.
+   *
+   * The rule is always present and only its colour changes, so nothing
+   * reflows when a pointer crosses a link.
+   */
+  .link-hover {
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-decoration-color: transparent;
+    text-underline-offset: 4px;
+    transition: text-decoration-color var(--duration-hover) var(--ease-apple);
+  }
+  .link-hover:hover {
+    text-decoration-color: var(--color-gold);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .link-hover {
+      transition: none;
+    }
+  }
+
+  /*
    * With no muted ink, secondary copy on paper steps down by size and
    * case rather than by fading toward the canvas. This is that step,
    * named so it stays consistent instead of being re-invented per

@@ -64,7 +64,7 @@ export function CartLineItem({ line, size = 'drawer' }: CartLineItemProps) {
         <div className="flex items-baseline justify-between gap-4">
           <a
             href={`/products/${line.handle}`}
-            className="text-[14px] font-medium leading-snug text-ink transition-colors duration-hover ease-apple hover:text-maroon motion-reduce:transition-none"
+            className="text-[14px] font-medium leading-snug text-ink transition-colors duration-hover ease-apple link-hover motion-reduce:transition-none"
           >
             {line.title}
           </a>
@@ -77,7 +77,7 @@ export function CartLineItem({ line, size = 'drawer' }: CartLineItemProps) {
           <p className="mt-1 text-[13px] text-ink">{line.variantTitle}</p>
         )}
         {!line.availableForSale && (
-          <p className="mt-1 text-[12px] label text-maroon">
+          <p className="mt-1 text-[12px] label text-ink">
             Now sold out — remove to check out
           </p>
         )}
@@ -89,7 +89,7 @@ export function CartLineItem({ line, size = 'drawer' }: CartLineItemProps) {
               disabled={busy}
               onClick={() => changeQuantity(line.quantity - 1)}
               aria-label={`Decrease quantity of ${line.title}`}
-              className="flex h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-maroon disabled:opacity-40 motion-reduce:transition-none"
+              className="flex h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:bg-bone disabled:opacity-40 motion-reduce:transition-none"
             >
               <Minus aria-hidden size={14} strokeWidth={1.6} />
             </button>
@@ -104,7 +104,7 @@ export function CartLineItem({ line, size = 'drawer' }: CartLineItemProps) {
               disabled={busy}
               onClick={() => changeQuantity(line.quantity + 1)}
               aria-label={`Increase quantity of ${line.title}`}
-              className="flex h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-maroon disabled:opacity-40 motion-reduce:transition-none"
+              className="flex h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:bg-bone disabled:opacity-40 motion-reduce:transition-none"
             >
               <Plus aria-hidden size={14} strokeWidth={1.6} />
             </button>
@@ -114,14 +114,14 @@ export function CartLineItem({ line, size = 'drawer' }: CartLineItemProps) {
             type="button"
             disabled={busy}
             onClick={() => changeQuantity(0)}
-            className="inline-flex min-h-11 items-center text-[12px] label text-ink underline decoration-hairline-light underline-offset-4 transition-colors duration-hover ease-apple hover:text-maroon disabled:opacity-40 motion-reduce:transition-none"
+            className="inline-flex min-h-11 items-center text-[12px] label text-ink underline decoration-hairline-light underline-offset-4 transition-colors duration-hover ease-apple hover:decoration-gold disabled:opacity-40 motion-reduce:transition-none"
           >
             Remove
           </button>
         </div>
 
         {error && (
-          <p className="mt-2 text-[13px] text-maroon" role="alert">
+          <p className="mt-2 text-[13px] text-ink" role="alert">
             {error}
           </p>
         )}

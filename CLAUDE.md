@@ -9,9 +9,20 @@ TanStack Start + Shopify Storefront API. Tokens in `src/app.css`, guards in
   or Tailwind default color (no zinc/stone/amber/etc). No opacity tricks to
   invent new shades except black/velvet overlays on photography.
 - Body text: ink on paper, bone on velvet. Never gold or maroon for body text.
-- maroon = interactive brand accent, LIGHT GROUND ONLY: primary button fill
-  (bone text on it), selected states, link hover, the ONE OF ONE stamp.
-  Never on velvet, never as a section background.
+- maroon is a SIGNATURE, not a workhorse. Hard rules:
+  - Maximum ONE maroon element per viewport — the single primary CTA only.
+    When two CTAs share a row, the second is a hairline ghost button.
+  - Maroon appears in ZERO typography: no headings, eyebrows, links, prices,
+    labels or status text. Link hover is ink with a gold hairline underline.
+  - All repeating components (quick-adds, newsletter submit, card buttons,
+    badges, pagination, counts, chips) use ink fills, never maroon.
+  - Maroon never sits inside a dark scene, over photography, or adjacent to
+    rose-gold product images. If a maroon element would touch rose-gold
+    photography, use ink for that element.
+  - Maroon keeps the small stamps — ONE OF ONE, hallmark. That is where it
+    belongs, and a stamp never shares a viewport with a maroon CTA.
+  - Maroon is a FILL only. `text-maroon`, `border-maroon`, `ring-maroon` and
+    `decoration-maroon` do not appear in this codebase.
 - gold = material accent: 1px hairlines, the JA hallmark stamp, mono spec
   type and prices on dark scenes. On paper: hairlines only, never text.
   Gold ≤ ~5% of any viewport.
@@ -45,10 +56,15 @@ TanStack Start + Shopify Storefront API. Tokens in `src/app.css`, guards in
 - **Any dark surface carries `data-ground="velvet"`.** That switches the
   focus ring and selection highlight to gold, because maroon may not touch
   velvet and is illegible there anyway (1.4:1).
-- **Errors render in maroon on paper** (11.8:1). Maroon *is* the sanctioned
-  brick; no ninth token was minted for it.
-- **Primary button** = `bg-maroon text-bone`, hover darkens to `bg-ink`.
-  There is no second maroon shade to hover into.
+- **Errors render in ink**, not maroon. Maroon is typography-free, and an
+  error always shares a viewport with a submit button — which is where the
+  one maroon goes. `role="alert"` and explicit wording carry the meaning.
+- **Buttons.** `BTN_PRIMARY` (maroon) is the page's one ask. `BTN_INK` is
+  the filled button for anything that repeats. `BTN_SECONDARY` is the
+  hairline ghost and is always the second button in a row. Inside a velvet
+  scene use the `_ON_VELVET` pair — maroon may not appear there at all.
+- **`.link-hover`** is the link idiom: ink type, gold hairline drawn in
+  underneath. Gold on paper is a hairline, and an underline is a hairline.
 - Gold on paper measures 2.2:1. It is a hairline there and never type.
 
 ## Other conventions

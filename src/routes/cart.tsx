@@ -67,7 +67,7 @@ function CartPage() {
             </ul>
             <a
               href="/shop"
-              className="mt-4 inline-flex min-h-11 items-center text-[12px] label text-ink underline decoration-hairline-light underline-offset-4 transition-colors duration-hover ease-apple hover:text-maroon motion-reduce:transition-none"
+              className="mt-4 inline-flex min-h-11 items-center text-[12px] label text-ink underline decoration-hairline-light underline-offset-4 transition-colors duration-hover ease-apple hover:decoration-gold motion-reduce:transition-none"
             >
               Continue shopping
             </a>

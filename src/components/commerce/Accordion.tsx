@@ -59,7 +59,7 @@ export function Accordion({ items }: AccordionProps) {
                     key={entry}
                     className="flex gap-2.5 text-[15px] leading-relaxed text-ink"
                   >
-                    <span aria-hidden className="mt-2.5 h-px w-3 shrink-0 bg-maroon" />
+                    <span aria-hidden className="mt-2.5 h-px w-3 shrink-0 bg-ink" />
                     {entry}
                   </li>
                 ))}

@@ -138,7 +138,7 @@ export function BottomSheet({
                 type="button"
                 onClick={onClose}
                 aria-label={`Close ${title.toLowerCase()}`}
-                className="flex h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-maroon"
+                className="flex h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:bg-paper"
               >
                 <X aria-hidden size={19} strokeWidth={1.5} />
               </button>

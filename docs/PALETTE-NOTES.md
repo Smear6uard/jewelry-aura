@@ -7,6 +7,45 @@ scan of the source tree for off-palette hex, Tailwind default colours,
 shadow utilities and opacity-derived shades. A retune of a hex fails a
 test rather than shipping.
 
+## Maroon is a signature, not a workhorse
+
+Maroon appears in exactly **four places** in the source, all of them fills:
+
+| Where | What |
+| ----- | ---- |
+| `lib/ui.ts` → `BTN_PRIMARY` | the single primary CTA of a page |
+| `StickyBuyBar.tsx` ×2 | the mobile PDP's CTA — two exclusive branches of one button |
+| `routes/custom.tsx` | the ONE OF ONE stamp |
+
+Everything else that used to be maroon is ink: every eyebrow, link, price,
+star, arrow, badge, chip, count bubble, quick-add, checkbox, progress bar,
+nav indicator and selected state. `palette.test.ts` asserts that list of
+four literally — adding a fifth means editing the test on purpose.
+
+**Maroon is a fill only.** `text-maroon`, `border-maroon`, `ring-maroon`
+and `decoration-maroon` are banned outright and tested for. The moment
+maroon can be typography it becomes a link colour again, and from there an
+eyebrow, and from there the workhorse it was demoted from.
+
+**Link hover is `.link-hover`** (defined in `app.css`): the type holds at
+ink and a gold hairline draws in underneath. Gold on paper is a hairline,
+and an underline is a hairline — so the link idiom and the colour rule are
+the same rule. Icon-only controls can't take an underline, so they fill
+with the opposite ground on hover (bone on paper, paper inside a bone
+panel). The nav indicator and the burger's hover mark went gold with them.
+
+**Two CTAs in a row = one fill and one ghost.** `BTN_SECONDARY` is the
+hairline ghost and is always the second button. `BTN_INK` is the filled
+button for anything that repeats — same weight as primary, no brand
+colour, and it hovers by drawing a gold hairline rather than shifting its
+fill (there is no darker ink to move to).
+
+**The stamp and the CTA never share a screen.** On `/custom` the ONE OF
+ONE stamp is the hero's only maroon, so both hero buttons stepped down to
+ghosts; the maroon submit button lives further down with its form. Product
+card badges are all ink — a badge repeats across a grid *and* sits on the
+photograph, so two separate rules land on it.
+
 ## The two grounds
 
 | Ground | Fill | Body type | Rules | Accent |
@@ -56,16 +95,19 @@ the panel disappears. A test asserts bone stays below 1.2:1 so nobody
 **Maroon and gold never meet.** The moissanite band is the only place
 gold carries type, and it works because that band goes fully velvet and
 therefore carries no maroon — the CTAs invert to bone
-(`BTN_PRIMARY_ON_VELVET`). When real moissanite products exist, the band
-reverts to paper and the product cards bring maroon back with them. The
-two treatments never coexist.
+(`BTN_PRIMARY_ON_VELVET`). Since the demotion, gold does most of the
+interaction marking on paper too (link underlines, the nav indicator,
+the ink button's hover ring), which is safe precisely because maroon has
+retreated to four fills that none of those sit beside.
 
 ## Deliberate deviations
 
-- **Form errors are maroon, not a new brick.** The rules allow "a muted
-  brick derived from maroon"; maroon itself measures 11.8:1 on paper and
-  is already that colour, so no ninth token was minted. Inside the velvet
-  footer the error goes gold, since maroon is barred from that ground.
+- **Form errors are ink.** They were maroon; the demotion took that away
+  for two reasons at once — maroon is typography-free now, and an error
+  always shares a viewport with a submit button, which is where the one
+  maroon goes. `role="alert"` plus explicit wording carries the meaning,
+  which is what WCAG asks for anyway (never colour alone). Inside the
+  velvet footer the error is gold, the only accent legal on that ground.
 - **Placeholders are ink and italic.** With no muted step, a placeholder
   would otherwise be indistinguishable from a typed value. `::placeholder
   { font-style: italic }` in `app.css` separates hint from value by shape

@@ -51,7 +51,7 @@ export function CustomPromo() {
           </div>
 
           <div className="flex flex-col justify-center bg-bone px-5 py-8 md:px-10 md:py-12">
-            <p className="text-[11px] label-wide text-maroon">Custom work</p>
+            <p className="text-[11px] label-wide text-ink">Custom work</p>
             <h2 className="display mt-2 text-[28px] leading-tight text-ink md:text-[36px]">
               One of one
             </h2>

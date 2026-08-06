@@ -98,7 +98,7 @@ export function FilterSheet(props: FilterProps) {
         <SlidersHorizontal aria-hidden size={15} strokeWidth={1.5} />
         Filter
         {count > 0 && (
-          <span className="ml-0.5 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-maroon px-1 text-[10px] font-semibold leading-none text-bone">
+          <span className="ml-0.5 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-ink px-1 text-[10px] font-semibold leading-none text-bone">
             {count}
           </span>
         )}
@@ -133,7 +133,7 @@ function Panel({
       {hasActiveFacets(facets) && (
         <a
           href={hrefFor(clearedFacets())}
-          className="inline-flex w-fit items-center text-[12px] label text-maroon underline decoration-maroon underline-offset-4 transition-colors duration-hover ease-apple hover:text-ink motion-reduce:transition-none"
+          className="inline-flex w-fit items-center text-[12px] label text-ink underline decoration-hairline-light underline-offset-4 transition-colors duration-hover ease-apple hover:decoration-gold motion-reduce:transition-none"
         >
           Clear all filters
         </a>
@@ -145,7 +145,7 @@ function Panel({
             <li key={category.handle}>
               <a
                 href={`/collections/${category.handle}`}
-                className={`flex items-center text-[13px] transition-colors duration-hover ease-apple hover:text-maroon motion-reduce:transition-none ${
+                className={`flex items-center text-[13px] transition-colors duration-hover ease-apple link-hover motion-reduce:transition-none ${
                   touch ? 'min-h-11' : 'py-1'
                 } ${
                   activeCategory === category.handle
@@ -160,7 +160,7 @@ function Panel({
           <li>
             <a
               href="/shop"
-              className={`flex items-center text-[13px] text-ink transition-colors duration-hover ease-apple hover:text-maroon motion-reduce:transition-none ${
+              className={`flex items-center text-[13px] text-ink transition-colors duration-hover ease-apple link-hover motion-reduce:transition-none ${
                 touch ? 'min-h-11' : 'py-1'
               }`}
             >
@@ -292,7 +292,7 @@ function FacetList({
             <a
               href={hrefFor(selected ? undefined : option.value)}
               aria-pressed={selected}
-              className={`flex items-center justify-between gap-2 text-[13px] transition-colors duration-hover ease-apple hover:text-maroon motion-reduce:transition-none ${row} ${
+              className={`flex items-center justify-between gap-2 text-[13px] transition-colors duration-hover ease-apple link-hover motion-reduce:transition-none ${row} ${
                 selected ? 'font-medium text-ink' : 'text-ink'
               }`}
             >
@@ -300,7 +300,7 @@ function FacetList({
                 <span
                   aria-hidden
                   className={`inline-block h-[11px] w-[11px] shrink-0 border ${
-                    selected ? 'border-maroon bg-maroon' : 'border-hairline-light'
+                    selected ? 'border-ink bg-ink' : 'border-hairline-light'
                   }`}
                 />
                 {option.label}

@@ -23,9 +23,14 @@ const SHAPE =
   'motion-reduce:transition-none'
 
 /**
- * Primary — maroon fill, bone text. The only button shape allowed to
- * carry the brand colour, and the only one used for add-to-cart and
- * checkout.
+ * Primary — maroon fill, bone text. THE one maroon element allowed in a
+ * viewport, and the reason the rest of the site gave maroon up: a single
+ * saturated block reads as the thing to press only while nothing else on
+ * screen is competing for that read.
+ *
+ * Use it for the one action a page is asking for — add to cart, check
+ * out, start a commission — and nowhere else. Anything that repeats
+ * (quick-adds, card buttons, newsletter submit) takes BTN_INK.
  *
  * Hover darkens to ink rather than to a lighter maroon: there is exactly
  * one maroon in this palette, so the hover state has to move to a
@@ -34,16 +39,25 @@ const SHAPE =
 export const BTN_PRIMARY = `${SHAPE} bg-maroon text-bone hover:bg-ink active:scale-[0.99] disabled:opacity-70`
 
 /**
- * Secondary — transparent with a near-black hairline, inverting to a
- * near-black fill on hover. Never a bone fill on paper: at 1.09:1 that
- * is an invisible button.
+ * The filled button for everything that repeats. Same weight as primary,
+ * no brand colour — an ink fill states "this is the action here" without
+ * spending the one maroon a viewport is allowed.
+ *
+ * Hover draws a gold hairline rather than shifting the fill; there is no
+ * darker ink to move to.
+ */
+export const BTN_INK = `${SHAPE} bg-ink text-bone hover:ring-1 hover:ring-gold active:scale-[0.99] disabled:opacity-70`
+
+/**
+ * Secondary — the hairline ghost. When two calls to action share a row
+ * the second one is always this: an outline, never a second fill, so the
+ * maroon beside it stays the only place the eye lands first.
  */
 export const BTN_SECONDARY = `${SHAPE} border border-ink text-ink hover:bg-ink hover:text-bone`
 
-/** Tertiary — a maroon text link with an underline that draws in. */
+/** Tertiary — an ink text link; the gold hairline draws in on hover. */
 export const BTN_TERTIARY =
-  'group/link inline-flex items-center gap-1.5 text-[12px] label text-maroon ' +
-  'transition-colors duration-hover ease-apple hover:text-ink'
+  'group/link inline-flex items-center gap-1.5 text-[12px] label text-ink link-hover'
 
 /**
  * The same two shapes inside a velvet scene. Maroon may not touch
@@ -96,5 +110,5 @@ export const CHIP =
   'inline-flex min-h-[44px] min-w-[3.25rem] items-center justify-center px-4 text-[14px] ' +
   'transition-colors duration-hover ease-apple motion-reduce:transition-none'
 export const CHIP_OFF = `${CHIP} border border-hairline-light bg-bone text-ink hover:border-ink`
-export const CHIP_ON = `${CHIP} border border-maroon bg-maroon text-bone`
+export const CHIP_ON = `${CHIP} border border-ink bg-ink text-bone`
 export const CHIP_DISABLED = `${CHIP} cursor-not-allowed border border-hairline-light bg-paper text-ink opacity-40 line-through`

@@ -71,9 +71,18 @@ function sourceFiles(): Array<[string, string]> {
   return out
 }
 
+/**
+ * Comments out. These files explain the colour rules at length, and an
+ * apostrophe in "the page's one ask" will otherwise open a string literal
+ * that swallows the paragraph around it.
+ */
+function stripComments(source: string): string {
+  return source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
+}
+
 /** Every string literal in a source file — where classNames live. */
 function stringLiterals(source: string): string[] {
-  return source.match(/(['"`])(?:\\.|(?!\1)[\s\S])*?\1/g) ?? []
+  return stripComments(source).match(/(['"`])(?:\\.|(?!\1)[\s\S])*?\1/g) ?? []
 }
 
 describe('the eight tokens', () => {
@@ -225,6 +234,69 @@ describe('the source tree obeys the colour rules', () => {
         .filter((cls) => !/^bg-velvet\/\d+$/.test(cls))
         .map((cls) => `${path}: ${cls}`),
     )
+    expect(offenders).toEqual([])
+  })
+
+  /**
+   * Maroon is a signature, not a workhorse. It is a FILL and nothing
+   * else — the moment it can be typography it becomes a link colour
+   * again, and from there an eyebrow, and from there the workhorse it
+   * was demoted from.
+   */
+  it('uses maroon as a fill only — never type, rule, ring or underline', () => {
+    const offenders = files.flatMap(([path, source]) =>
+      [
+        ...source.matchAll(
+          /\b(?:text|border|ring|divide|decoration|outline|fill|stroke|placeholder|from|to|via)-maroon\b/g,
+        ),
+      ].map((m) => `${path}: ${m[0]}`),
+    )
+    expect(offenders).toEqual([])
+  })
+
+  /**
+   * Every maroon fill in the codebase, by design. Adding one means
+   * deciding it is a page's single primary CTA or a small stamp — so it
+   * should mean editing this list on purpose, not by accident.
+   *
+   * StickyBuyBar's two entries are mutually exclusive branches of the
+   * same button, and it only renders once the inline Add to cart has
+   * scrolled out of view.
+   */
+  it('keeps maroon fills to the primary CTA and the stamp', () => {
+    const EXPECTED = {
+      'lib/ui.ts': 1, // BTN_PRIMARY
+      'components/commerce/StickyBuyBar.tsx': 2, // one branch renders
+      'routes/custom.tsx': 1, // the ONE OF ONE stamp
+    }
+    const found: Record<string, number> = {}
+    for (const [path, source] of files) {
+      const count = (stripComments(source).match(/\bbg-maroon\b/g) ?? []).length
+      if (count > 0) found[path] = count
+    }
+    expect(found).toEqual(EXPECTED)
+  })
+
+  /**
+   * A repeating component is one rendered per product, per row or per
+   * result. None of them may spend the viewport's single maroon.
+   */
+  it('keeps maroon out of every repeating component', () => {
+    const REPEATING = [
+      'components/commerce/ProductCard.tsx',
+      'components/commerce/QuickAdd.tsx',
+      'components/commerce/Pagination.tsx',
+      'components/commerce/ProductGrid.tsx',
+      'components/commerce/CartLineItem.tsx',
+      'components/commerce/VariantSelector.tsx',
+      'components/commerce/FilterSidebar.tsx',
+      'components/commerce/StarRating.tsx',
+      'components/layout/Footer.tsx',
+    ]
+    const offenders = files
+      .filter(([path]) => REPEATING.includes(path))
+      .filter(([, source]) => /\bmaroon\b/.test(stripComments(source)))
+      .map(([path]) => path)
     expect(offenders).toEqual([])
   })
 

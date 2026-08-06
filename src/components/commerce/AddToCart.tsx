@@ -79,7 +79,7 @@ export function AddToCart({
             disabled={unavailable || quantity <= 1}
             onClick={() => setQuantity((q) => Math.max(1, q - 1))}
             aria-label="Decrease quantity"
-            className="flex h-12 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-maroon disabled:opacity-30 motion-reduce:transition-none"
+            className="flex h-12 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:bg-paper disabled:opacity-30 motion-reduce:transition-none"
           >
             <Minus aria-hidden size={15} strokeWidth={1.6} />
           </button>
@@ -94,7 +94,7 @@ export function AddToCart({
             disabled={unavailable || quantity >= MAX_QUANTITY}
             onClick={() => setQuantity((q) => Math.min(MAX_QUANTITY, q + 1))}
             aria-label="Increase quantity"
-            className="flex h-12 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-maroon disabled:opacity-30 motion-reduce:transition-none"
+            className="flex h-12 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:bg-paper disabled:opacity-30 motion-reduce:transition-none"
           >
             <Plus aria-hidden size={15} strokeWidth={1.6} />
           </button>
@@ -116,7 +116,7 @@ export function AddToCart({
       </div>
 
       {error && (
-        <p className="mt-3 text-[13px] text-maroon" role="alert">
+        <p className="mt-3 text-[13px] text-ink" role="alert">
           {error}
         </p>
       )}
@@ -126,7 +126,7 @@ export function AddToCart({
           This one is gone, but we make them.{' '}
           <a
             href="/custom"
-            className="text-maroon underline decoration-maroon underline-offset-4 transition-colors duration-hover ease-apple hover:text-ink motion-reduce:transition-none"
+            className="text-ink underline decoration-hairline-light underline-offset-4 transition-colors duration-hover ease-apple hover:decoration-gold motion-reduce:transition-none"
           >
             Commission the same piece
           </a>

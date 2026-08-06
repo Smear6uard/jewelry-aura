@@ -101,18 +101,17 @@ export function Header() {
                 <li key={link.label} className="group/nav static">
                   <a
                     href={link.href}
-                    className={`relative flex h-16 items-center px-2.5 text-[12px] label transition-colors duration-hover ease-apple xl:px-3.5 ${
-                      link.accent
-                        ? 'text-maroon hover:text-ink'
-                        : 'text-ink hover:text-maroon'
-                    }`}
+                    className="relative flex h-16 items-center px-2.5 text-[12px] label text-ink xl:px-3.5"
                   >
                     {link.label}
-                    {/* The one place maroon marks navigation state. Draws
-                        in from the left rather than out from the centre. */}
+                    {/* Nav state is a gold hairline that draws in from the
+                        left. It used to be a 2px maroon bar; maroon is a
+                        signature now, and eight nav items cannot each be
+                        one. Gold at 1px is the same signal at the weight
+                        the palette actually allows on paper. */}
                     <span
                       aria-hidden
-                      className="pointer-events-none absolute inset-x-2 bottom-0 h-[2px] origin-left scale-x-0 bg-maroon transition-transform duration-hover ease-apple group-hover/nav:scale-x-100 group-focus-within/nav:scale-x-100 motion-reduce:transition-none"
+                      className="pointer-events-none absolute inset-x-2 bottom-0 h-px origin-left scale-x-0 bg-gold transition-transform duration-hover ease-apple group-hover/nav:scale-x-100 group-focus-within/nav:scale-x-100 motion-reduce:transition-none"
                     />
                   </a>
 
@@ -129,7 +128,7 @@ export function Header() {
               type="button"
               onClick={() => setSearchOpen(true)}
               aria-label="Search"
-              className="hidden h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-maroon md:flex"
+              className="hidden h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:bg-bone md:flex"
             >
               <Search aria-hidden size={19} strokeWidth={1.5} />
             </button>
@@ -137,7 +136,7 @@ export function Header() {
             <a
               href="/pages/orders"
               aria-label="Account and orders"
-              className="hidden h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-maroon md:flex"
+              className="hidden h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:bg-bone md:flex"
             >
               <User aria-hidden size={19} strokeWidth={1.5} />
             </a>
@@ -229,7 +228,7 @@ export function Header() {
  * chrome affordance borrowed from somewhere else. Three 18px hairlines
  * in ink read as a mark set in the same ink as the type beside them.
  * The one flourish: on hover the middle line pulls in from the right
- * and the set goes maroon — the same maroon the nav underline uses, so
+ * and the set goes gold — the same gold the nav underline uses, so
  * the header has one hover language rather than two.
  */
 function BurgerButton({
@@ -255,7 +254,7 @@ function BurgerButton({
         <span
           key={line}
           aria-hidden
-          className={`block h-[1.5px] w-[18px] origin-left bg-ink transition-[background-color,transform] duration-hover ease-apple group-hover/burger:bg-maroon motion-reduce:transition-none ${
+          className={`block h-[1.5px] w-[18px] origin-left bg-ink transition-[background-color,transform] duration-hover ease-apple group-hover/burger:bg-gold motion-reduce:transition-none ${
             line === 1 ? 'group-hover/burger:scale-x-[0.62]' : ''
           }`}
         />
@@ -266,7 +265,7 @@ function BurgerButton({
 
 /**
  * Cart trigger. The badge shows a small pulse until the post-paint
- * getCart resolves (never a false 0), a maroon count bubble when the
+ * getCart resolves (never a false 0), an ink count bubble when the
  * cart has items, and nothing when it is empty.
  */
 function CartButton() {
@@ -283,7 +282,7 @@ function CartButton() {
           ? 'Open cart'
           : `Open cart, ${count} ${count === 1 ? 'item' : 'items'}`
       }
-      className="relative -mr-2.5 flex h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-maroon md:mr-0"
+      className="relative -mr-2.5 flex h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:bg-bone md:mr-0"
     >
       <ShoppingBag aria-hidden size={19} strokeWidth={1.5} />
       {count === null && (
@@ -295,7 +294,7 @@ function CartButton() {
       {count !== null && count > 0 && (
         <span
           aria-hidden
-          className="absolute right-1 top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-maroon px-1 text-[10px] font-semibold leading-none text-bone"
+          className="absolute right-1 top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-ink px-1 text-[10px] font-semibold leading-none text-bone"
         >
           {count > 99 ? '99+' : count}
         </span>

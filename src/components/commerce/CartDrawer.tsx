@@ -131,7 +131,7 @@ export function CartDrawer() {
                 type="button"
                 onClick={closeCart}
                 aria-label="Close cart"
-                className="flex h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-maroon motion-reduce:transition-none"
+                className="flex h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:bg-paper motion-reduce:transition-none"
               >
                 <X aria-hidden size={19} strokeWidth={1.5} />
               </button>
@@ -181,7 +181,7 @@ export function CartDrawer() {
                 <a
                   href="/cart"
                   onClick={closeCart}
-                  className="mt-1 flex min-h-11 items-center justify-center text-[12px] label text-ink underline decoration-hairline-light underline-offset-4 transition-colors duration-hover ease-apple hover:text-maroon motion-reduce:transition-none"
+                  className="mt-1 flex min-h-11 items-center justify-center text-[12px] label text-ink underline decoration-hairline-light underline-offset-4 transition-colors duration-hover ease-apple hover:decoration-gold motion-reduce:transition-none"
                 >
                   View full cart
                 </a>

@@ -1,7 +1,7 @@
 /**
  * components/sections/Reviews.tsx — customer quotes.
  *
- * Bone cards on the paper canvas, maroon stars, name and piece under
+ * Bone cards on the paper canvas, ink stars, name and piece under
  * each quote. Naming the piece is what separates a review from a
  * testimonial: it tells the reader which part of the catalog the opinion
  * applies to.

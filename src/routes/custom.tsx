@@ -21,7 +21,7 @@ import { SectionHeader } from '~/components/commerce/SectionHeader'
 import { STORE } from '~/lib/catalog'
 import { useSmoothScrollTo } from '~/lib/scroll-to'
 import { submitInquiry, type FormOutcome } from '~/lib/forms'
-import { BTN_PRIMARY, BTN_PRIMARY_BLOCK, BTN_SECONDARY, FIELD } from '~/lib/ui'
+import { BTN_PRIMARY_BLOCK, BTN_SECONDARY, FIELD } from '~/lib/ui'
 import {
   HERO_SOCIAL_IMAGE,
   SITE_URL,
@@ -105,7 +105,17 @@ function CustomPage() {
   return (
     <main>
       <section className="mx-auto max-w-[1440px] px-4 pb-4 pt-10 md:px-8 md:pt-14">
-        <p className="text-[11px] label-wide text-maroon">One of one</p>
+        {/*
+          * THE STAMP. Maroon's one home outside a primary CTA: a small,
+          * solid mark on the page that is actually about one-of-one work.
+          * It is the only maroon in this viewport — the two calls to
+          * action below it are the hairline ghost, and the maroon submit
+          * button lives further down the page with the form it belongs
+          * to. A stamp and a CTA never share a screen.
+          */}
+        <p className="inline-flex bg-maroon px-2 py-1 text-[10px] label-wide text-bone">
+          One of one
+        </p>
         <h1 className="display mt-3 max-w-[18ch] text-[32px] leading-[1.05] text-ink md:text-[48px]">
           Commission a piece nobody else owns
         </h1>
@@ -115,7 +125,7 @@ function CustomPage() {
           to five weeks.
         </p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          <a href="#inquiry" onClick={toInquiry} className={BTN_PRIMARY}>
+          <a href="#inquiry" onClick={toInquiry} className={BTN_SECONDARY}>
             Start an inquiry
           </a>
           <a href={STORE.phoneHref} className={BTN_SECONDARY}>
@@ -142,7 +152,7 @@ function CustomPage() {
             <li key={step.n} className="border-t border-hairline-light pt-4">
               {/* Numbered because these genuinely happen in order — the
                   quote precedes the build, the build precedes the fit. */}
-              <span className="text-[11px] label-wide text-maroon">
+              <span className="text-[11px] label-wide text-ink">
                 {step.n}
               </span>
               <h3 className="mt-2 text-[16px] font-medium text-ink">
@@ -246,7 +256,7 @@ function InquiryForm() {
             <p
               role="status"
               className={`mt-3 max-w-[52ch] text-[14px] ${
-                outcome.ok ? 'font-medium text-maroon' : 'text-ink'
+                outcome.ok ? 'font-medium text-ink' : 'text-ink'
               }`}
             >
               {outcome.message}
@@ -281,7 +291,7 @@ function InquiryForm() {
 
             <a
               href={STORE.instagram}
-              className="mt-4 inline-flex min-h-11 items-center text-[14px] text-maroon underline decoration-maroon underline-offset-4 transition-colors duration-hover ease-apple hover:text-ink motion-reduce:transition-none"
+              className="mt-4 inline-flex min-h-11 items-center text-[14px] text-ink underline decoration-hairline-light underline-offset-4 transition-colors duration-hover ease-apple hover:decoration-gold motion-reduce:transition-none"
             >
               See finished work on Instagram
             </a>

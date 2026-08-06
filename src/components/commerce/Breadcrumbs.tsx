@@ -29,7 +29,7 @@ export function Breadcrumbs({ items, className = '' }: BreadcrumbsProps) {
             ) : (
               <a
                 href={item.path}
-                className="transition-colors duration-hover ease-apple hover:text-maroon motion-reduce:transition-none"
+                className="transition-colors duration-hover ease-apple link-hover motion-reduce:transition-none"
               >
                 {item.name}
               </a>

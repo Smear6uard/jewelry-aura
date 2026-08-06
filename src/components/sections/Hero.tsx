@@ -29,7 +29,7 @@
  *
  * On the photograph: it is a dark-velvet campaign shot, and on a cream
  * canvas that darkness is the feature. It carries no filter, no scrim
- * and no hue grade — the previous build's maroon hue-blend existed only
+ * and no hue grade — the previous build's hue-blend existed only
  * to stop green velvet fighting a near-black page, and on cream the
  * frame reads as a jewel box on its own.
  */
@@ -130,7 +130,7 @@ export function Hero() {
             initial={fade.initial}
             animate={fade.animate}
             transition={{ duration: DURATION.content, ease: easeOutExpo }}
-            className="text-[11px] label-wide text-maroon"
+            className="text-[11px] label-wide text-ink"
           >
             {EYEBROW}
           </motion.p>
@@ -184,7 +184,7 @@ export function Hero() {
                 initial={fade.initial}
                 animate={fade.animate}
                 transition={{ duration: DURATION.content, ease: easeOutExpo }}
-                className="text-[11px] label-wide text-maroon"
+                className="text-[11px] label-wide text-ink"
               >
                 {EYEBROW}
               </motion.p>

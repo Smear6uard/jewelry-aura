@@ -42,7 +42,7 @@ export function Pagination({ page, totalPages, hrefFor }: PaginationProps) {
         <a
           href={hrefFor(page - 1)}
           rel="prev"
-          className={`${arrow} text-ink hover:text-maroon`}
+          className={`${arrow} text-ink link-hover`}
         >
           <ChevronLeft aria-hidden size={15} strokeWidth={1.6} /> Prev
         </a>
@@ -54,7 +54,7 @@ export function Pagination({ page, totalPages, hrefFor }: PaginationProps) {
             <li key={n}>
               <span
                 aria-current="page"
-                className="inline-flex h-11 w-11 items-center justify-center bg-maroon text-[13px] tabular-nums text-bone"
+                className="inline-flex h-11 w-11 items-center justify-center bg-ink text-[13px] tabular-nums text-bone"
               >
                 {n}
               </span>
@@ -64,7 +64,7 @@ export function Pagination({ page, totalPages, hrefFor }: PaginationProps) {
               <a
                 href={hrefFor(n)}
                 aria-label={`Page ${n}`}
-                className="inline-flex h-11 w-11 items-center justify-center bg-bone text-[13px] tabular-nums text-ink border border-hairline-light transition-colors duration-hover ease-apple hover:text-maroon motion-reduce:transition-none"
+                className="inline-flex h-11 w-11 items-center justify-center bg-bone text-[13px] tabular-nums text-ink border border-hairline-light transition-colors duration-hover ease-apple hover:border-ink motion-reduce:transition-none"
               >
                 {n}
               </a>
@@ -81,7 +81,7 @@ export function Pagination({ page, totalPages, hrefFor }: PaginationProps) {
         <a
           href={hrefFor(page + 1)}
           rel="next"
-          className={`${arrow} text-ink hover:text-maroon`}
+          className={`${arrow} text-ink link-hover`}
         >
           Next <ChevronRight aria-hidden size={15} strokeWidth={1.6} />
         </a>

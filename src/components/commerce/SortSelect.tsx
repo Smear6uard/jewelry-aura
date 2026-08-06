@@ -102,7 +102,7 @@ export function SortSheet({ value, hrefFor }: SortProps) {
                       aria-hidden
                       size={17}
                       strokeWidth={1.8}
-                      className="shrink-0 text-maroon"
+                      className="shrink-0 text-ink"
                     />
                   )}
                 </a>

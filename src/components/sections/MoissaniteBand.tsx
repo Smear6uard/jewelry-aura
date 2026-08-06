@@ -21,7 +21,7 @@
  * When the case has moissanite pieces in it, they take over the right
  * column and the spec card steps aside — at that point the products are
  * the better argument. The band reverts to paper with it, because a
- * product card is a paper object and its badges are maroon.
+ * product card is a paper object with its own accents.
  */
 
 import { ArrowRight } from 'lucide-react'
@@ -77,7 +77,7 @@ export function MoissaniteBand({
           >
             <p
               className={`text-[11px] label-wide ${
-                vitrine ? 'text-bone' : 'text-maroon'
+                vitrine ? 'text-bone' : 'text-ink'
               }`}
             >
               The stone

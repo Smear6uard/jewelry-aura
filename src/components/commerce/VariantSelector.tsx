@@ -53,7 +53,7 @@ export function VariantSelector({ options, onSelect }: VariantSelectorProps) {
                   onClick={() => onSelect(value.search)}
                   className={`relative flex h-11 w-11 items-center justify-center rounded-full transition-colors duration-hover ease-apple motion-reduce:transition-none ${
                     value.selected
-                      ? 'ring-2 ring-maroon ring-offset-2 ring-offset-paper'
+                      ? 'ring-2 ring-ink ring-offset-2 ring-offset-paper'
                       : 'ring-1 ring-hairline-light hover:ring-ink'
                   } ${
                     value.available

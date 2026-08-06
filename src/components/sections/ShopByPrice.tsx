@@ -51,7 +51,7 @@ export function ShopByPrice() {
                   aria-hidden
                   size={17}
                   strokeWidth={1.6}
-                  className="shrink-0 text-maroon transition-transform duration-hover ease-apple group-hover/band:translate-x-0.5 motion-reduce:transition-none"
+                  className="shrink-0 text-ink transition-transform duration-hover ease-apple group-hover/band:translate-x-0.5 motion-reduce:transition-none"
                 />
               </a>
             </li>

@@ -104,7 +104,7 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
               <span
                 key={image.src}
                 className={`h-1 transition-all duration-micro ease-apple motion-reduce:transition-none ${
-                  index === active ? 'w-6 bg-maroon' : 'w-1.5 bg-hairline-light'
+                  index === active ? 'w-6 bg-ink' : 'w-1.5 bg-hairline-light'
                 }`}
               />
             ))}
@@ -125,7 +125,7 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
                 aria-current={index === active}
                 className={`aspect-square overflow-hidden bg-bone transition-opacity duration-hover ease-apple motion-reduce:transition-none ${
                   index === active
-                    ? 'opacity-100 ring-1 ring-maroon'
+                    ? 'opacity-100 ring-1 ring-ink'
                     : 'opacity-70 border border-hairline-light hover:opacity-100'
                 }`}
               >

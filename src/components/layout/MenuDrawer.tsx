@@ -64,13 +64,12 @@ const FLAT_ROWS = [
 
 const ROW_LABEL =
   'flex min-h-12 flex-1 items-center px-5 text-[15px] font-medium text-ink'
-// Split so the maroon variant can replace the colour rather than append
-// it: two text-* utilities on one element resolve by stylesheet order,
-// not by class-string order, and ink-muted wins that race.
-const SUB_LINK_BASE =
-  'flex min-h-11 items-center text-[14px] transition-colors duration-hover ease-apple motion-reduce:transition-none'
-const SUB_LINK = `${SUB_LINK_BASE} text-ink hover:text-maroon`
-const SUB_LINK_BRAND = `${SUB_LINK_BASE} text-maroon hover:text-ink`
+// There was a second, maroon variant of this for the Women's door. Every
+// link in the drawer is ink now — maroon does not mark typography — so
+// the two collapsed into one.
+const SUB_LINK =
+  'flex min-h-11 items-center text-[14px] text-ink link-hover ' +
+  'transition-colors duration-hover ease-apple motion-reduce:transition-none'
 
 interface MenuDrawerProps {
   open: boolean
@@ -156,7 +155,7 @@ export function MenuDrawer({ open, onClose }: MenuDrawerProps) {
                 type="button"
                 onClick={onClose}
                 aria-label="Close menu"
-                className="-mr-2.5 flex h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-maroon"
+                className="-mr-2.5 flex h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:bg-paper"
               >
                 <X aria-hidden size={19} strokeWidth={1.5} />
               </button>
@@ -239,7 +238,7 @@ export function MenuDrawer({ open, onClose }: MenuDrawerProps) {
                         </li>
                       ))}
                       <li>
-                        <a href={WOMENS.href} className={SUB_LINK_BRAND}>
+                        <a href={WOMENS.href} className={SUB_LINK}>
                           All women’s
                         </a>
                       </li>
@@ -258,7 +257,7 @@ export function MenuDrawer({ open, onClose }: MenuDrawerProps) {
                 <li className="border-b border-hairline-light">
                   <a
                     href="/collections/sale"
-                    className="flex min-h-12 items-center px-5 text-[15px] font-medium text-maroon"
+                    className="flex min-h-12 items-center px-5 text-[15px] font-medium text-ink"
                   >
                     Sale
                   </a>
@@ -332,7 +331,7 @@ function DisclosureButton({
       onClick={onClick}
       aria-expanded={expanded}
       aria-label={label}
-      className="flex w-12 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-maroon"
+      className="flex w-12 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:bg-paper"
     >
       <Chevron open={expanded} />
     </button>

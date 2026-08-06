@@ -109,7 +109,7 @@ function StaticPage() {
             <p className="text-[11px] label-wide text-ink">Still stuck?</p>
             <a
               href={STORE.phoneHref}
-              className="mt-2 inline-flex min-h-11 items-center text-[16px] font-medium text-maroon transition-colors duration-hover ease-apple hover:text-ink motion-reduce:transition-none"
+              className="mt-2 inline-flex min-h-11 items-center text-[16px] font-medium text-ink transition-colors duration-hover ease-apple link-hover motion-reduce:transition-none"
             >
               {STORE.phone}
             </a>
@@ -145,7 +145,7 @@ function StaticPage() {
                     >
                       <span
                         aria-hidden
-                        className="mt-3 h-px w-3.5 shrink-0 bg-maroon"
+                        className="mt-3 h-px w-3.5 shrink-0 bg-ink"
                       />
                       {entry}
                     </li>

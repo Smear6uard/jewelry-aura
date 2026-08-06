@@ -16,7 +16,7 @@
  * repeating itself.
  *
  * The names are set in the display serif, which is the one flourish
- * here. Everything else is a hairline and a maroon arrow.
+ * here. Everything else is a hairline and an ink arrow.
  */
 
 import { ArrowRight } from 'lucide-react'
@@ -60,7 +60,7 @@ export function WomensShelf() {
                   aria-hidden
                   size={16}
                   strokeWidth={1.6}
-                  className="shrink-0 text-maroon transition-transform duration-hover ease-apple group-hover/door:translate-x-0.5 motion-reduce:transition-none"
+                  className="shrink-0 text-ink transition-transform duration-hover ease-apple group-hover/door:translate-x-0.5 motion-reduce:transition-none"
                 />
               </a>
             </li>

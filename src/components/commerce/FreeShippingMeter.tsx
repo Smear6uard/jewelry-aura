@@ -2,7 +2,7 @@
  * components/commerce/FreeShippingMeter.tsx — progress toward free
  * shipping, shown in the cart drawer and on the cart page.
  *
- * The bar is the one place in the cart where maroon fills a shape, and
+ * The bar fills in ink. Maroon in the cart belongs to the checkout
  * the fill reaching the end of the track is the whole message. Copy names
  * the remaining amount rather than the percentage, because "$38 away" is
  * actionable and "74%" is not.
@@ -47,7 +47,7 @@ export function FreeShippingMeter({ subtotal }: FreeShippingMeterProps) {
         aria-valuenow={Math.min(subtotal, FREE_SHIPPING_THRESHOLD)}
         aria-label="Progress toward free shipping"
       >
-        {/* Maroon throughout, deepening at the finish line. The reward
+        {/* Ink throughout, deepening at the finish line. The reward
             state is the bar reaching the end, not a change of colour —
             a second accent here would be a fourth colour on the site. */}
         <div
@@ -56,7 +56,7 @@ export function FreeShippingMeter({ subtotal }: FreeShippingMeterProps) {
             width: `${percent}%`,
             backgroundColor: reached
               ? 'var(--color-ink)'
-              : 'var(--color-maroon)',
+              : 'var(--color-ink)',
           }}
         />
       </div>

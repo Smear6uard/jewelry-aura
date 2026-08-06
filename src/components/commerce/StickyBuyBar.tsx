@@ -2,7 +2,7 @@
  * components/commerce/StickyBuyBar.tsx — the PDP's phone buy bar.
  *
  * Pinned to the bottom of the viewport with the price and a full-width
- * maroon add-to-cart, clearing the iOS home indicator. It appears only
+ * maroon add-to-cart — the page's one maroon element, clearing the iOS home indicator. It appears only
  * once the inline add-to-cart has scrolled out of view: two identical buy
  * buttons on screen at once makes the shopper decide which one is real.
  *

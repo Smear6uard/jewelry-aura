@@ -128,7 +128,7 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
               type="button"
               onClick={onClose}
               aria-label="Close search"
-              className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:text-maroon"
+              className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:bg-paper"
             >
               <X aria-hidden size={19} strokeWidth={1.5} />
             </button>
