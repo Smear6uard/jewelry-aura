@@ -2,9 +2,15 @@
  * components/layout/MegaMenu.tsx — the full-width category panel.
  *
  * The single strongest "this is a store, not a brand site" signal in the
- * design, so it is built as a real menu: three columns of ways into the
- * category (style, metal, price), a commission from the bench on the
- * right, and a shop-all link.
+ * design, so it is built as a real menu: the case described and its
+ * shop-all door, two columns of ways in (style, then price), and a
+ * commission from the bench on the right.
+ *
+ * TWO FACET COLUMNS, NOT THREE. Metal used to be the middle one. It is a
+ * filter now and lives only in FilterSidebar — a mega menu shows a
+ * shopper a list of doors with no counts on them, so every entry has to
+ * be a door that opens, and half the metal list opened onto an empty
+ * case. See the note above METAL_FACETS in lib/catalog.ts.
  *
  * Why this is CSS, not React state
  * --------------------------------
@@ -29,7 +35,6 @@
 
 import { ArrowRight } from 'lucide-react'
 import {
-  METAL_FACETS,
   PRICE_FACETS,
   SERVICES,
   STORE,
@@ -71,39 +76,25 @@ export function MegaMenuPanel({ category }: { category: Category }) {
 
   return (
     <Panel>
-      <div className="col-span-5">
-        <p className="max-w-[36ch] text-[14px] leading-relaxed text-ink">
+      <div className="col-span-4">
+        <p className="max-w-[34ch] text-[14px] leading-relaxed text-ink">
           {category.blurb}
         </p>
 
-        <div className="mt-6 grid grid-cols-2 gap-8">
-          <div>
-            <ColumnHeading>Shop by style</ColumnHeading>
-            <FacetLinks options={category.styles} base={base} param="style" />
-          </div>
-          <div>
-            <ColumnHeading>Shop by metal</ColumnHeading>
-            <FacetLinks options={METAL_FACETS} base={base} param="metal" />
-          </div>
-        </div>
+        <AllLink href={base}>All {category.label.toLowerCase()}</AllLink>
       </div>
 
+      {/* Style takes the wider of the two: its labels are the long ones
+          ("Portrait & photo", "Box & wheat"), while a price band is
+          eleven characters at most. */}
       <div className="col-span-3">
+        <ColumnHeading>Shop by style</ColumnHeading>
+        <FacetLinks options={category.styles} base={base} param="style" />
+      </div>
+
+      <div className="col-span-2">
         <ColumnHeading>Shop by price</ColumnHeading>
         <FacetLinks options={PRICE_FACETS} base={base} param="price" />
-
-        <a
-          href={base}
-          className="group/all mt-7 inline-flex items-center gap-1.5 text-[12px] label text-ink transition-colors duration-hover ease-apple link-hover"
-        >
-          All {category.label.toLowerCase()}
-          <ArrowRight
-            aria-hidden
-            size={13}
-            strokeWidth={1.6}
-            className="transition-transform duration-hover ease-apple group-hover/all:translate-x-0.5 motion-reduce:transition-none"
-          />
-        </a>
       </div>
 
       <FeaturedCommission featured={category.featured} />
@@ -122,14 +113,17 @@ export function MegaMenuPanel({ category }: { category: Category }) {
 export function WomensMenuPanel() {
   return (
     <Panel>
-      <div className="col-span-5">
+      <div className="col-span-6">
         <p className="max-w-[36ch] text-[14px] leading-relaxed text-ink">
           {WOMENS.blurb}
         </p>
 
         <div className="mt-6">
           <ColumnHeading>Shop by category</ColumnHeading>
-          <ul className="grid grid-cols-2 gap-x-8 gap-y-2">
+          {/* Held to a readable measure: the column took the panel's
+              full width once metal came out, which stranded "Pendants"
+              half a panel away from "Chains". */}
+          <ul className="grid max-w-[22rem] grid-cols-2 gap-x-8 gap-y-2">
             {WOMENS.links.map((link) => (
               <li key={link.href}>
                 <a
@@ -148,18 +142,7 @@ export function WomensMenuPanel() {
         <ColumnHeading>Shop by price</ColumnHeading>
         <FacetLinks options={PRICE_FACETS} base={WOMENS.href} param="price" />
 
-        <a
-          href={WOMENS.href}
-          className="group/all mt-7 inline-flex items-center gap-1.5 text-[12px] label text-ink transition-colors duration-hover ease-apple link-hover"
-        >
-          All women’s
-          <ArrowRight
-            aria-hidden
-            size={13}
-            strokeWidth={1.6}
-            className="transition-transform duration-hover ease-apple group-hover/all:translate-x-0.5 motion-reduce:transition-none"
-          />
-        </a>
+        <AllLink href={WOMENS.href}>All women’s</AllLink>
       </div>
 
       <FeaturedCommission
@@ -221,20 +204,38 @@ export function ServicesMenuPanel() {
         <p className="max-w-[30ch] text-[13px] leading-relaxed text-ink">
           A piece that does not exist yet is a commission, not a repair.
         </p>
-        <a
-          href="/custom"
-          className="group/all mt-5 inline-flex items-center gap-1.5 text-[12px] label text-ink transition-colors duration-hover ease-apple link-hover"
-        >
-          Start a commission
-          <ArrowRight
-            aria-hidden
-            size={13}
-            strokeWidth={1.6}
-            className="transition-transform duration-hover ease-apple group-hover/all:translate-x-0.5 motion-reduce:transition-none"
-          />
-        </a>
+        <AllLink href="/custom">Start a commission</AllLink>
       </div>
     </Panel>
+  )
+}
+
+/**
+ * The panel's one strong link: the door that takes the whole shelf, set
+ * apart from the facet lists by case and by the arrow. In a category
+ * panel it sits directly under the blurb, because the sentence describing
+ * the case and the link into it are one thought.
+ */
+function AllLink({
+  href,
+  children,
+}: {
+  href: string
+  children: React.ReactNode
+}) {
+  return (
+    <a
+      href={href}
+      className="group/all mt-6 inline-flex items-center gap-1.5 text-[12px] label text-ink transition-colors duration-hover ease-apple link-hover"
+    >
+      {children}
+      <ArrowRight
+        aria-hidden
+        size={13}
+        strokeWidth={1.6}
+        className="transition-transform duration-hover ease-apple group-hover/all:translate-x-0.5 motion-reduce:transition-none"
+      />
+    </a>
   )
 }
 
@@ -243,6 +244,11 @@ export function ServicesMenuPanel() {
  * commission. It is not stock in this category, so it points at /custom
  * rather than at the collection — a photograph under a category heading
  * is read as a promise about the category.
+ *
+ * Three columns wide, not four. A menu panel is as tall as its tallest
+ * item, and at four columns this photograph was 600px across and 450px
+ * down — it left the facet lists floating above 400px of empty paper.
+ * The panel should be the height of the choices it offers.
  */
 function FeaturedCommission({
   featured,
@@ -250,7 +256,7 @@ function FeaturedCommission({
   featured: Category['featured']
 }) {
   return (
-    <a href="/custom" className="group/piece col-span-4 block">
+    <a href="/custom" className="group/piece col-span-3 block">
       <div className="relative aspect-[4/3] overflow-hidden bg-bone border border-hairline-light">
         <picture>
           <source type="image/avif" srcSet={`${featured.image}.avif`} />
@@ -262,7 +268,7 @@ function FeaturedCommission({
             height={842}
             loading="lazy"
             decoding="async"
-            sizes="360px"
+            sizes="300px"
             className="h-full w-full object-cover transition-transform duration-content ease-out-expo group-hover/piece:scale-[1.03] motion-reduce:transition-none"
           />
         </picture>

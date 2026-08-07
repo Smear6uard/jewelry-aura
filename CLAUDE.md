@@ -170,6 +170,12 @@ and the copy names the piece, so a new photograph means new copy too.
 - An unpriced piece gets the hallmark plate — "Priced at the bench —
   call", on `tel:`. The bench quotes chains by weight in a minute; a
   commission form answers in a business day.
+- A menu offers doors, not filters. Every style in `CATEGORIES[].styles`
+  must have a keyword rule in `lib/shopify/facets.ts`; `facets.test.ts`
+  fails the build otherwise, because a menu shows no counts and a link
+  onto an empty case is indistinguishable from a broken one. Metal is a
+  filter for the same reason — `METAL_FACETS` appears only in
+  `FilterSidebar`, which greys out the zeroes.
 - A product URL is a public slug, not necessarily the Shopify handle —
   see `lib/shopify/product-slugs.ts`. Renaming the handle in the admin is
   the real fix and deletes that file.

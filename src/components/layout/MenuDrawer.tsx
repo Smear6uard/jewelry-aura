@@ -15,10 +15,14 @@
  *   Chains · Pendants · Earrings · Rings · Bracelets · Women's
  *
  * The first five are accordion rows: tapping the label goes straight to
- * the collection, tapping the chevron opens its styles and metals.
- * Splitting those two targets matters on a phone — an accordion that
- * swallows the tap you meant as navigation is the most common
- * mobile-menu failure.
+ * the collection, tapping the chevron opens its styles. Splitting those
+ * two targets matters on a phone — an accordion that swallows the tap
+ * you meant as navigation is the most common mobile-menu failure.
+ *
+ * Styles only. Three metal rows used to follow them under every
+ * category, which put "Rose gold" under Earrings where no such pair
+ * exists. Metal is a filter with counts beside it now — see the note
+ * above METAL_FACETS in lib/catalog.ts.
  *
  * Women's is the exception, and deliberately so. It is not a sixth case
  * of merchandise sitting beside the other five; it is the same five,
@@ -45,7 +49,6 @@ import { DURATION, easeApple, easeOutExpo } from '~/lib/motion'
 import {
   CATEGORIES,
   FOOTER_SERVICE_LINKS,
-  METAL_FACETS,
   MOISSANITE,
   SERVICES,
   STORE,
@@ -196,16 +199,6 @@ export function MenuDrawer({ open, onClose }: MenuDrawerProps) {
                               className={SUB_LINK}
                             >
                               {style.label}
-                            </a>
-                          </li>
-                        ))}
-                        {METAL_FACETS.slice(0, 3).map((metal) => (
-                          <li key={metal.value}>
-                            <a
-                              href={`/collections/${category.handle}?metal=${metal.value}`}
-                              className={SUB_LINK}
-                            >
-                              {metal.label}
                             </a>
                           </li>
                         ))}

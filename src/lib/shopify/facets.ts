@@ -46,11 +46,28 @@ const STYLE_KEYWORDS: Array<[style: string, patterns: string[]]> = [
   ['portrait', ['portrait', 'photo', 'picture', 'memorial']],
   ['iced', ['iced', 'icy', 'flooded', 'vvs']],
   ['charm', ['charm']],
+  // Earrings are named twice over — by fitting and by shape ("Square
+  // Stud Earrings Gold") — so a pair registers for both and can be
+  // reached from either door in the menu.
+  ['stud', ['stud']],
+  ['hoop', ['hoop', 'huggie']],
+  ['heart', ['heart']],
+  ['square', ['square']],
+  ['circle', ['circle']],
   ['engagement', ['engagement', 'bridal', 'solitaire', 'halo']],
   ['band', ['band', 'wedding', 'eternity']],
   ['signet', ['signet', 'pinky']],
   ['bangle', ['bangle', 'cuff']],
 ]
+
+/**
+ * Every style this file can derive. The menu's style links are checked
+ * against it in facets.test.ts, so a category cannot offer a door that
+ * no product can ever come through.
+ */
+export const KNOWN_STYLES: ReadonlySet<string> = new Set(
+  STYLE_KEYWORDS.map(([style]) => style),
+)
 
 function matchesAny(haystack: string, patterns: string[]): boolean {
   return patterns.some((pattern) => haystack.includes(pattern))

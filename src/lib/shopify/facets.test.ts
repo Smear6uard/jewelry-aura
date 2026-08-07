@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
+import { CATEGORIES } from '~/lib/catalog'
 import {
   FACET_GROUPS,
+  KNOWN_STYLES,
   activeFacetCount,
   allFacetCounts,
   applyFacets,
@@ -75,6 +77,41 @@ describe('stylesOf', () => {
   it('picks up pendant styles', () => {
     expect(stylesOf('Custom Name Plate')).toContain('name')
     expect(stylesOf('Iced Cross Pendant').sort()).toEqual(['cross', 'iced'])
+  })
+
+  // The catalog's earrings are named by fitting and by shape — "Square
+  // Stud Earrings Gold", "Silver Heart Earrings" — so both halves have to
+  // register or the menu's shape links land on an empty listing.
+  it('picks up earring fittings and shapes', () => {
+    expect(stylesOf('Square Stud Earrings Gold').sort()).toEqual([
+      'square',
+      'stud',
+    ])
+    expect(stylesOf('Circle Stud Earrings Silver/Black').sort()).toEqual([
+      'circle',
+      'stud',
+    ])
+    expect(stylesOf('Silver Heart Earrings')).toEqual(['heart'])
+    expect(stylesOf('Gold Hoop Earrings')).toEqual(['hoop'])
+  })
+})
+
+/**
+ * The guard that keeps a menu link from pointing at a facet nothing can
+ * satisfy. "Studs" and "Hoops" sat in the earrings menu for months with
+ * no entry in the keyword table behind them, so every shopper who picked
+ * one got an empty case — a dead link wearing a live link's clothes.
+ */
+describe('menu styles are derivable', () => {
+  it('backs every style offered in a menu with a keyword rule', () => {
+    for (const category of CATEGORIES) {
+      for (const style of category.styles) {
+        expect(
+          KNOWN_STYLES.has(style.value),
+          `${category.handle} offers "${style.label}" (style=${style.value}) with no keyword rule in facets.ts`,
+        ).toBe(true)
+      }
+    }
   })
 })
 

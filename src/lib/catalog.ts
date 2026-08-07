@@ -60,7 +60,20 @@ export interface Category {
   }
 }
 
-/** Metal facets — shared across every category. */
+/**
+ * Metal facets — a filter, not a menu door.
+ *
+ * These used to run as a "Shop by metal" column in every mega-menu panel
+ * and as three rows in every drawer accordion. They came out: the bench
+ * names most pieces plain "Gold" or "Silver", so a menu offering Yellow
+ * gold / White gold / Rose gold under Earrings was inventing a
+ * distinction the catalog does not make, and two of the remaining values
+ * matched nothing at all. As a PLP filter the same list is honest,
+ * because FilterSidebar renders each value with its count and greys out
+ * the zeroes. A menu cannot do that — it can only promise.
+ *
+ * FilterSidebar is the only consumer. Keep it that way.
+ */
 export const METAL_FACETS: FacetOption[] = [
   { value: 'yellow-gold', label: 'Yellow gold' },
   { value: 'white-gold', label: 'White gold' },
@@ -125,15 +138,13 @@ export const CATEGORIES: Category[] = [
   {
     handle: 'pendants',
     label: 'Pendants',
-    blurb: 'Name plates, crosses, portraits and charms, set by hand.',
+    blurb: 'Name plates, picture pendants and charms, set by hand.',
     tileImage: '/JA-image1',
     tileAlt:
       'A custom white gold plate pendant set with round and baguette diamonds, on dark velvet.',
     styles: [
       { value: 'name', label: 'Name & initial' },
-      { value: 'cross', label: 'Crosses' },
       { value: 'portrait', label: 'Portrait & photo' },
-      { value: 'iced', label: 'Fully iced' },
       { value: 'charm', label: 'Charms' },
     ],
     featured: {
@@ -146,12 +157,20 @@ export const CATEGORIES: Category[] = [
   {
     handle: 'earrings',
     label: 'Earrings',
-    blurb: 'Studs and hoops in gold, silver and moissanite — sold as pairs.',
+    blurb: 'Hearts, squares and circles — studs and hoops in gold and silver, sold as pairs.',
+    /**
+     * Two fittings, then three shapes — the order the case is actually
+     * shopped in, and the order the bench names a pair ("Square Stud
+     * Earrings Gold"). Huggies and Moissanite were dropped: nothing in
+     * the catalog is either, and neither had a keyword rule behind it,
+     * so both links landed on an empty case.
+     */
     styles: [
       { value: 'stud', label: 'Studs' },
       { value: 'hoop', label: 'Hoops' },
-      { value: 'huggie', label: 'Huggies' },
-      { value: 'moissanite', label: 'Moissanite' },
+      { value: 'heart', label: 'Hearts' },
+      { value: 'square', label: 'Squares' },
+      { value: 'circle', label: 'Circles' },
     ],
     featured: {
       image: '/JA-image2',
@@ -164,11 +183,14 @@ export const CATEGORIES: Category[] = [
     handle: 'rings',
     label: 'Rings',
     blurb: 'Engagement, bands and signets — moissanite or natural stone.',
+    // Moissanite was a fourth entry here, and it is a metal rather than a
+    // style — `?style=moissanite` matched nothing, ever. It keeps its own
+    // door in the burger and the footer, which is where a material
+    // belongs.
     styles: [
       { value: 'engagement', label: 'Engagement' },
       { value: 'band', label: 'Wedding bands' },
       { value: 'signet', label: 'Signet' },
-      { value: 'moissanite', label: 'Moissanite' },
     ],
     featured: {
       image: '/JA-image3',
