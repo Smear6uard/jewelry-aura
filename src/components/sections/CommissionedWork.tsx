@@ -77,10 +77,19 @@ export function CommissionedWork() {
     >
       <div className="mx-auto max-w-[1440px] px-4 pb-8 pt-14 md:px-8 md:pb-10 md:pt-20">
         <Reveal>
-          <p className="text-[11px] label-wide text-bone">From the bench</p>
+          {/* NO EYEBROW. The paper sections above this one open with a
+              small uppercase line over the heading, and that is right for
+              them — a shelf needs saying what kind of shelf it is. These
+              three velvet scenes share a different voice: the exhibit has
+              no heading at all, the bench has nothing but its four facts,
+              and a label reading "From the bench" over a heading reading
+              "Commissioned work" is a label labelling a label. It is also
+              the eyebrow /custom already uses, which would make two pages
+              read as one module. The title opens the section on its
+              own. */}
           <h2
             id="commissioned-heading"
-            className="commission-title display mt-3 text-bone"
+            className="commission-title display text-bone"
           >
             Commissioned work
           </h2>
