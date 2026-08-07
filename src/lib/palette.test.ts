@@ -21,7 +21,7 @@ const SRC = new URL('..', import.meta.url).pathname
 const PALETTE = {
   paper: '#f7f3ec',
   ink: '#191410',
-  velvet: '#171209',
+  velvet: '#1e1013',
   bone: '#efe9de',
   maroon: '#5a1b22',
   gold: '#c2a15e',
@@ -156,7 +156,12 @@ describe('type on velvet', () => {
 })
 
 describe('the filled surfaces', () => {
-  it('clears AA for bone on a maroon button', () => {
+  /**
+   * No button on this site is maroon any more — the stamp is the only
+   * maroon fill left. The pairing is still measured because the stamp is
+   * bone-on-maroon and has to stay readable at 10px.
+   */
+  it('clears AA for bone on the maroon stamp', () => {
     expect(contrast(token('bone'), token('maroon'))).toBeGreaterThanOrEqual(AA_BODY)
   })
 
@@ -255,18 +260,12 @@ describe('the source tree obeys the colour rules', () => {
   })
 
   /**
-   * Every maroon fill in the codebase, by design. Adding one means
-   * deciding it is a page's single primary CTA or a small stamp — so it
-   * should mean editing this list on purpose, not by accident.
-   *
-   * StickyBuyBar's two entries are mutually exclusive branches of the
-   * same button, and it only renders once the inline Add to cart has
-   * scrolled out of view.
+   * Every maroon fill in the codebase, by design. There is one, and it
+   * is a stamp — no button on this site is maroon. Adding an entry here
+   * should mean deciding something is a hallmark, on purpose.
    */
-  it('keeps maroon fills to the primary CTA and the stamp', () => {
+  it('keeps maroon fills to the stamps and nothing else', () => {
     const EXPECTED = {
-      'lib/ui.ts': 1, // BTN_PRIMARY
-      'components/commerce/StickyBuyBar.tsx': 2, // one branch renders
       'routes/custom.tsx': 1, // the ONE OF ONE stamp
     }
     const found: Record<string, number> = {}
@@ -275,6 +274,17 @@ describe('the source tree obeys the colour rules', () => {
       if (count > 0) found[path] = count
     }
     expect(found).toEqual(EXPECTED)
+  })
+
+  /**
+   * The button vocabulary is written once, in lib/ui.ts. If maroon can't
+   * appear there it can't appear on a button anywhere, which is a
+   * stronger guarantee than counting fills after the fact.
+   */
+  it('ships no maroon in the button vocabulary', () => {
+    const ui = files.find(([path]) => path === 'lib/ui.ts')
+    expect(ui, 'lib/ui.ts').toBeDefined()
+    expect(stripComments(ui![1])).not.toMatch(/\bmaroon\b/)
   })
 
   /**

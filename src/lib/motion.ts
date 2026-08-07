@@ -21,7 +21,10 @@
  */
 
 import type { Variants } from 'framer-motion'
-import { useReducedMotion as useFramerReducedMotion } from 'framer-motion'
+import {
+  cubicBezier,
+  useReducedMotion as useFramerReducedMotion,
+} from 'framer-motion'
 
 // ─── Easing tokens ───────────────────────────────────────────────────────
 
@@ -45,6 +48,18 @@ export const EASE = {
   sharpOut: easeSharpOut,
   inOut: easeInOut,
 } as const
+
+/**
+ * The same curves as callable easing functions.
+ *
+ * A `transition` takes a bezier tuple; `useTransform` takes a function.
+ * Scroll-scrubbed animation runs entirely through `useTransform`, so
+ * without these every scrubbed value would be linear — which is what
+ * makes scroll choreography feel mechanical. Derived from the tuples
+ * above so a retune of a curve moves both forms at once.
+ */
+export const easeOutExpoFn = cubicBezier(...easeOutExpo)
+export const easeAppleFn = cubicBezier(...easeApple)
 
 // ─── Duration scale (seconds) ────────────────────────────────────────────
 

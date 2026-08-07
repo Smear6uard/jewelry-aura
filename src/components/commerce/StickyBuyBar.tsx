@@ -2,7 +2,7 @@
  * components/commerce/StickyBuyBar.tsx — the PDP's phone buy bar.
  *
  * Pinned to the bottom of the viewport with the price and a full-width
- * maroon add-to-cart — the page's one maroon element, clearing the iOS home indicator. It appears only
+ * ink add-to-cart, clearing the iOS home indicator. It appears only
  * once the inline add-to-cart has scrolled out of view: two identical buy
  * buttons on screen at once makes the shopper decide which one is real.
  *
@@ -99,7 +99,7 @@ export function StickyBuyBar({
             {unpriced ? (
               <a
                 href="/custom"
-                className="flex min-h-12 flex-1 items-center justify-center bg-maroon px-5 text-[12px] label text-bone"
+                className="flex min-h-12 flex-1 items-center justify-center bg-ink px-5 text-[12px] label text-bone"
               >
                 Get a price
               </a>
@@ -112,7 +112,7 @@ export function StickyBuyBar({
                 className={
                   soldOut || !variant
                     ? 'flex min-h-12 flex-1 cursor-not-allowed items-center justify-center bg-bone px-5 text-[12px] label text-ink'
-                    : 'flex min-h-12 flex-1 items-center justify-center bg-maroon px-5 text-[12px] label text-bone transition-colors duration-hover ease-apple active:scale-[0.99] disabled:opacity-70 motion-reduce:transition-none'
+                    : 'flex min-h-12 flex-1 items-center justify-center bg-ink px-5 text-[12px] label text-bone transition-colors duration-hover ease-apple active:scale-[0.99] disabled:opacity-70 motion-reduce:transition-none'
                 }
               >
                 {soldOut ? 'Sold out' : pending ? 'Adding…' : 'Add to cart'}

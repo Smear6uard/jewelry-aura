@@ -11,7 +11,6 @@ import { TrustBar } from '~/components/sections/TrustBar'
 import { MoissaniteBand } from '~/components/sections/MoissaniteBand'
 import { WomensShelf } from '~/components/sections/WomensShelf'
 import { CustomPromo } from '~/components/sections/CustomPromo'
-import { ShopByPrice } from '~/components/sections/ShopByPrice'
 import { Reviews } from '~/components/sections/Reviews'
 import { ProductRail } from '~/components/commerce/ProductRail'
 import { CATEGORIES } from '~/lib/catalog'
@@ -40,7 +39,7 @@ import {
 const MIN_RAIL_PRODUCTS = 4
 
 /** The homepage shelf is a shop window, not the catalog: eight pieces. */
-const BEST_SELLER_LIMIT = 8
+const CASE_LIMIT = 8
 
 interface HomeData {
   bestSellers: ProductCardModel[]
@@ -69,13 +68,18 @@ interface ShopProductsData {
  * the Shopify collections behind the menu do not exist yet. One fetch,
  * and a tile that resolves for any category with a photographed,
  * in-stock piece in it.
+ *
+ * ONE ROUND TRIP, NOT TWO. The shelf used to make its own BEST_SELLING
+ * request beside this one. Both asked the same query with the same sort;
+ * the only difference was the page size, and this one is bigger. The
+ * shelf now selects out of the catalog the page has already fetched.
  */
 const getHomeData = createServerFn({ method: 'GET' }).handler(
   async (): Promise<HomeData> => {
     try {
       const [
         { storefrontRequest },
-        { getBestSellersLogic },
+        { selectBestSellers },
         { SHOP_PRODUCTS_QUERY },
         { findVirtualCollection, selectVirtual },
       ] = await Promise.all([
@@ -85,14 +89,13 @@ const getHomeData = createServerFn({ method: 'GET' }).handler(
         import('~/lib/shopify/virtual-collections'),
       ])
 
-      const [bestSellers, catalog] = await Promise.all([
-        getBestSellersLogic(storefrontRequest, BEST_SELLER_LIMIT),
-        storefrontRequest<ShopProductsData>(SHOP_PRODUCTS_QUERY, {
-          variables: { first: 250 },
-        }),
-      ])
+      const catalog = await storefrontRequest<ShopProductsData>(
+        SHOP_PRODUCTS_QUERY,
+        { variables: { first: 250 } },
+      )
 
       const nodes = catalog.products.nodes
+      const bestSellers = selectBestSellers(nodes, CASE_LIMIT)
 
       const tileFallbacks: TileFallbacks = {}
       for (const category of CATEGORIES) {
@@ -168,24 +171,26 @@ export const Route = createFileRoute('/')({
           image: HERO_SOCIAL_IMAGE,
           imageAlt: HERO_SOCIAL_IMAGE_ALT,
         }),
-        { property: 'og:image:width', content: '1536' },
-        { property: 'og:image:height', content: '1024' },
+        { property: 'og:image:width', content: '1672' },
+        { property: 'og:image:height', content: '941' },
       ],
       links: [
         { rel: 'canonical', href: SITE_URL },
         // The hero breaks at 1024px, so the preload media queries have to
         // agree with the <picture> in components/sections/Hero.tsx or the
-        // browser fetches the wrong asset at high priority.
+        // browser fetches the wrong asset at high priority. It matters
+        // more here than it used to: the hero opens on a 900ms fade from
+        // black, and a frame that arrives late spends that budget twice.
         {
           rel: 'preload',
-          href: '/hero-portrait-wide.avif',
+          href: '/new-hero-horizontal.avif',
           as: 'image',
           media: '(min-width: 1024px)',
           fetchPriority: 'high',
         },
         {
           rel: 'preload',
-          href: '/hero-portrait-tall.avif',
+          href: '/new-hero-vertical.avif',
           as: 'image',
           media: '(max-width: 1023px)',
           fetchPriority: 'high',
@@ -216,26 +221,29 @@ export const Route = createFileRoute('/')({
 // ═══════════════════════════════════════════
 //
 // The order is a shopping funnel, not a narrative:
-//   Hero           one frame, two category CTAs
-//   CategoryTiles  the "I can shop here" moment, above the fold
-//   Best sellers   what other people bought — the ONE product shelf
+//   Hero           one pinned frame, two CTAs
+//   CategoryTiles  the "I can shop here" moment, and the curtain that
+//                  slides up over the hero
+//   The case       what other people bought — the ONE product shelf
 //   Trust bar      the terms, immediately after the shelf
 //   Moissanite     the stone, argued, with a route into the case
 //   Women's        the five categories again, cut for her
 //   Custom promo   the workshop's differentiator, one band
-//   Shop by price  for the visitor who knows the budget, not the piece
 //   Reviews        social proof — omitted until three real ones exist
 //
 // ONE PRODUCT SHELF, NOT TWO. A "New arrivals" rail used to sit below
 // the trust bar. On a catalog this size the two shelves between them
 // listed most of the store, which turns the homepage into the catalog
-// and leaves /shop with nothing to be. Best sellers is ranked by real
-// sales and capped at eight; everything else on this page is a door,
-// and every door leads to a listing page that can hold the rest.
+// and leaves /shop with nothing to be. The case is ranked by real sales
+// and capped at eight; everything else on this page is a door, and every
+// door leads to a listing page that can hold the rest.
 //
-// A pinned custom-work gallery and a store-location section used to sit
-// in this list. Both read as brand-site rather than marketplace, and both
-// were removed with the sections that rendered them.
+// A "Shop by price" band of three price-facet tiles used to sit between
+// the custom promo and the reviews. It was three links dressed as a
+// section: the same three bands are already offered in every mega-menu
+// panel and in the filter sidebar, which is where a shopper who is
+// thinking in budget actually is. A pinned custom-work gallery and a
+// store-location section went the same way earlier.
 // ═══════════════════════════════════════════
 
 function HomePage() {
@@ -244,27 +252,35 @@ function HomePage() {
   return (
     <main>
       <Hero />
-      <CategoryTiles fallbacks={tileFallbacks} />
 
-      <ProductRail
-        id="best-sellers"
-        title="Best sellers"
-        eyebrow="Most bought"
-        products={bestSellers}
-        limit={BEST_SELLER_LIMIT}
-        link={{ href: '/shop', label: 'View all' }}
-        minProducts={MIN_RAIL_PRODUCTS}
-        eager
-      />
+      {/*
+       * Everything below the hero rides up over it as one sheet — see
+       * `.hero-curtain` in app.css and the choreography note in
+       * components/sections/Hero.tsx. It has to be opaque, because for
+       * the last third of the hero's scroll it is literally covering a
+       * photograph.
+       */}
+      <div className="hero-curtain bg-paper">
+        <CategoryTiles fallbacks={tileFallbacks} />
 
-      <TrustBar />
+        <ProductRail
+          id="the-case"
+          title="The case"
+          products={bestSellers}
+          limit={CASE_LIMIT}
+          link={{ href: '/shop', label: 'View all' }}
+          minProducts={MIN_RAIL_PRODUCTS}
+          eager
+        />
 
-      <MoissaniteBand products={moissanite} />
-      <WomensShelf />
+        <TrustBar />
 
-      <CustomPromo />
-      <ShopByPrice />
-      <Reviews />
+        <MoissaniteBand products={moissanite} />
+        <WomensShelf />
+
+        <CustomPromo />
+        <Reviews />
+      </div>
     </main>
   )
 }

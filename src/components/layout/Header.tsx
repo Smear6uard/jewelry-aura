@@ -14,9 +14,11 @@
  * only in a desktop nav row that phones never saw and that could not
  * hold six doors plus a women's floor without wrapping. Now there is one
  * canonical menu, and the nav row is a shortcut layered on top of it:
- * the five categories, Women's, Custom and Sale, shown from lg up where
- * there is room to set them without crowding. Below lg the burger
- * carries the whole taxonomy on its own.
+ * Chains, Pendants, Bracelets, Women's, Custom and Services, shown from
+ * lg up. Six items, not eight — Earrings, Rings, Moissanite and Sale are
+ * one tap away in the burger, which carries the whole taxonomy at every
+ * breakpoint. Custom is set in the display serif because it is the one
+ * item in the row that is not a shelf.
  *
  * Phones also keep a persistent search field pinned under the bar — on a
  * phone, search is the primary way people navigate a catalog, and
@@ -40,7 +42,11 @@ import { useEffect, useRef, useState } from 'react'
 import { Search, ShoppingBag, User } from 'lucide-react'
 import { CATEGORIES, NAV_LINKS, WOMENS } from '~/lib/catalog'
 import { useCart } from '~/components/commerce/CartProvider'
-import { MegaMenuPanel, WomensMenuPanel } from '~/components/layout/MegaMenu'
+import {
+  MegaMenuPanel,
+  ServicesMenuPanel,
+  WomensMenuPanel,
+} from '~/components/layout/MegaMenu'
 import { MenuDrawer } from '~/components/layout/MenuDrawer'
 import { SearchOverlay } from '~/components/layout/SearchOverlay'
 
@@ -101,14 +107,24 @@ export function Header() {
                 <li key={link.label} className="group/nav static">
                   <a
                     href={link.href}
-                    className="relative flex h-16 items-center px-2.5 text-[12px] label text-ink xl:px-3.5"
+                    className={`relative flex h-16 items-center px-2.5 text-ink xl:px-3.5 ${
+                      // Custom is the one item in this row that is not a
+                      // shelf, and the change of voice says so before the
+                      // label does: Fraunces, sentence case, among five
+                      // uppercase sans labels. No second colour is spent
+                      // on it — the palette has none to spare, and a
+                      // typeface is the quieter distinction anyway.
+                      link.signature
+                        ? 'display text-[16px] leading-none'
+                        : 'text-[12px] label'
+                    }`}
                   >
                     {link.label}
                     {/* Nav state is a gold hairline that draws in from the
                         left. It used to be a 2px maroon bar; maroon is a
-                        signature now, and eight nav items cannot each be
-                        one. Gold at 1px is the same signal at the weight
-                        the palette actually allows on paper. */}
+                        stamp now, and six nav items cannot each be one.
+                        Gold at 1px is the same signal at the weight the
+                        palette actually allows on paper. */}
                     <span
                       aria-hidden
                       className="pointer-events-none absolute inset-x-2 bottom-0 h-px origin-left scale-x-0 bg-gold transition-transform duration-hover ease-apple group-hover/nav:scale-x-100 group-focus-within/nav:scale-x-100 motion-reduce:transition-none"
@@ -117,6 +133,7 @@ export function Header() {
 
                   {link.category && <MegaMenuPanel category={link.category} />}
                   {link.womens && <WomensMenuPanel />}
+                  {link.services && <ServicesMenuPanel />}
                 </li>
               ))}
             </ul>
@@ -133,12 +150,18 @@ export function Header() {
               <Search aria-hidden size={19} strokeWidth={1.5} />
             </button>
 
+            {/* Labelled, not just aria-labelled. An unlabelled person
+                glyph in a store header is read as "sign in" about as
+                often as it is read as "orders", and this store has no
+                accounts to sign into — the page behind it is order
+                lookup and receipts. The word does that work; the icon
+                just makes it findable at a glance. */}
             <a
               href="/pages/orders"
-              aria-label="Account and orders"
-              className="hidden h-11 w-11 items-center justify-center text-ink transition-colors duration-hover ease-apple hover:bg-bone md:flex"
+              className="hidden h-11 items-center gap-1.5 px-2.5 text-[12px] label text-ink transition-colors duration-hover ease-apple hover:bg-bone md:flex"
             >
-              <User aria-hidden size={19} strokeWidth={1.5} />
+              <User aria-hidden size={17} strokeWidth={1.5} />
+              Orders
             </a>
 
             <CartButton />

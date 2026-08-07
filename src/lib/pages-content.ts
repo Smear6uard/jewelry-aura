@@ -243,6 +243,32 @@ const PAGES: ContentPage[] = [
     ],
   },
   {
+    handle: 'services',
+    title: 'Services',
+    summary:
+      'Repair, watch service and written appraisal — on any piece, whether or not it came from us.',
+    blocks: [
+      {
+        body: [
+          'Half of what leaves this bench was not bought here. Send a photo of what you have and we quote it the same day at no charge; approve the quote and we mail you a prepaid insured label.',
+        ],
+        list: [
+          'Jewelry repair — sizing, soldering, retipping, stone setting, restringing, refinishing and engraving',
+          'Watch service — batteries and crystals, full movement service, case and bracelet refinishing, band sizing',
+          'Appraisal — written valuations for insurance, estate and resale, with photographs and stone grading',
+          'Custom commissions — a piece designed and built to your specification, quoted before any work starts',
+        ],
+      },
+      {
+        heading: 'Before you send anything',
+        body: [
+          `Call ${STORE.phone} first for high-value, vintage or inherited pieces. We agree the declared value, insure the shipment for it in both directions, and have the right hands holding time before the package moves.`,
+          STORE.replyWindow,
+        ],
+      },
+    ],
+  },
+  {
     handle: 'repair',
     title: 'Jewelry repair',
     summary:

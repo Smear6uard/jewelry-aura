@@ -86,8 +86,9 @@ export const LENGTH_FACETS: FacetOption[] = [
   { value: '24-plus', label: '24" and longer' },
 ]
 
-/** Price bands — the merchandising ladder used by the menu, the filter
- *  sidebar, and the homepage's Shop by price section. */
+/** Price bands — the merchandising ladder used by every mega-menu
+ *  panel and the filter sidebar. The homepage used to offer them a
+ *  third time as a section of its own; three links are not a section. */
 export const PRICE_FACETS: FacetOption[] = [
   { value: 'under-250', label: 'Under $250' },
   { value: '250-750', label: '$250 – $750' },
@@ -244,6 +245,42 @@ export const MOISSANITE = {
   href: '/collections/moissanite',
 } as const
 
+// ─── Services ──────────────────────────────────────────────────────────
+//
+// The bench's work that is not a product: repair, watch service,
+// appraisal. It earns a nav slot because it is the half of this business
+// a catalog cannot show — someone with a broken clasp is not browsing
+// chains, and the only route to it used to be a footer column.
+//
+// `href` is a real hub page (see lib/pages-content.ts), not the first
+// item in its own list. A top-level menu label that quietly lands on one
+// of its children is the small dishonesty that makes a menu feel
+// generated.
+
+export const SERVICES = {
+  label: 'Services',
+  href: '/pages/services',
+  blurb:
+    'Repair, watch service and written appraisal — on any piece, whether or not it came from us. Quotes are free and same-day.',
+  links: [
+    {
+      label: 'Jewelry repair',
+      href: '/pages/repair',
+      note: 'Sizing, soldering, retipping, restringing',
+    },
+    {
+      label: 'Watch service',
+      href: '/pages/watch-service',
+      note: 'Batteries, crystals, full movement service',
+    },
+    {
+      label: 'Appraisal',
+      href: '/pages/appraisal',
+      note: 'Insurance, estate and resale valuations',
+    },
+  ],
+} as const
+
 export interface NavLink {
   label: string
   href: string
@@ -251,30 +288,43 @@ export interface NavLink {
   category?: Category
   /** Opens the women's panel — the five categories again. */
   womens?: boolean
-  /** Maroon-coloured nav item — reserved for Sale. */
-  accent?: boolean
+  /** Opens the services panel — repair, watch service, appraisal. */
+  services?: boolean
+  /**
+   * Set in the display serif rather than the nav's uppercase sans.
+   * Reserved for Custom: it is the only item in the row that is not a
+   * shelf, and the change of voice says that before the label does.
+   */
+  signature?: boolean
 }
 
 /**
- * The desktop nav row: the five categories, then Women's, Custom and
- * Sale. Categories and Women's open mega-menu panels; the rest are
- * direct links.
+ * The desktop nav row: three shopping doors, Women's, Custom, Services.
  *
- * This row is a shortcut, not the taxonomy's only home — the burger in
- * the corner opens the same list at every breakpoint, which is why the
- * row can hide below lg without stranding anyone. Watch service moved
- * into the drawer and the footer's Services column for the same reason:
- * it is a service, and it was spending a category slot.
+ * SIX ITEMS, NOT EIGHT. The row used to carry all five categories plus
+ * Women's, Custom and Sale, which is eight labels competing at 12px and
+ * a row that wrapped the moment a viewport dipped under 1200px. It is a
+ * shortcut, not the taxonomy — the burger in the corner opens the full
+ * list at every breakpoint — so it now carries the three cases people
+ * actually arrive for (chains, pendants, bracelets) and the two doors a
+ * catalog cannot show. Earrings, Rings, Moissanite and Sale keep their
+ * place in the burger, the footer and the price columns of every panel.
  */
+const NAV_CATEGORY_HANDLES = ['chains', 'pendants', 'bracelets'] as const
+
 export const NAV_LINKS: NavLink[] = [
-  ...CATEGORIES.map((category) => ({
-    label: category.label,
-    href: `/collections/${category.handle}`,
-    category,
-  })),
+  ...NAV_CATEGORY_HANDLES.map((handle) => {
+    const category = findCategory(handle)
+    if (!category) throw new Error(`NAV_LINKS: no category "${handle}"`)
+    return {
+      label: category.label,
+      href: `/collections/${category.handle}`,
+      category,
+    }
+  }),
   { label: WOMENS.label, href: WOMENS.href, womens: true },
-  { label: 'Custom', href: '/custom' },
-  { label: 'Sale', href: '/collections/sale', accent: true },
+  { label: 'Custom', href: '/custom', signature: true },
+  { label: SERVICES.label, href: SERVICES.href, services: true },
 ]
 
 /** Footer "Shop" column — categories plus the catch-all surfaces. */
@@ -286,11 +336,10 @@ export const FOOTER_SHOP_LINKS = [
   { label: 'Shop all', href: '/shop' },
 ]
 
+/** Footer "Services" column — the bench's work, plus commissions. */
 export const FOOTER_SERVICE_LINKS = [
   { label: 'Custom commissions', href: '/custom' },
-  { label: 'Jewelry repair', href: '/pages/repair' },
-  { label: 'Watch service', href: '/pages/watch-service' },
-  { label: 'Appraisal', href: '/pages/appraisal' },
+  ...SERVICES.links.map((link) => ({ label: link.label, href: link.href })),
 ]
 
 export const FOOTER_SUPPORT_LINKS = [

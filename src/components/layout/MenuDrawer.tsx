@@ -47,6 +47,7 @@ import {
   FOOTER_SERVICE_LINKS,
   METAL_FACETS,
   MOISSANITE,
+  SERVICES,
   STORE,
   WOMENS,
 } from '~/lib/catalog'
@@ -58,7 +59,10 @@ const FOCUSABLE =
 const FLAT_ROWS = [
   { label: MOISSANITE.label, href: MOISSANITE.href },
   { label: 'Custom work', href: '/custom' },
-  { label: 'Watch service', href: '/pages/watch-service' },
+  // Was a direct link to Watch service, which promoted one of three
+  // services over the other two. The hub is the honest row; the three
+  // still list out under "Services" further down this drawer.
+  { label: SERVICES.label, href: SERVICES.href },
   { label: 'Shop all', href: '/shop' },
 ]
 

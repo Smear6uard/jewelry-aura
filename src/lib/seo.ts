@@ -8,18 +8,20 @@ export const SITE_NAME = 'Jewelry Aura'
 const ORG_ID = `${SITE_URL}/#organization`
 const WEBSITE_ID = `${SITE_URL}/#website`
 
-export const HERO_SOCIAL_IMAGE = `${SITE_URL}/hero-portrait-wide.png`
+// JPEG rather than the source PNG: a share card is fetched by crawlers
+// that will not negotiate AVIF, and 1.3MB of PNG is a card that times
+// out on half of them.
+export const HERO_SOCIAL_IMAGE = `${SITE_URL}/new-hero-horizontal.jpg`
 /**
  * Descriptive alt for the homepage share image (og:image:alt).
  *
- * The share image is the ungraded campaign file, so this describes the
- * photograph as it actually is. The homepage grades the same asset
- * toward the brand palette in CSS (see components/sections/Hero.tsx);
- * a share card cannot inherit that, and describing a colour the file
- * does not have would be worse than a plain description.
+ * It describes the photograph as it actually is. The homepage dims the
+ * same frame as the visitor scrolls (see components/sections/Hero.tsx);
+ * a share card cannot inherit that, and describing a state the file is
+ * not in would be worse than a plain description.
  */
 export const HERO_SOCIAL_IMAGE_ALT =
-  'A man in a heavy gold rope chain against dark velvet — a Jewelry Aura custom piece.'
+  'A man in an open black shirt wearing a heavy gold rope chain, lit against a deep red curtain.'
 
 // Titles front-load the money keywords and close with the brand (Google
 // rewrites brand-first titles that bury the search terms). ≤ ~60 chars.

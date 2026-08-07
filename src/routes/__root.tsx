@@ -126,9 +126,20 @@ function RootComponent() {
  * Every animated wrapper on the site carries `data-reveal`, and this
  * stylesheet — which only parses when scripting is off — puts them back.
  * The motion is the enhancement; the content is not.
+ *
+ * The hero's pin comes out with them. Its 200svh stage and sticky frame
+ * are pure CSS and would still work without JavaScript, but nothing
+ * would happen inside them: the whole point of holding the frame still
+ * for a screen of scrolling is the choreography that scroll drives. The
+ * same collapse `prefers-reduced-motion` performs (see app.css) applies
+ * here, for the same reason — one screen, everything visible, no pin.
  */
 const NO_JS_REVEAL_CSS =
-  '[data-reveal],[data-reveal] *{opacity:1!important;transform:none!important;visibility:visible!important}'
+  '[data-reveal],[data-reveal] *{opacity:1!important;transform:none!important;visibility:visible!important}' +
+  '.hero-stage{height:auto!important}' +
+  '.hero-pin{position:static!important;height:88svh!important}' +
+  '.hero-dim,.hero-sweep,.hero-cue{display:none!important}' +
+  '.hero-curtain{margin-top:0!important}'
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
   return (

@@ -31,6 +31,8 @@ import { ArrowRight } from 'lucide-react'
 import {
   METAL_FACETS,
   PRICE_FACETS,
+  SERVICES,
+  STORE,
   WOMENS,
   type Category,
   type FacetOption,
@@ -168,6 +170,70 @@ export function WomensMenuPanel() {
           alt: 'A custom Queen script piece with a heart drop, in yellow gold and pavé diamonds.',
         }}
       />
+    </Panel>
+  )
+}
+
+/**
+ * The services panel — the bench, not a shelf.
+ *
+ * It deliberately carries no photograph. Every other panel ends in a
+ * commission because a category panel is selling a look; this one is
+ * answering "can you fix this?", and the useful things to put beside
+ * that question are what each service covers and the phone number. A
+ * hero shot of a repaired clasp would be decoration.
+ */
+export function ServicesMenuPanel() {
+  return (
+    <Panel>
+      <div className="col-span-5">
+        <p className="max-w-[38ch] text-[14px] leading-relaxed text-ink">
+          {SERVICES.blurb}
+        </p>
+
+        <a
+          href={STORE.phoneHref}
+          className="mt-6 inline-flex text-[13px] text-ink link-hover"
+        >
+          {STORE.phone}
+        </a>
+        <p className="quiet mt-1 max-w-[34ch] text-ink">{STORE.replyWindow}</p>
+      </div>
+
+      <div className="col-span-4">
+        <ColumnHeading>What we do</ColumnHeading>
+        <ul className="flex flex-col gap-3">
+          {SERVICES.links.map((link) => (
+            <li key={link.href}>
+              <a href={link.href} className="group/service block">
+                <span className="text-[13px] font-medium text-ink link-hover">
+                  {link.label}
+                </span>
+                <span className="quiet mt-0.5 block text-ink">{link.note}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="col-span-3">
+        <ColumnHeading>Made to order</ColumnHeading>
+        <p className="max-w-[30ch] text-[13px] leading-relaxed text-ink">
+          A piece that does not exist yet is a commission, not a repair.
+        </p>
+        <a
+          href="/custom"
+          className="group/all mt-5 inline-flex items-center gap-1.5 text-[12px] label text-ink transition-colors duration-hover ease-apple link-hover"
+        >
+          Start a commission
+          <ArrowRight
+            aria-hidden
+            size={13}
+            strokeWidth={1.6}
+            className="transition-transform duration-hover ease-apple group-hover/all:translate-x-0.5 motion-reduce:transition-none"
+          />
+        </a>
+      </div>
     </Panel>
   )
 }

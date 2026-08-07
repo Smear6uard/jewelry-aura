@@ -40,6 +40,7 @@ import {
   useMemo,
   useState,
   type ReactNode,
+  type RefObject,
 } from 'react'
 import Lenis from 'lenis'
 import { useMotionValue, type MotionValue } from 'framer-motion'
@@ -116,4 +117,81 @@ export function useScrollProgress(): MotionValue<number> {
   const ctx = useContext(LenisContext)
   const fallback = useMotionValue(0)
   return ctx?.scrollProgress ?? fallback
+}
+
+/**
+ * Progress (0..1) of the page through ONE element's own scroll range:
+ * 0 when the element's top meets the top of the viewport, 1 when its
+ * bottom meets the bottom.
+ *
+ * This is Framer's `useScroll({ target, offset: ['start start', 'end
+ * end'] })` rewritten against Lenis. Framer reads `window.scrollY` on
+ * its own RAF tick, which can land between Lenis ticks; a pinned hero
+ * whose every layer is scrubbed off that value shows the resulting
+ * one-frame jitter far more plainly than a lazy parallax does. Reading
+ * inside Lenis's own `scroll` emit puts the measurement in phase with
+ * the smoothing. See the file header for the general form of this.
+ *
+ * Geometry is measured once and re-measured on resize rather than per
+ * event: a `getBoundingClientRect()` on every scroll tick forces layout
+ * at exactly the moment the compositor is trying to stay out of the way.
+ *
+ * A native `scroll` listener runs alongside the Lenis one. Lenis leaves
+ * touch scrolling native (`syncTouch: false`), and it is null for the
+ * first client render — the second subscription is what makes this
+ * correct on a phone and during hydration. Both read the same
+ * `window.scrollY`, so agreeing is automatic and a double update is one
+ * redundant `set` of an identical number.
+ */
+export function useElementScrollProgress(
+  ref: RefObject<HTMLElement | null>,
+): MotionValue<number> {
+  const progress = useMotionValue(0)
+  const lenis = useLenis()
+
+  useEffect(() => {
+    const element = ref.current
+    if (!element) return
+
+    let top = 0
+    let range = 0
+
+    const measure = () => {
+      const rect = element.getBoundingClientRect()
+      top = rect.top + window.scrollY
+      // How far the page scrolls while the element owns the viewport.
+      range = rect.height - window.innerHeight
+    }
+
+    const update = () => {
+      if (range <= 0) {
+        progress.set(0)
+        return
+      }
+      const raw = (window.scrollY - top) / range
+      progress.set(raw < 0 ? 0 : raw > 1 ? 1 : raw)
+    }
+
+    const remeasure = () => {
+      measure()
+      update()
+    }
+
+    remeasure()
+
+    const observer = new ResizeObserver(remeasure)
+    observer.observe(element)
+    window.addEventListener('resize', remeasure)
+    window.addEventListener('scroll', update, { passive: true })
+    lenis?.on('scroll', update)
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', remeasure)
+      window.removeEventListener('scroll', update)
+      lenis?.off('scroll', update)
+    }
+  }, [lenis, progress, ref])
+
+  return progress
 }

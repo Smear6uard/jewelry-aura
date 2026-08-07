@@ -7,20 +7,32 @@ scan of the source tree for off-palette hex, Tailwind default colours,
 shadow utilities and opacity-derived shades. A retune of a hex fails a
 test rather than shipping.
 
-## Maroon is a signature, not a workhorse
+## Maroon is a stamp, not a button
 
-Maroon appears in exactly **four places** in the source, all of them fills:
+Maroon appears in exactly **one fill** in the source:
 
 | Where | What |
 | ----- | ---- |
-| `lib/ui.ts` → `BTN_PRIMARY` | the single primary CTA of a page |
-| `StickyBuyBar.tsx` ×2 | the mobile PDP's CTA — two exclusive branches of one button |
 | `routes/custom.tsx` | the ONE OF ONE stamp |
+
+plus two states in `app.css`: the `:focus-visible` ring and `::selection`,
+both on paper only.
+
+**No button on this site is maroon.** `BTN_PRIMARY` was a maroon fill on
+the theory that one saturated block per viewport reads as the one thing
+to press. It does — once. Every page has a primary action, so the
+"signature" turned up on the hero, on the cart, on the PDP, on the sticky
+buy bar and under every form: a workhorse wearing a signature's clothes.
+`BTN_PRIMARY` is now an alias of `BTN_INK`, and hierarchy comes from
+placement and from what sits beside a button instead of from a second
+colour.
 
 Everything else that used to be maroon is ink: every eyebrow, link, price,
 star, arrow, badge, chip, count bubble, quick-add, checkbox, progress bar,
-nav indicator and selected state. `palette.test.ts` asserts that list of
-four literally — adding a fifth means editing the test on purpose.
+nav indicator and selected state. `palette.test.ts` asserts the single
+remaining fill literally, and separately asserts that the word `maroon`
+cannot appear in `lib/ui.ts` at all — if it can't reach the button
+vocabulary it can't reach a button.
 
 **Maroon is a fill only.** `text-maroon`, `border-maroon`, `ring-maroon`
 and `decoration-maroon` are banned outright and tested for. The moment
@@ -40,18 +52,24 @@ button for anything that repeats — same weight as primary, no brand
 colour, and it hovers by drawing a gold hairline rather than shifting its
 fill (there is no darker ink to move to).
 
-**The stamp and the CTA never share a screen.** On `/custom` the ONE OF
-ONE stamp is the hero's only maroon, so both hero buttons stepped down to
-ghosts; the maroon submit button lives further down with its form. Product
-card badges are all ink — a badge repeats across a grid *and* sits on the
-photograph, so two separate rules land on it.
+Product card badges are all ink — a badge repeats across a grid *and*
+sits on the photograph, so two separate rules land on it.
 
 ## The two grounds
 
 | Ground | Fill | Body type | Rules | Accent |
 | ------ | ---- | --------- | ----- | ------ |
-| paper  | `#F7F3EC` | ink `#191410` | hairline-light `#DDD5C7` | maroon `#5A1B22` |
-| velvet | `#171209` | bone `#EFE9DE` | hairline-dark `#352B1F`  | gold `#C2A15E` |
+| paper  | `#F7F3EC` | ink `#191410` | hairline-light `#DDD5C7` | maroon `#5A1B22` (stamp + focus) |
+| velvet | `#1E1013` | bone `#EFE9DE` | hairline-dark `#352B1F`  | gold `#C2A15E` |
+
+**Velvet is a near-black burgundy, not an espresso.** It was `#171209`
+until the campaign photography changed. The homepage hero is shot against
+a deep red curtain, and a brown-black page ground behind a red-black
+photograph reads as two darks that *almost* match — the worst possible
+relationship between a frame and its page. Warming the ground toward the
+curtain makes the photograph continue the page instead of sitting on it.
+The shift is small in ratio terms (bone on velvet 15.4:1 → 15.3:1, gold
+7.6:1 → 7.5:1) and every guard still clears AAA.
 
 Velvet is the announcement bar, the trust band, the footer, the
 moissanite vitrine and the image lightbox. Each of those carries
@@ -64,12 +82,12 @@ invisible there anyway.
 | Pairing | Ratio | Verdict |
 | ------- | ----- | ------- |
 | ink on paper | 16.5:1 | AAA |
-| maroon on paper | 11.8:1 | AAA — links, stamps, selected states, errors |
-| bone on velvet | 15.4:1 | AAA |
-| gold on velvet | 7.6:1 | AAA — spec type and prices |
-| bone on maroon | 10.8:1 | AAA — primary button |
-| bone on ink | 15.1:1 | AAA — secondary button, sale badge |
-| velvet on bone | 15.4:1 | AAA — button inside a velvet scene |
+| maroon on paper | 11.8:1 | AAA — the stamp and the focus ring |
+| bone on velvet | 15.3:1 | AAA |
+| gold on velvet | 7.5:1 | AAA — spec type and prices |
+| bone on maroon | 10.8:1 | AAA — the stamp's own type |
+| bone on ink | 15.1:1 | AAA — every filled button, sale badge |
+| velvet on bone | 15.3:1 | AAA — button inside a velvet scene |
 | hairline-light on paper | 1.32:1 | a rule, not type |
 | gold on paper | **2.2:1** | **hairline only — never type** |
 
@@ -92,20 +110,17 @@ is `bg-bone` **plus** `border border-hairline-light`. Drop the border and
 the panel disappears. A test asserts bone stays below 1.2:1 so nobody
 "fixes" the fill instead of drawing the rule.
 
-**Maroon and gold never meet.** The moissanite band is the only place
-gold carries type, and it works because that band goes fully velvet and
-therefore carries no maroon — the CTAs invert to bone
-(`BTN_PRIMARY_ON_VELVET`). Since the demotion, gold does most of the
-interaction marking on paper too (link underlines, the nav indicator,
-the ink button's hover ring), which is safe precisely because maroon has
-retreated to four fills that none of those sit beside.
+**Maroon and gold never meet.** Gold carries type only on velvet (the
+moissanite band, the hero eyebrow), and those scenes carry no maroon at
+all — their CTAs invert to bone. On paper gold does most of the
+interaction marking (link underlines, the nav indicator, the ink button's
+hover ring), which is safe precisely because maroon has retreated to one
+stamp that none of those sit beside.
 
 ## Deliberate deviations
 
-- **Form errors are ink.** They were maroon; the demotion took that away
-  for two reasons at once — maroon is typography-free now, and an error
-  always shares a viewport with a submit button, which is where the one
-  maroon goes. `role="alert"` plus explicit wording carries the meaning,
+- **Form errors are ink.** Maroon is typography-free, so an error cannot
+  be red here. `role="alert"` plus explicit wording carries the meaning,
   which is what WCAG asks for anyway (never colour alone). Inside the
   velvet footer the error is gold, the only accent legal on that ground.
 - **Placeholders are ink and italic.** With no muted step, a placeholder

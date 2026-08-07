@@ -11,9 +11,20 @@
  * Every button clears a 44px tap target through padding, not font size.
  *
  * There are two grounds and each has its own set. On PAPER a filled
- * button is maroon; inside a VELVET scene maroon may not appear at all,
- * so the fill inverts to bone. Nothing here lifts on a shadow — the
- * palette has no shadow scale, and a button's affordance is its fill.
+ * button is ink; inside a VELVET scene ink is invisible, so the pair
+ * inverts to bone. Nothing here lifts on a shadow — the palette has no
+ * shadow scale, and a button's affordance is its fill.
+ *
+ * NO BUTTON IN THIS FILE IS MAROON.
+ *
+ * BTN_PRIMARY used to be a maroon fill, on the theory that one
+ * saturated block per viewport reads as the one thing to press. It does
+ * — once. Every page has a primary action, so the "signature" appeared
+ * on the hero, on every card row's CTA, on the cart, on the PDP and in
+ * the footer, which is a workhorse wearing a signature's clothes. Ink
+ * carries the same weight without spending the accent, and maroon is
+ * now what it claims to be: the ONE OF ONE stamp, the focus ring, and
+ * nothing else.
  */
 
 /** Shared geometry: 44px minimum, centred content, uppercase label. */
@@ -23,25 +34,8 @@ const SHAPE =
   'motion-reduce:transition-none'
 
 /**
- * Primary — maroon fill, bone text. THE one maroon element allowed in a
- * viewport, and the reason the rest of the site gave maroon up: a single
- * saturated block reads as the thing to press only while nothing else on
- * screen is competing for that read.
- *
- * Use it for the one action a page is asking for — add to cart, check
- * out, start a commission — and nowhere else. Anything that repeats
- * (quick-adds, card buttons, newsletter submit) takes BTN_INK.
- *
- * Hover darkens to ink rather than to a lighter maroon: there is exactly
- * one maroon in this palette, so the hover state has to move to a
- * different token instead of a second tint of the same one.
- */
-export const BTN_PRIMARY = `${SHAPE} bg-maroon text-bone hover:bg-ink active:scale-[0.99] disabled:opacity-70`
-
-/**
- * The filled button for everything that repeats. Same weight as primary,
- * no brand colour — an ink fill states "this is the action here" without
- * spending the one maroon a viewport is allowed.
+ * The filled button on paper: ink fill, bone text. This is the only
+ * filled shape the light ground has, primary or otherwise.
  *
  * Hover draws a gold hairline rather than shifting the fill; there is no
  * darker ink to move to.
@@ -49,9 +43,21 @@ export const BTN_PRIMARY = `${SHAPE} bg-maroon text-bone hover:bg-ink active:sca
 export const BTN_INK = `${SHAPE} bg-ink text-bone hover:ring-1 hover:ring-gold active:scale-[0.99] disabled:opacity-70`
 
 /**
+ * Primary — the one action a page is asking for (add to cart, check out,
+ * start a commission).
+ *
+ * It is the same ink fill as BTN_INK, and that is the point: hierarchy
+ * on this site comes from placement and from what sits beside a button,
+ * not from a second colour. The name is kept because call sites read
+ * better for it — `BTN_PRIMARY` at the bottom of a form says which
+ * button matters even though the class string is shared.
+ */
+export const BTN_PRIMARY = BTN_INK
+
+/**
  * Secondary — the hairline ghost. When two calls to action share a row
  * the second one is always this: an outline, never a second fill, so the
- * maroon beside it stays the only place the eye lands first.
+ * filled button beside it stays the only place the eye lands first.
  */
 export const BTN_SECONDARY = `${SHAPE} border border-ink text-ink hover:bg-ink hover:text-bone`
 
@@ -60,9 +66,9 @@ export const BTN_TERTIARY =
   'group/link inline-flex items-center gap-1.5 text-[12px] label text-ink link-hover'
 
 /**
- * The same two shapes inside a velvet scene. Maroon may not touch
- * velvet, so the filled button inverts to bone-on-velvet and the
- * outlined one draws its hairline in bone.
+ * The same two shapes inside a velvet scene. An ink fill on a near-black
+ * ground is a rectangle nobody can see, so the filled button inverts to
+ * bone-on-velvet and the outlined one draws its hairline in bone.
  */
 export const BTN_PRIMARY_ON_VELVET = `${SHAPE} bg-bone text-velvet hover:bg-gold active:scale-[0.99] disabled:opacity-70`
 export const BTN_SECONDARY_ON_VELVET = `${SHAPE} border border-bone text-bone hover:bg-bone hover:text-velvet`
@@ -102,9 +108,9 @@ export const FIELD_ON_VELVET =
   'placeholder:text-ink focus:outline-none'
 
 /**
- * A tappable choice chip: 44px tall, hairline at rest, maroon fill when
- * on. A selected variant is a selected state, which is the one thing
- * maroon exists for.
+ * A tappable choice chip: 44px tall, hairline at rest, ink fill when on.
+ * A chip repeats — five lengths, five sizes, three metals — so it takes
+ * the same ink fill every other repeating control takes.
  */
 export const CHIP =
   'inline-flex min-h-[44px] min-w-[3.25rem] items-center justify-center px-4 text-[14px] ' +

@@ -15,9 +15,18 @@
    bone on velvet. There is no muted step. Hierarchy is carried by
    size, weight and case — not by fading type toward the background.
 
-   maroon is the INTERACTIVE accent and lives on paper only: primary
-   button fills, selected states, link hover, the ONE OF ONE stamp.
-   Never a section background, never on velvet.
+   velvet is a near-black BURGUNDY, not an espresso. It was #171209
+   until the campaign photography changed: the hero is shot against a
+   deep red curtain, and a brown-black page ground behind a red-black
+   photograph reads as two different darks that nearly match. Warming
+   the ground toward the curtain makes the frame continue the page.
+
+   maroon is a STAMP, not a button. It survives in exactly two places:
+   the ONE OF ONE / hallmark marks, and the focus ring and selection
+   highlight on paper. Every filled button on this site is ink — a
+   saturated block that appears on every page stops being a signature
+   the second time you see it. Never a section background, never on
+   velvet, never typography.
 
    gold is the MATERIAL accent: hairlines anywhere, and on velvet it
    also carries the mono spec type and prices. On paper it is a
@@ -33,15 +42,15 @@
      Measured, so a retune has to re-check rather than guess:
        ink    on paper   16.5:1
        maroon on paper   11.8:1
-       bone   on velvet  15.4:1
-       gold   on velvet   7.6:1
-       bone   on maroon  10.8:1
+       bone   on velvet  15.3:1
+       gold   on velvet   7.5:1
+       bone   on ink     15.1:1
        gold   on paper    2.2:1  ← hairline only, never type
      src/lib/palette.test.ts fails if any of these drop.
      ────────────────────────────────────────────────────────────── */
   --color-paper: #f7f3ec; /* canvas: all light backgrounds (~60%)   */
-  --color-ink: #191410; /* all text on light ground; 2° buttons   */
-  --color-velvet: #171209; /* dark scenes, vitrines, photo ground    */
+  --color-ink: #191410; /* all text on light ground; every filled button */
+  --color-velvet: #1e1013; /* dark scenes, vitrines, photo ground    */
   --color-bone: #efe9de; /* text on velvet; raised panels on paper */
   --color-maroon: #5a1b22; /* BRAND accent — light ground only       */
   --color-gold: #c2a15e; /* MATERIAL accent — hairlines, spec type */
@@ -93,6 +102,9 @@
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-apple: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-sharp-out: cubic-bezier(0.4, 0, 0.2, 1);
+  /* Symmetric — for something that crosses the frame and leaves, where
+     an out-curve would spend four fifths of its run off-screen. */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 /* ═══════════════════════════════════════════
@@ -300,5 +312,220 @@
   }
   .safe-bottom-lg {
     padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* ═══════════════════════════════════════════
+   HERO CHOREOGRAPHY
+   ═══════════════════════════════════════════
+
+   The pinned homepage hero, in CSS rather than in the component,
+   because three of these have to be true before React has run:
+
+   1. THE START STATE. Every scrubbed layer begins hidden. Framer writes
+      its inline transform on mount and overrides these classes; a
+      visitor who prefers reduced motion never gets that inline style,
+      so the reduce block below is what puts the content back. Doing it
+      this way means there is no frame where a reduced-motion visitor
+      sees a blank hero and then a populated one.
+
+   2. THE PIN ITSELF. `prefers-reduced-motion` collapses the 200svh
+      stage to one screen and unsticks the frame, so nothing is pinned
+      and the page is an ordinary hero followed by ordinary sections.
+
+   3. THE CURTAIN. Everything after the hero rides up over it on a
+      negative margin — no JavaScript, no measurement, just a taller
+      stage than the sheet that covers it.
+
+   Everything else the hero does is transform and opacity, driven by
+   scroll progress. See components/sections/Hero.tsx.
+   ─────────────────────────────────────────── */
+
+.hero-stage {
+  height: 200svh;
+}
+.hero-pin {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+}
+
+/*
+ * The next section slides up over the pinned frame like a curtain.
+ *
+ * The stage is 200svh and the frame inside it is 100svh, so the frame
+ * is pinned across 100svh of scrolling. Pulling the sheet below up by
+ * 35svh puts its top edge at the bottom of the viewport when the hero
+ * is 65% through, and it climbs from there — the parallax gets the
+ * first stretch of the last act to itself, then the curtain arrives.
+ * The higher stacking context is what makes it a curtain rather than a
+ * queue.
+ *
+ * 35 rather than 45 because of the calls to action. They sit at the
+ * foot of the hero block and drift up 12vh across the act; a 45svh
+ * curtain climbs faster than that and takes the primary button's
+ * bottom edge with it while it is still the thing being offered.
+ */
+.hero-curtain {
+  position: relative;
+  z-index: 10;
+  margin-top: -35svh;
+}
+
+/*
+ * The legibility scrim, below lg only.
+ *
+ * The vertical crop puts the model's hand across the lower third, which
+ * is exactly where a phone has to set four lines of type. This is the
+ * overlay-on-photography exception the colour rules carve out — one
+ * token, no hue invented, and it only darkens what is already the
+ * darkest part of the frame. The horizontal crop needs nothing: it
+ * carries its own black on the left, which is why that side was chosen
+ * for the type in the first place.
+ */
+.hero-scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    var(--color-velvet) 0%,
+    color-mix(in srgb, var(--color-velvet) 76%, transparent) 30%,
+    transparent 62%
+  );
+}
+@media (min-width: 1024px) {
+  .hero-scrim {
+    display: none;
+  }
+}
+
+/*
+ * The dimmer starts OFF.
+ *
+ * It is a full-frame velvet sheet, so its resting value has to be
+ * written down: an element with no opacity set is opaque, and a
+ * reduced-motion visitor — who never receives the scrubbed inline
+ * style — would get a hero that is a black rectangle where the
+ * photograph should be.
+ */
+.hero-dim {
+  opacity: 0;
+}
+
+/* Word masks: each word starts below its own baseline mask. */
+.hero-word {
+  transform: translateY(110%);
+}
+
+/* Anything that arrives in act 2. */
+.hero-late {
+  opacity: 0;
+}
+
+/* Act 1 opens this out to 0.34em. Set here rather than left to `.spec`
+   so the reduced-motion hero shows the tracking the design was drawn
+   at instead of the mono default it happens to inherit. */
+.hero-eyebrow {
+  letter-spacing: 0.14em;
+}
+
+/*
+ * The case light: one pass of raked light across the chain on load, the
+ * way a jeweller tilts a piece under the counter lamp. It is the one
+ * gradient on the site, it is bone-derived rather than a new colour,
+ * and it lives inside the photograph — which is the exception the
+ * colour rules already carve out for overlays on photography.
+ */
+.hero-sweep {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    102deg,
+    transparent 40%,
+    color-mix(in srgb, var(--color-bone) 14%, transparent) 50%,
+    transparent 60%
+  );
+  mix-blend-mode: screen;
+  transform: translate3d(-120%, 0, 0);
+  will-change: transform;
+  animation: hero-sweep 1600ms var(--ease-in-out) 650ms 1 forwards;
+}
+@keyframes hero-sweep {
+  from {
+    transform: translate3d(-120%, 0, 0);
+  }
+  to {
+    transform: translate3d(120%, 0, 0);
+  }
+}
+
+/*
+ * The scroll cue: a pulse of light running down a hairline — the case
+ * light again, at the size of a hint.
+ *
+ * It sits a header's height off the foot of the frame rather than on
+ * it, because of where the frame is when the cue matters most. At rest
+ * the hero has not pinned yet: it starts below the announcement bar and
+ * the header, so the bottom 100–136px of its 100svh are under the fold.
+ * A cue pinned to the frame's foot would be invisible at exactly the
+ * one moment it has a job.
+ */
+.hero-cue {
+  position: absolute;
+  bottom: calc(var(--header-h) + 2.75rem);
+  left: 50%;
+  transform: translateX(-50%);
+}
+.hero-cue-rail {
+  display: block;
+  width: 1px;
+  height: 56px;
+  overflow: hidden;
+  background: var(--color-hairline-dark);
+}
+.hero-cue-run {
+  display: block;
+  height: 18px;
+  width: 100%;
+  background: var(--color-gold);
+  transform: translateY(-100%);
+  will-change: transform;
+  animation: hero-cue 2400ms var(--ease-sharp-out) infinite;
+}
+@keyframes hero-cue {
+  0% {
+    transform: translateY(-100%);
+  }
+  55%,
+  100% {
+    transform: translateY(320%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-stage {
+    height: auto;
+  }
+  .hero-pin {
+    position: static;
+    height: 88svh;
+  }
+  .hero-curtain {
+    margin-top: 0;
+  }
+  .hero-word {
+    transform: none;
+  }
+  .hero-late {
+    opacity: 1;
+  }
+  .hero-sweep,
+  .hero-cue {
+    display: none;
+  }
+  .hero-cue-run {
+    animation: none;
   }
 }
