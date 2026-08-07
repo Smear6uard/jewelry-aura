@@ -149,21 +149,20 @@ export const SITEMAP_COLLECTIONS_QUERY = `#graphql
 `
 
 /**
- * Lean per-variant fields for the bulk variant list: the 250-node list
- * exists only to compute sibling option availability, so it never needs
- * price/title — those ride on the resolved selected/fallback variant.
+ * Per-variant fields, used both for the resolved variant and for the bulk
+ * list.
+ *
+ * The bulk list used to take a leaner fragment on the grounds that it
+ * "exists only to compute sibling option availability, so it never needs
+ * price/title". It needs both now: a product page opened with no option
+ * chosen opens on the cheapest purchasable variant rather than the first
+ * one (see `cheapestAvailable` in adapters.ts), and choosing it means
+ * comparing prices across the whole list and then rendering the winner.
+ *
+ * The Storefront API prices a query by the size of its connections, not
+ * by the number of fields inside them, so the wider fragment costs the
+ * same as the lean one did.
  */
-export const VARIANT_AVAILABILITY_FRAGMENT = `#graphql
-  fragment VariantAvailability on ProductVariant {
-    id
-    availableForSale
-    selectedOptions {
-      name
-      value
-    }
-  }
-`
-
 export const VARIANT_FIELDS_FRAGMENT = `#graphql
   fragment VariantFields on ProductVariant {
     id
@@ -225,7 +224,7 @@ export const PRODUCT_QUERY = `#graphql
       }
       variants(first: 250) {
         nodes {
-          ...VariantAvailability
+          ...VariantFields
         }
       }
       selectedVariant: variantBySelectedOptions(
@@ -251,7 +250,6 @@ export const PRODUCT_QUERY = `#graphql
     }
   }
   ${VARIANT_FIELDS_FRAGMENT}
-  ${VARIANT_AVAILABILITY_FRAGMENT}
 `
 
 /*

@@ -529,3 +529,329 @@
     animation: none;
   }
 }
+
+/* ═══════════════════════════════════════════
+   SCENE CHOREOGRAPHY
+   ═══════════════════════════════════════════
+
+   The shared vocabulary behind the two pinned scenes below the hero —
+   the featured exhibit and the commission sequence. Three classes, so
+   that collapsing a scene (no JavaScript, reduced motion, a phone) is
+   three rules rather than a rule per scene.
+
+     .scene-stage   the tall block a scene scrolls THROUGH. Its height is
+                    the scene's own business; this only makes it a
+                    positioning context.
+     .scene-pin     the one screen that holds still inside it.
+     .scene-beat    one of several frames stacked inside a pin.
+
+   NOTHING PINS BELOW lg. A pinned scene needs a viewport tall enough to
+   set poster type over a photograph, and a phone scrolling a 500svh
+   stage with a finger is scrubbing at a resolution nobody asked for. The
+   same markup renders as ordinary stacked bands there, and the
+   components skip their scrubbed styles to match (see `useIsWide`).
+   ─────────────────────────────────────────── */
+
+.scene-stage {
+  position: relative;
+}
+.scene-pin {
+  position: relative;
+}
+.scene-beat {
+  position: relative;
+}
+
+@media (min-width: 1024px) {
+  .scene-pin {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    overflow: hidden;
+  }
+  .scene-beat {
+    position: absolute;
+    inset: 0;
+  }
+}
+
+/* ─── The featured exhibit ────────────────────────────────────────────
+   One piece, one screen, and its hallmark at the size of a wall. See
+   components/sections/FeaturedExhibit.tsx for the acts.
+   ─────────────────────────────────────────────────────────────────── */
+
+.exhibit-photo {
+  position: relative;
+  height: 58svh;
+  width: 100%;
+  overflow: hidden;
+}
+.exhibit-dim {
+  position: absolute;
+  inset: 0;
+  background: var(--color-velvet);
+  /* Starts OFF. An element with no opacity set is opaque, and a visitor
+     who never receives the scrubbed inline style would otherwise get a
+     velvet rectangle where the photograph should be. */
+  opacity: 0;
+  pointer-events: none;
+}
+.exhibit-content {
+  position: relative;
+  padding: 2.25rem 1rem 3.5rem;
+}
+.exhibit-term-row + .exhibit-term-row {
+  border-top: 1px solid var(--color-gold);
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+}
+.exhibit-term {
+  color: var(--color-gold);
+  font-size: clamp(2.25rem, 11vw, 3rem);
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+.exhibit-note {
+  margin-top: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .exhibit-stage {
+    height: 220svh;
+  }
+  .exhibit-photo {
+    position: absolute;
+    /* Bleeds 6svh past the frame top and bottom. The last act drifts the
+       photograph up 4vh against the type, and a layer that was exactly
+       one screen tall would pull its own bottom edge into view — a strip
+       of bare velvet under the picture, right where the frame is meant
+       to be full. */
+    inset: -6svh 0;
+    height: auto;
+  }
+  .exhibit-content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 3rem;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+  .exhibit-specs {
+    width: min(38%, 27rem);
+  }
+  .exhibit-term-row + .exhibit-term-row {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+  }
+  .exhibit-term {
+    /* ~90px at 1440 and up: the stamp inside a clasp, enlarged until it
+       is the largest type on the site. */
+    font-size: clamp(3.5rem, 6.2vw, 5.75rem);
+  }
+  .exhibit-note {
+    width: min(32%, 24rem);
+    align-self: flex-end;
+    margin-top: 0;
+    padding-bottom: 14svh;
+  }
+
+  /* Start states, in CSS rather than in the component, so the scene is
+     never blank for a frame before React writes its first scrubbed
+     style. They exist only where the scrub runs. */
+  .exhibit-term {
+    transform: translateY(110%);
+  }
+  .exhibit-note {
+    opacity: 0;
+  }
+}
+
+/* ─── The commission sequence ─────────────────────────────────────────
+   Five beats, one per finished commission, stacked inside one pinned
+   frame at lg and stacked in normal flow below it. See
+   components/sections/CommissionedWork.tsx.
+   ─────────────────────────────────────────────────────────────────── */
+
+.commission-title {
+  font-size: clamp(2.25rem, 11vw, 3rem);
+  line-height: 0.98;
+}
+.commission-beat + .commission-beat {
+  margin-top: 3.5rem;
+}
+.commission-figure {
+  margin: 0 auto;
+  max-width: 1440px;
+  padding: 0 1rem;
+}
+.commission-photo {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  width: 100%;
+  overflow: hidden;
+}
+.commission-caption {
+  margin-top: 1.5rem;
+}
+.commission-name {
+  font-size: clamp(2.5rem, 13vw, 3.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+}
+
+@media (min-width: 1024px) {
+  .commission-stage {
+    /* One screen of scrolling per beat. */
+    height: 500svh;
+  }
+  .commission-title {
+    font-size: clamp(3rem, 8vw, 7rem);
+  }
+  .commission-beat + .commission-beat {
+    margin-top: 0;
+  }
+  .commission-frame {
+    display: flex;
+    height: 100%;
+    align-items: center;
+  }
+  .commission-figure {
+    display: flex;
+    /* The photograph is first in the markup and sits on the right: a
+       <figcaption> reads better after its picture, and the piece is what
+       the beat is about. Reversing the row is a visual decision that
+       leaves the reading order alone. */
+    flex-direction: row-reverse;
+    width: 100%;
+    align-items: center;
+    padding: 0 2rem;
+  }
+  .commission-caption {
+    position: relative;
+    z-index: 2;
+    flex: 1 1 auto;
+    /* Set against the photograph rather than away from it: the type is
+       right-aligned and the column overhangs the picture's edge by a
+       fixed 4rem, so every name runs the same distance onto the piece
+       whether it is "HRG" or "Twenty-Three". A left-aligned column
+       overlaps by whatever the name happens to measure, which is not a
+       decision. */
+    margin-top: 0;
+    margin-right: -4rem;
+    text-align: right;
+  }
+  /* The NAME breaks the picture's edge; the hallmark line under it does
+     not. One thing crossing the boundary is a decision — two is a
+     column that happens to be too wide. */
+  .commission-caption p {
+    justify-content: flex-end;
+    margin-right: 4rem;
+  }
+  .commission-photo {
+    flex: 0 0 auto;
+    height: 62svh;
+    width: auto;
+    margin-right: 6%;
+  }
+  .commission-name {
+    font-size: clamp(3.5rem, 7vw, 7rem);
+  }
+
+  /* Start states for every beat but the first, which is already in place
+     when the sequence begins — there is nothing above it to arrive
+     over. Both properties are ones the scrub then owns. */
+  .commission-beat:not(:first-child) .commission-sheet {
+    transform: translateY(100%);
+  }
+  .commission-beat:not(:first-child) .commission-picture {
+    transform: translateY(-32%);
+  }
+  .commission-beat:not(:first-child) .commission-name-inner {
+    transform: translateY(110%);
+  }
+  .commission-beat:not(:first-child) .commission-caption {
+    opacity: 0;
+  }
+}
+
+/* ─── The bench ───────────────────────────────────────────────────────
+   A photograph with the four promises stamped along the bottom of it.
+   No pin and no scrub: it is a full stop, not a scene.
+   ─────────────────────────────────────────────────────────────────── */
+
+.bench {
+  position: relative;
+  height: 60svh;
+  min-height: 24rem;
+  overflow: hidden;
+}
+.bench-scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* The same overlay-on-photography exception the hero's scrim takes:
+     one token, no invented hue, darkening only what is already dark so
+     the promises have something to sit on. */
+  background: linear-gradient(
+    to top,
+    var(--color-velvet) 0%,
+    color-mix(in srgb, var(--color-velvet) 78%, transparent) 30%,
+    transparent 62%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene-stage {
+    height: auto;
+  }
+  .scene-pin {
+    position: static;
+    height: auto;
+    overflow: visible;
+  }
+  .scene-beat {
+    position: relative;
+    inset: auto;
+  }
+  .commission-beat + .commission-beat {
+    margin-top: 4rem;
+  }
+  .exhibit-photo {
+    position: relative;
+    inset: auto;
+    height: 58svh;
+  }
+  .exhibit-content {
+    position: relative;
+    inset: auto;
+    padding: 2.25rem 1rem 3.5rem;
+  }
+  .exhibit-term {
+    transform: none;
+  }
+  .exhibit-note {
+    opacity: 1;
+    align-self: auto;
+    width: auto;
+    padding-bottom: 0;
+    margin-top: 2rem;
+  }
+  /* These have to repeat the start states' own selectors, not a shorter
+     version of them. `.commission-beat:not(:first-child) .commission-sheet`
+     outranks a bare `.commission-sheet` however far down the file it
+     sits, and a reduced-motion visitor would get four beats whose
+     photographs are parked one frame below the window with nothing
+     coming to move them back. */
+  .commission-beat:not(:first-child) .commission-sheet,
+  .commission-beat:not(:first-child) .commission-picture,
+  .commission-beat:not(:first-child) .commission-name-inner {
+    transform: none;
+  }
+  .commission-beat:not(:first-child) .commission-caption {
+    opacity: 1;
+  }
+}

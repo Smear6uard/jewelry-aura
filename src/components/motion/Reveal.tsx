@@ -26,6 +26,12 @@ type RevealProps = {
   delay?: number
   as?: IntrinsicTag
   amount?: number
+  /**
+   * Play forward only. The default is reversible — see the viewport note
+   * below — and this exists for the rare block that must not move again
+   * once it has been read.
+   */
+  once?: boolean
 }
 
 // Reduced-motion variant — visible immediately, no transform.
@@ -39,7 +45,11 @@ export function Reveal({
   className,
   delay = 0,
   as = 'div',
-  amount = 0.3,
+  // 0.15 rather than 0.3 because the reveal now plays in both directions:
+  // a section taller than three viewports can never show 30% of itself at
+  // once, and a threshold it cannot meet is a section that never arrives.
+  amount = 0.15,
+  once = false,
 }: RevealProps) {
   const reduced = useReducedMotion()
 
@@ -52,7 +62,7 @@ export function Reveal({
         visible: {
           ...(scrollReveal.visible as object),
           transition: {
-            duration: DURATION.content,
+            duration: DURATION.reveal,
             ease: easeOutExpo,
             delay,
           },
@@ -73,7 +83,12 @@ export function Reveal({
       variants={variants}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, amount, margin: '-10%' }}
+      // ONCE PER DIRECTION, REVERSIBLE. Leaving the viewport returns the
+      // block to its start state, so scrolling back up plays the reveal
+      // backwards instead of leaving a trail of already-spent sections.
+      // The page reads the same travelling in either direction, which is
+      // the same property the scrubbed scenes have by construction.
+      viewport={{ once, amount, margin: '-10%' }}
     >
       {children}
     </MotionTag>

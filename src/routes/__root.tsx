@@ -127,19 +127,30 @@ function RootComponent() {
  * stylesheet — which only parses when scripting is off — puts them back.
  * The motion is the enhancement; the content is not.
  *
- * The hero's pin comes out with them. Its 200svh stage and sticky frame
- * are pure CSS and would still work without JavaScript, but nothing
- * would happen inside them: the whole point of holding the frame still
- * for a screen of scrolling is the choreography that scroll drives. The
- * same collapse `prefers-reduced-motion` performs (see app.css) applies
- * here, for the same reason — one screen, everything visible, no pin.
+ * Every pin comes out with them — the hero's, and the two scenes below
+ * it. Their tall stages and sticky frames are pure CSS and would still
+ * work without JavaScript, but nothing would happen inside them: the
+ * whole point of holding a frame still for a screen of scrolling is the
+ * choreography that scroll drives, and the commission sequence would be
+ * five photographs stacked on top of each other. The same collapse
+ * `prefers-reduced-motion` performs (see app.css) applies here, for the
+ * same reason — everything in normal flow, everything visible, no pin.
  */
 const NO_JS_REVEAL_CSS =
   '[data-reveal],[data-reveal] *{opacity:1!important;transform:none!important;visibility:visible!important}' +
   '.hero-stage{height:auto!important}' +
   '.hero-pin{position:static!important;height:88svh!important}' +
   '.hero-dim,.hero-sweep,.hero-cue{display:none!important}' +
-  '.hero-curtain{margin-top:0!important}'
+  '.hero-curtain{margin-top:0!important}' +
+  '.scene-stage{height:auto!important}' +
+  '.scene-pin{position:static!important;height:auto!important;overflow:visible!important}' +
+  '.scene-beat{position:relative!important;inset:auto!important}' +
+  '.commission-beat+.commission-beat{margin-top:4rem!important}' +
+  '.commission-caption{opacity:1!important}' +
+  '.exhibit-photo{position:relative!important;inset:auto!important;height:58svh!important}' +
+  '.exhibit-content{position:relative!important;inset:auto!important;padding:2.25rem 1rem 3.5rem!important}' +
+  '.exhibit-dim{display:none!important}' +
+  '.exhibit-note{opacity:1!important;width:auto!important;padding-bottom:0!important}'
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
   return (

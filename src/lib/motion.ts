@@ -70,7 +70,17 @@ export const DURATION = {
   hover: 0.18,
   /** Small UI shifts: dropdowns, tooltips. */
   micro: 0.3,
-  /** Section content reveals. */
+  /**
+   * THE SCROLL-REVEAL BEAT. Every section below the hero enters on this:
+   * headlines out of baseline masks, photographs out of their own frame.
+   *
+   * Half a second, and shorter than `content` on purpose. A reveal fires
+   * once per section on a page with nine of them, so it is paced for
+   * something the visitor meets repeatedly while scrolling — where a
+   * drawer opens once and can afford to take its time.
+   */
+  reveal: 0.5,
+  /** Panels that open over the page: drawers, sheets, overlays. */
   content: 0.6,
   /** Hero element entries, large reveals. */
   hero: 0.9,
@@ -146,7 +156,35 @@ export const scrollReveal: Variants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: DURATION.content, ease: easeOutExpo },
+    transition: { duration: DURATION.reveal, ease: easeOutExpo },
+  },
+}
+
+// ─── Unmask (the image reveal) ───────────────────────────────────────────
+//
+// A photograph arrives out of its own frame rather than fading in: a
+// static window with `overflow: hidden`, a sheet inside it that rises
+// from one full height below, and the picture inside THAT counter-moving
+// so it lags the window instead of riding it. Two transforms, no
+// clip-path — clip-path is not a compositor property everywhere, and the
+// site's rule for anything scroll-driven is transform and opacity only.
+//
+// The same trick the hero's headline uses on a word, at the size of a
+// photograph. Components/motion/Unmask.tsx composes the pair.
+
+export const unmaskSheet: Variants = {
+  hidden: { y: '100%' },
+  visible: {
+    y: '0%',
+    transition: { duration: DURATION.reveal, ease: easeOutExpo },
+  },
+}
+
+export const unmaskContent: Variants = {
+  hidden: { y: '-32%' },
+  visible: {
+    y: '0%',
+    transition: { duration: DURATION.reveal, ease: easeOutExpo },
   },
 }
 
@@ -167,7 +205,7 @@ export const splitWordChild: Variants = {
   visible: {
     opacity: 1,
     y: '0%',
-    transition: { duration: DURATION.content, ease: easeOutExpo },
+    transition: { duration: DURATION.reveal, ease: easeOutExpo },
   },
 }
 

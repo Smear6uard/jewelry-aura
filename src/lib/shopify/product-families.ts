@@ -97,11 +97,11 @@ export function findFamily(node: ProductCardNode): ProductFamily | undefined {
  *            of them.
  *   images   the second frame becomes a different metal, so the desktop
  *            hover crossfade shows what choosing gets you.
- *   variants emptied, which makes the card's add control read "Choose
- *            options" and route to the product page (see QuickAdd). A
- *            group of twelve listings has no single variant to add, and
- *            a "Quick add" that silently picks a metal is the dishonest
- *            version of this card.
+ *   variants emptied, which makes the card's action read "View" and
+ *            route to the product page (see QuickAdd). A group of twelve
+ *            listings has no single variant to add, and an "Add" that
+ *            silently picks a metal is the dishonest version of this
+ *            card.
  */
 function collapse(
   family: ProductFamily,

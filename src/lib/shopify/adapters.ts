@@ -1,6 +1,8 @@
 // Adapters: raw Storefront API shapes -> view models the UI renders.
 // Pure functions, no fetch — everything here is unit-tested.
 
+import { publicSlug } from './product-slugs'
+
 export interface MoneyNode {
   amount: string
   currencyCode: string
@@ -70,9 +72,10 @@ export interface ProductCardModel {
   priceFrom: boolean
   /**
    * True when the piece carries no real price in Shopify (amount is
-   * missing or zero). The card renders an "Enquire" link to /custom
-   * rather than a dead "Price on request" string — a shopper looking at
-   * an unpriced chain needs somewhere to go, not a notice.
+   * missing or zero). The card stamps a hallmark plate offering the
+   * phone rather than a dead "Price on request" string — a shopper
+   * looking at an unpriced chain needs a way to get the number, not a
+   * notice that there isn't one.
    */
   unpriced: boolean
   availableForSale: boolean
@@ -81,7 +84,7 @@ export interface ProductCardModel {
    * Optional card enrichments. Each degrades to a quieter card rather
    * than an error: no second image means the desktop hover falls back
    * to a slow scale, no rating means no star row at all (never a zero
-   * state), no variantId means Quick add becomes "Choose options" and
+   * state), no variantId means the card's action becomes "View" and
    * routes to the product page instead of the cart.
    */
   /** Second photograph, crossfaded in on desktop hover. */
@@ -133,7 +136,8 @@ export function formatMoney(money: MoneyNode): string {
  * A zero amount means the piece has not been priced in the admin yet,
  * not that it is free. Rendering "$0" next to a gold chain reads as a
  * broken store, so the view models carry an `unpriced` flag and the UI
- * offers an action ("Enquire", routing to /custom) in place of a number.
+ * offers an action — the hallmark plate, on `tel:` — in place of a
+ * number.
  * The underlying Shopify variant is still $0 — that is a catalog fix,
  * not a display one, and this only stops the storefront advertising it.
  */
@@ -326,7 +330,10 @@ export function mapProductCard(node: ProductCardNode): ProductCardModel {
   const unpriced = isUnpriced(min)
 
   return {
-    handle: node.handle,
+    // The URL the site publishes, which is the Shopify handle for every
+    // product but the one whose handle contradicts its title. See
+    // lib/shopify/product-slugs.ts.
+    handle: publicSlug(node.handle),
     title: node.title,
     price: priceLabel(min),
     // A range only reads as a range when there is a number to open it.
@@ -348,7 +355,11 @@ export function mapProductCard(node: ProductCardNode): ProductCardModel {
 
 // ─── Product detail (PDP) ────────────────────────────────────────────────
 
-/** Lean shape fetched for the bulk variant list (availability math only). */
+/**
+ * The part of a variant the option-availability math reads. Narrower than
+ * VariantNode on purpose: `selectionOf` and `variantMatching` have no
+ * business seeing a price, and typing them this way says so.
+ */
 export interface VariantAvailabilityNode {
   id: string
   availableForSale: boolean
@@ -382,7 +393,11 @@ export interface ProductDetailNode {
     optionValues: Array<{ name: string; swatch: { color: string | null } | null }>
   }>
   images: { nodes: GalleryImageNode[] }
-  variants: { nodes: VariantAvailabilityNode[] }
+  /**
+   * Every variant. Carries prices as well as availability so the page can
+   * open on the one the card advertised — see `cheapestAvailable`.
+   */
+  variants: { nodes: VariantNode[] }
   selectedVariant: VariantNode | null
   fallbackVariant: VariantNode | null
   ratingMetafield?: MetafieldNode | null
@@ -496,10 +511,49 @@ export function mapVariant(variant: VariantNode): VariantModel {
   }
 }
 
+/**
+ * The cheapest variant a shopper can actually buy, or null when none is.
+ *
+ * THIS IS WHAT THE CARD PROMISED. A card whose variants span a range
+ * renders "From $79.99" off `priceRange.minVariantPrice`, and Shopify's
+ * `selectedOrFirstAvailableVariant` resolves to the FIRST variant in
+ * option order instead — on the 2mm Rope that is the 16", at $149.99.
+ * The shopper taps a $79.99 chain and lands on one priced at nearly
+ * double, which reads as a switch even though both numbers are true.
+ *
+ * So a product page opened with no length chosen opens on the cheapest
+ * purchasable length. Ties keep option order, which is the order the
+ * selector renders.
+ *
+ * Unpriced variants ($0 in the admin, R-side catalog work) are not
+ * "cheapest" — they are unpriced, and picking one would hide a real price
+ * behind a piece that has none.
+ */
+function cheapestAvailable(variants: ReadonlyArray<VariantNode>): VariantNode | null {
+  let best: VariantNode | null = null
+  let bestAmount = Number.POSITIVE_INFINITY
+  for (const variant of variants) {
+    if (!variant.availableForSale || isUnpriced(variant.price)) continue
+    const amount = Number.parseFloat(variant.price.amount)
+    if (!Number.isFinite(amount) || amount >= bestAmount) continue
+    best = variant
+    bestAmount = amount
+  }
+  return best
+}
+
 export function mapProductDetail(node: ProductDetailNode): ProductDetailModel {
-  // Shopify's selectedOrFirstAvailableVariant resolves whenever any variant
-  // exists, so no further fallback into the (lean) bulk list is needed.
-  const resolved = node.selectedVariant ?? node.fallbackVariant ?? null
+  // The exact combination in the URL wins. With nothing selected —
+  // `variantBySelectedOptions` returns null for an empty option list —
+  // the page opens on the cheapest purchasable variant, which is the
+  // price the card that linked here was advertising. Shopify's
+  // first-available resolution is the last resort, and the only one left
+  // when every variant is sold out or unpriced.
+  const resolved =
+    node.selectedVariant ??
+    cheapestAvailable(node.variants.nodes) ??
+    node.fallbackVariant ??
+    null
   const selection = resolved ? selectionOf(resolved) : {}
 
   // Shopify's placeholder option for single-variant products.
@@ -528,7 +582,10 @@ export function mapProductDetail(node: ProductDetailNode): ProductDetailModel {
   }))
 
   return {
-    handle: node.handle,
+    // The published URL, not necessarily the Shopify handle — see
+    // lib/shopify/product-slugs.ts. Breadcrumbs and the canonical link
+    // both read this.
+    handle: publicSlug(node.handle),
     title: node.title,
     description: node.description,
     seoTitle: node.seo?.title || node.title,

@@ -15,12 +15,12 @@
  *   name       ink sans 14px — not the display serif; product names set
  *              in a serif are what makes a grid read as a lookbook
  *   price      "From $79.99" across a variant range, struck compare-at
- *              beside a sale price, "Enquire" (a link, not a notice) when
- *              the piece has no price in Shopify yet
+ *              beside a sale price, and a hallmark plate offering the
+ *              phone when the piece has no price in Shopify yet
  *   rating     ink stars and a review count, only when a review app
  *              has written real data — never a zero state
- *   quick add  full-width and permanently visible on phones; a hover
- *              overlay on the image on desktop
+ *   quick add  ONE control, full-width, at the foot of the tile, at
+ *              every width. See components/commerce/QuickAdd.
  *
  * Photography carries no filter, scrim or overlay. On cream, dark velvet
  * product shots separate on their own and white-ground catalog shots
@@ -37,6 +37,7 @@
 import { Link } from '@tanstack/react-router'
 import { QuickAdd } from '~/components/commerce/QuickAdd'
 import { StarRating } from '~/components/commerce/StarRating'
+import { STORE } from '~/lib/catalog'
 import type { ProductBadge, ProductCardModel } from '~/lib/shopify/adapters'
 
 interface ProductCardProps {
@@ -103,11 +104,6 @@ export function ProductCard({
         )}
 
         {badge && <Badge kind={badge} />}
-
-        {/* Desktop: slides up over the image on hover. */}
-        <div className="hidden md:block">
-          <QuickAdd product={product} placement="overlay" />
-        </div>
       </div>
 
       <div className="flex flex-1 flex-col p-3 md:p-4">
@@ -134,11 +130,10 @@ export function ProductCard({
           </p>
         )}
 
-        {/* Phones: permanently visible, full width, at the foot of the
-            tile. `mt-auto` pins it to the bottom so cards in a row line
+        {/* `mt-auto` pins the action to the bottom so cards in a row line
             up even when one title wraps to two lines. */}
-        <div className="mt-auto md:hidden">
-          <QuickAdd product={product} placement="inline" />
+        <div className="mt-auto">
+          <QuickAdd product={product} />
         </div>
       </div>
     </article>
@@ -146,9 +141,19 @@ export function ProductCard({
 }
 
 /**
- * Price row. An unpriced piece gets an action rather than a notice: the
- * previous build rendered a static "Price on request", which is a dead
- * end on a card whose entire job is to be tapped.
+ * Price row.
+ *
+ * THE HALLMARK PLATE. A piece with no price in Shopify used to render
+ * "Enquire", linking to the commission form — a word that asks the
+ * shopper to start a project when all they wanted was a number, and a
+ * form that answers in a business day. These are stock chains; the bench
+ * quotes them by weight, on the phone, in about a minute.
+ *
+ * So the plate says what is true and offers the fastest way to the
+ * answer. It is stamped rather than written: a hairline plate in the
+ * card's own bone, uppercase, the same shape the hallmark takes
+ * everywhere else on the site. On paper that stamp is ink — gold is a
+ * hairline on this ground and never type.
  */
 function Price({ product }: { product: ProductCardModel }) {
   if (product.unpriced) {
@@ -157,10 +162,11 @@ function Price({ product }: { product: ProductCardModel }) {
         {/* Sits inside the card's stretched link area, so it needs its own
             z-index to be the thing that gets tapped. */}
         <a
-          href="/custom"
-          className="relative z-20 inline-flex min-h-[24px] items-center text-[13px] font-medium text-ink underline decoration-hairline-light underline-offset-4 transition-colors duration-hover ease-apple hover:decoration-gold md:text-[14px] motion-reduce:transition-none"
+          href={STORE.phoneHref}
+          aria-label={`${product.title} is priced at the bench — call ${STORE.phone}`}
+          className="relative z-20 inline-flex min-h-[28px] items-center border border-hairline-light bg-paper px-2 py-1 text-[10px] label-wide text-ink transition-colors duration-hover ease-apple hover:border-ink motion-reduce:transition-none"
         >
-          Enquire
+          Priced at the bench — call
         </a>
       </p>
     )

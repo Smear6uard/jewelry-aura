@@ -72,8 +72,8 @@ describe('selectBestSellers', () => {
 
   /**
    * Twelve listings of the same chain are twelve best sellers. The shelf
-   * shows one card, at the rank of the highest member, and it says
-   * "Choose options" because there is no single variant to add.
+   * shows one card, at the rank of the highest member, and its action
+   * reads "View" because there is no single variant to add.
    */
   it('collapses a product family to one card at its best rank', () => {
     const best = selectBestSellers([

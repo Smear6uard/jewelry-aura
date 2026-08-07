@@ -1,30 +1,29 @@
 /**
- * components/commerce/QuickAdd.tsx — the add button on a product card.
+ * components/commerce/QuickAdd.tsx — the one action on a product card.
  *
  * Two honest states, chosen by what the card actually knows:
  *
- *   • The card carries a single purchasable variant → "Quick add".
+ *   • The card carries a single purchasable variant → "Add".
  *     One tap adds it and opens the cart.
  *   • The piece needs a length, size or metal chosen first, or the card
- *     has no variant id → "Choose options", rendered as a link to the
- *     product page.
+ *     has no variant id → "View", rendered as a link to the product page.
  *
- * A button labelled "Quick add" that silently navigates somewhere else is
- * the worst version of this control, so the label always matches what
- * pressing it does.
+ * A button labelled "Add" that silently navigates somewhere else is the
+ * worst version of this control, so the label always matches what
+ * pressing it does. "View" is a word for going to look at something;
+ * "Choose options" was a word for a modal this store does not have.
  *
- * TWO PLACEMENTS, NOT ONE RESPONSIVE ONE.
+ * ONE CONTROL PER CARD.
  *
- *   placement="inline"  Phones. A permanently visible, full-width button
- *                       at the foot of the tile. Nothing about it is
- *                       hover-dependent, because there is no hover on a
- *                       touch screen and a buy button that only exists
- *                       under a pointer is a lost sale.
- *   placement="overlay" Desktop. Slides up over the bottom edge of the
- *                       image on card hover or keyboard focus.
- *
- * The card renders both and lets the breakpoint pick, so the mobile
- * control is never a hidden desktop control that happens to be visible.
+ * There used to be two placements — a permanent button at the foot of the
+ * tile on phones and a hover overlay over the image on desktop — and the
+ * card rendered BOTH, hiding one per breakpoint. Every card therefore
+ * shipped its call to action twice: twice in the HTML, twice to a screen
+ * reader, and twice in the tab order, which is the "Choose options
+ * appears twice" the shelf was showing. There is now one button, at the
+ * foot of the tile, visible at every width. That is also the better
+ * control: a buy button that only exists under a pointer is a lost sale
+ * on the half of this traffic that has no pointer.
  */
 
 import { useRef, useState } from 'react'
@@ -32,25 +31,12 @@ import { Link } from '@tanstack/react-router'
 import { useCart } from '~/components/commerce/CartProvider'
 import type { ProductCardModel } from '~/lib/shopify/adapters'
 
-/** Slide-up reveal for the desktop overlay placement only. */
-const OVERLAY_REVEAL =
-  'absolute inset-x-0 bottom-0 translate-y-[130%] opacity-0 ' +
-  'transition-[transform,opacity] duration-hover ease-apple ' +
-  'group-hover/card:translate-y-0 group-hover/card:opacity-100 ' +
-  'group-focus-within/card:translate-y-0 group-focus-within/card:opacity-100 ' +
-  'motion-reduce:transition-none'
-
 const BUTTON =
-  'flex w-full min-h-11 items-center justify-center px-3 text-[12px] label ' +
-  'bg-ink text-bone hover:ring-1 hover:ring-gold active:scale-[0.99] ' +
+  'mt-3 flex w-full min-h-11 items-center justify-center px-3 text-[12px] label ' +
+  'relative z-20 bg-ink text-bone hover:ring-1 hover:ring-gold active:scale-[0.99] ' +
   'transition-colors duration-hover ease-apple disabled:opacity-70 motion-reduce:transition-none'
 
-interface QuickAddProps {
-  product: ProductCardModel
-  placement: 'inline' | 'overlay'
-}
-
-export function QuickAdd({ product, placement }: QuickAddProps) {
+export function QuickAdd({ product }: { product: ProductCardModel }) {
   const { add, openCart } = useCart()
   const [pending, setPending] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -59,21 +45,18 @@ export function QuickAdd({ product, placement }: QuickAddProps) {
   // button is a tap target that does nothing; the badge already says it.
   if (!product.availableForSale) return null
 
-  const wrapper = placement === 'overlay' ? OVERLAY_REVEAL : 'mt-3'
-
   // No variant id, or the piece needs a choice made first.
   const needsOptions = !product.variantId || (product.optionCount ?? 1) > 1
   if (needsOptions) {
     return (
-      <div className={wrapper}>
-        <Link
-          to="/products/$handle"
-          params={{ handle: product.handle }}
-          className={`${BUTTON} relative z-20`}
-        >
-          Choose options
-        </Link>
-      </div>
+      <Link
+        to="/products/$handle"
+        params={{ handle: product.handle }}
+        aria-label={`View ${product.title}`}
+        className={BUTTON}
+      >
+        View
+      </Link>
     )
   }
 
@@ -90,17 +73,15 @@ export function QuickAdd({ product, placement }: QuickAddProps) {
   }
 
   return (
-    <div className={wrapper}>
-      <button
-        ref={buttonRef}
-        type="button"
-        disabled={pending}
-        onClick={onClick}
-        aria-label={`Add ${product.title} to cart`}
-        className={`${BUTTON} relative z-20`}
-      >
-        {pending ? 'Adding…' : 'Quick add'}
-      </button>
-    </div>
+    <button
+      ref={buttonRef}
+      type="button"
+      disabled={pending}
+      onClick={onClick}
+      aria-label={`Add ${product.title} to cart`}
+      className={BUTTON}
+    >
+      {pending ? 'Adding…' : 'Add'}
+    </button>
   )
 }

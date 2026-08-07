@@ -8,9 +8,11 @@ import {
   type TileFallbacks,
 } from '~/components/sections/CategoryTiles'
 import { TrustBar } from '~/components/sections/TrustBar'
+import { FeaturedExhibit } from '~/components/sections/FeaturedExhibit'
+import { CommissionedWork } from '~/components/sections/CommissionedWork'
 import { MoissaniteBand } from '~/components/sections/MoissaniteBand'
 import { WomensShelf } from '~/components/sections/WomensShelf'
-import { CustomPromo } from '~/components/sections/CustomPromo'
+import { TheBench } from '~/components/sections/TheBench'
 import { Reviews } from '~/components/sections/Reviews'
 import { ProductRail } from '~/components/commerce/ProductRail'
 import { CATEGORIES } from '~/lib/catalog'
@@ -220,16 +222,29 @@ export const Route = createFileRoute('/')({
 // COMPOSITION
 // ═══════════════════════════════════════════
 //
-// The order is a shopping funnel, not a narrative:
-//   Hero           one pinned frame, two CTAs
-//   CategoryTiles  the "I can shop here" moment, and the curtain that
-//                  slides up over the hero
-//   The case       what other people bought — the ONE product shelf
-//   Trust bar      the terms, immediately after the shelf
-//   Moissanite     the stone, argued, with a route into the case
-//   Women's        the five categories again, cut for her
-//   Custom promo   the workshop's differentiator, one band
-//   Reviews        social proof — omitted until three real ones exist
+// A shopping funnel that alternates: every light section where a visitor
+// is choosing something is followed by a dark one where the workshop
+// says something, and back again. Paper is where you shop, velvet is
+// where you look.
+//
+//   Hero              one pinned frame, two CTAs               velvet
+//   CategoryTiles     the "I can shop here" moment, and the    paper
+//                     curtain that slides up over the hero
+//   The case          what other people bought — the ONE       paper
+//                     product shelf
+//   Featured exhibit  one piece, one screen, its hallmark      VELVET
+//                     at the size of a wall
+//   Trust rail        the terms, slim, one line                paper
+//   Commissioned work five beats, the page's argument          VELVET
+//   Moissanite        the stone, argued, with a route in       paper
+//   Women's           the five categories again, cut for her   paper
+//   Reviews           social proof — nothing until three real  paper
+//                     ones exist
+//   The bench         the four promises, stamped on a photo    VELVET
+//   Footer            (rendered by the root route)             velvet
+//
+// The three velvet scenes are all full-bleed and all carry the same
+// idea — the hallmark, at three magnifications. See the file headers.
 //
 // ONE PRODUCT SHELF, NOT TWO. A "New arrivals" rail used to sit below
 // the trust bar. On a catalog this size the two shelves between them
@@ -242,8 +257,9 @@ export const Route = createFileRoute('/')({
 // the custom promo and the reviews. It was three links dressed as a
 // section: the same three bands are already offered in every mega-menu
 // panel and in the filter sidebar, which is where a shopper who is
-// thinking in budget actually is. A pinned custom-work gallery and a
-// store-location section went the same way earlier.
+// thinking in budget actually is. A store-location section went the same
+// way earlier, and the "One of one" promo band was replaced by the
+// commission sequence that now makes its claim properly.
 // ═══════════════════════════════════════════
 
 function HomePage() {
@@ -273,13 +289,17 @@ function HomePage() {
           eager
         />
 
+        <FeaturedExhibit />
+
         <TrustBar />
+
+        <CommissionedWork />
 
         <MoissaniteBand products={moissanite} />
         <WomensShelf />
-
-        <CustomPromo />
         <Reviews />
+
+        <TheBench />
       </div>
     </main>
   )

@@ -13,7 +13,8 @@
  * as a shelf someone stopped filling — the same "thin catalog" signal
  * `minProducts` exists to prevent, one row further down. The phone
  * carousel still shows all of them; a scroll track has no rows to leave
- * ragged.
+ * ragged. Same list either way — the remainder is hidden at md, not
+ * rendered a second time.
  *
  * Same ProductCard as the catalog grid — a rail is a different layout,
  * not a different product.
@@ -72,33 +73,30 @@ export function ProductRail({
     >
       <SectionHeader title={title} eyebrow={eyebrow} link={link} />
 
-      {/* Phones: one snap track. The negative margin lets it bleed to the
-          viewport edge while the header keeps its gutter. */}
-      <div className="mt-5 md:hidden">
-        <ul className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-4 pb-1">
-          {shown.map((product, index) => (
-            <li
-              key={product.handle}
-              className="w-[40vw] min-w-[140px] shrink-0 snap-start"
-            >
-              <ProductCard
-                product={product}
-                sizes="40vw"
-                eager={eager && index < 2}
-              />
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* md and up: a level grid. Four across, tight gutters. */}
-      <ul className="mt-8 hidden gap-3 md:grid md:grid-cols-4">
-        {level.map((product, index) => (
-          <li key={product.handle}>
+      {/*
+       * ONE LIST, TWO LAYOUTS. A snap track on phones — the negative
+       * margin lets it bleed to the viewport edge while the header keeps
+       * its gutter — and a level four-across grid from md up.
+       *
+       * It used to be two lists with one hidden per breakpoint, which
+       * put every product in the HTML twice: two anchors per piece for a
+       * crawler to reconcile, two buy buttons in the tab order, and the
+       * page weight of a shelf nobody sees. The cards past the last full
+       * desktop row drop out with `md:hidden` rather than by being a
+       * second array.
+       */}
+      <ul className="no-scrollbar -mx-4 mt-5 flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-4 pb-1 md:mx-0 md:mt-8 md:grid md:grid-cols-4 md:gap-3 md:overflow-visible md:px-0 md:pb-0">
+        {shown.map((product, index) => (
+          <li
+            key={product.handle}
+            className={`w-[40vw] min-w-[140px] shrink-0 snap-start md:w-auto md:min-w-0 ${
+              index >= level.length ? 'md:hidden' : ''
+            }`}
+          >
             <ProductCard
               product={product}
-              sizes="(min-width: 1440px) 340px, 24vw"
-              eager={eager && index < 4}
+              sizes="(min-width: 1440px) 340px, (min-width: 768px) 24vw, 40vw"
+              eager={eager && index < 2}
             />
           </li>
         ))}

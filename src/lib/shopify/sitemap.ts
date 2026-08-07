@@ -7,6 +7,7 @@ import {
 } from './queries'
 import { SITE_URL } from '../seo'
 import { PAGE_HANDLES } from '../pages-content'
+import { publicSlug } from './product-slugs'
 import { virtualCollectionHandles } from './virtual-collections'
 
 const PAGE_SIZE = 250
@@ -110,8 +111,10 @@ export async function generateSitemapXml(
       lastmod: c.updatedAt,
     })),
     ...menuOnly.map((handle) => ({ path: `/collections/${handle}` })),
+    // Published slugs, so the sitemap lists the same URL the cards link
+    // to and the canonical claims. See lib/shopify/product-slugs.ts.
     ...products.map((p) => ({
-      path: `/products/${p.handle}`,
+      path: `/products/${publicSlug(p.handle)}`,
       lastmod: p.updatedAt,
     })),
   ]

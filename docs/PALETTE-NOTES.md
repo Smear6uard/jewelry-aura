@@ -55,6 +55,14 @@ fill (there is no darker ink to move to).
 Product card badges are all ink — a badge repeats across a grid *and*
 sits on the photograph, so two separate rules land on it.
 
+**The ONE OF ONE stamp inverts on velvet.** The homepage commission
+sequence stamps each of its five beats, and every one of them sits on a
+dark ground, so the stamp there is a bone plate with velvet type. This is
+not a loophole in "maroon is the one-of-one mark" — it is the measurement
+behind the rule. Maroon on velvet is 1.4:1: a maroon plate on that ground
+is a dark rectangle a reader has to guess at. The stamp keeps its maroon
+on `/custom`, where it appears once, on paper, at 11.8:1.
+
 ## The two grounds
 
 | Ground | Fill | Body type | Rules | Accent |

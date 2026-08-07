@@ -92,6 +92,13 @@ describe('mapProductCard', () => {
     expect(model.image).not.toBeNull()
   })
 
+  it('links the card at the published slug, not the Shopify handle', () => {
+    // The 4mm Cuban is still listed under `6mm-cuban-link-chain`; every
+    // card that renders it has to link to the width in its title.
+    const model = mapProductCard(cardNode({ handle: '6mm-cuban-link-chain' }))
+    expect(model.handle).toBe('4mm-cuban-link-chain')
+  })
+
   it('flags a price range as "from" pricing', () => {
     const model = mapProductCard(
       cardNode({
@@ -359,6 +366,100 @@ describe('mapProductDetail', () => {
     expect(model.variant?.availableForSale).toBe(false)
     expect(model.offer?.available).toBe(false)
   })
+
+  /**
+   * The 2mm Rope case: the card advertises `minVariantPrice` ("From
+   * $79.99") and Shopify's first-available variant is the 16" at
+   * $149.99. Opening the page on the cheapest purchasable length is what
+   * makes the card's number true when you arrive.
+   */
+  describe('with no option chosen', () => {
+    const rope = () => {
+      const variants = [
+        variantNode({ Size: '16"' }, { price: { amount: '149.99', currencyCode: 'USD' } }),
+        variantNode({ Size: '24"' }, { price: { amount: '79.99', currencyCode: 'USD' } }),
+        variantNode(
+          { Size: '26"' },
+          {
+            price: { amount: '39.99', currencyCode: 'USD' },
+            availableForSale: false,
+          },
+        ),
+      ]
+      return detailNode({
+        options: [
+          {
+            name: 'Size',
+            optionValues: [
+              { name: '16"', swatch: null },
+              { name: '24"', swatch: null },
+              { name: '26"', swatch: null },
+            ],
+          },
+        ],
+        variants: { nodes: variants },
+        selectedVariant: null,
+        fallbackVariant: variants[0],
+      })
+    }
+
+    it('opens on the cheapest purchasable variant, not the first one', () => {
+      const model = mapProductDetail(rope())
+      expect(model.variant?.price).toBe('$79.99')
+      expect(model.offer?.price).toBe('79.99')
+      const size = model.options[0].values.find((v) => v.name === '24"')!
+      expect(size.selected).toBe(true)
+    })
+
+    it('ignores a cheaper variant nobody can buy', () => {
+      // The 26" is $39.99 and sold out. Advertising it would be the same
+      // lie in the other direction.
+      expect(mapProductDetail(rope()).variant?.title).toBe('24"')
+    })
+
+    it('ignores an unpriced variant, which is not the same as a cheap one', () => {
+      const variants = [
+        variantNode({ Size: '18"' }, { price: { amount: '199.0', currencyCode: 'USD' } }),
+        variantNode({ Size: '20"' }, { price: { amount: '0.0', currencyCode: 'USD' } }),
+      ]
+      const model = mapProductDetail(
+        detailNode({
+          variants: { nodes: variants },
+          selectedVariant: null,
+          fallbackVariant: variants[0],
+        }),
+      )
+      expect(model.variant?.price).toBe('$199')
+      expect(model.variant?.unpriced).toBe(false)
+    })
+
+    it('still resolves when every variant is sold out', () => {
+      const gone = [
+        variantNode({ Size: '18"' }, { availableForSale: false }),
+        variantNode({ Size: '20"' }, { availableForSale: false }),
+      ]
+      const model = mapProductDetail(
+        detailNode({
+          variants: { nodes: gone },
+          selectedVariant: null,
+          fallbackVariant: gone[0],
+        }),
+      )
+      expect(model.variant?.id).toBe(gone[0].id)
+      expect(model.variant?.availableForSale).toBe(false)
+    })
+
+    it('lets an explicit URL selection beat the cheapest one', () => {
+      const node = rope()
+      node.selectedVariant = node.variants.nodes[0]
+      expect(mapProductDetail(node).variant?.price).toBe('$149.99')
+    })
+  })
+
+  it('publishes the aliased slug rather than the Shopify handle', () => {
+    const node = detailNode({ handle: '6mm-cuban-link-chain' })
+    expect(mapProductDetail(node).handle).toBe('4mm-cuban-link-chain')
+  })
 })
 
 describe('productJsonLd', () => {
@@ -519,7 +620,7 @@ describe('parseFormattedMoney', () => {
 // ─── Unpriced pieces ─────────────────────────────────────────────────
 // Most of the live chain catalog has no price set in the admin. The card
 // must not print "$0" and must not print a dead notice either — it flags
-// the piece so the UI can offer an "Enquire" link instead.
+// the piece so the UI can stamp the hallmark plate and offer the phone.
 
 describe('priceLabel and the unpriced flag', () => {
   it('returns an empty label for a zero or missing amount', () => {

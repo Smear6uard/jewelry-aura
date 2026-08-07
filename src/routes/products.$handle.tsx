@@ -34,6 +34,7 @@ import {
   type ProductDetailNode,
 } from '~/lib/shopify/adapters'
 import { PRODUCT_QUERY } from '~/lib/shopify/queries'
+import { canonicalSlug, shopifyHandle } from '~/lib/shopify/product-slugs'
 import {
   SITE_URL,
   breadcrumbJsonLd,
@@ -92,7 +93,12 @@ const getProduct = createServerFn({ method: 'GET' })
     ])
 
     const result = await storefrontRequest<ProductData>(PRODUCT_QUERY, {
-      variables: { handle: data.handle, selectedOptions: data.selected },
+      // The URL may carry a public slug the Storefront API has never
+      // heard of; only the real handle goes into the query.
+      variables: {
+        handle: shopifyHandle(data.handle),
+        selectedOptions: data.selected,
+      },
     })
     if (!result.product) return null
 
@@ -102,9 +108,12 @@ const getProduct = createServerFn({ method: 'GET' })
       () => [] as ProductCardModel[],
     )
 
+    // Card handles are public slugs, so the piece filters itself out of
+    // its own recommendation rail whichever of its two URLs was opened.
+    const self = canonicalSlug(data.handle)
     return {
       product: mapProductDetail(result.product),
-      related: related.filter((card) => card.handle !== data.handle).slice(0, 4),
+      related: related.filter((card) => card.handle !== self).slice(0, 4),
     }
   })
 
@@ -142,8 +151,11 @@ export const Route = createFileRoute('/products/$handle')({
     // then this may rise toward 86400.
     'Cache-Control':
       'public, max-age=0, s-maxage=900, stale-while-revalidate=86400',
+    // Tagged with the SHOPIFY handle: the product-update webhook only
+    // knows the handle Shopify carries, so both URLs of an aliased piece
+    // have to purge under that one name.
     'Vercel-Cache-Tag': isValidHandle(params.handle)
-      ? `product-${params.handle},products`
+      ? `product-${shopifyHandle(params.handle)},products`
       : 'products',
   }),
   head: ({ loaderData, params }) => {
@@ -151,8 +163,10 @@ export const Route = createFileRoute('/products/$handle')({
       return { meta: [{ title: 'Piece not found | Jewelry Aura' }] }
     }
     const product = loaderData.product
-    const path = `/products/${params.handle}`
-    // Canonical is the clean product URL — variant params never fragment it.
+    // Both URLs of an aliased piece serve the same page; the canonical is
+    // always the slug the site publishes. Variant params never fragment
+    // it either.
+    const path = `/products/${canonicalSlug(params.handle)}`
     const canonical = `${SITE_URL}${path}`
     const title = `${product.seoTitle} | Jewelry Aura`
     const description =

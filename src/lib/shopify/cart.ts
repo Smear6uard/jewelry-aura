@@ -18,6 +18,7 @@ import {
   setResponseHeader,
 } from '@tanstack/react-start/server'
 import { formatMoney, type MoneyNode } from './adapters'
+import { publicSlug } from './product-slugs'
 import {
   CART_CREATE_MUTATION,
   CART_LINES_ADD_MUTATION,
@@ -97,6 +98,7 @@ export interface CartLineModel {
   title: string
   /** Variant title; empty string when it is Shopify's "Default Title". */
   variantTitle: string
+  /** Published product slug — what the line links to. */
   handle: string
   /** Formatted unit price, e.g. "$1,450". */
   price: string
@@ -131,7 +133,9 @@ function mapCartLine(line: RawCartLine): CartLineModel {
     title: merchandise.product.title,
     variantTitle:
       merchandise.title === DEFAULT_VARIANT_TITLE ? '' : merchandise.title,
-    handle: merchandise.product.handle,
+    // Same public slug the card linked to, so a cart line never sends a
+    // shopper to a URL that contradicts the title beside it.
+    handle: publicSlug(merchandise.product.handle),
     price: formatMoney(merchandise.price),
     lineTotal: formatMoney({
       amount: String(unitAmount * line.quantity),
