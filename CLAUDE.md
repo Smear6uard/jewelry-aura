@@ -1,7 +1,9 @@
 # Jewelry Aura
 
 TanStack Start + Shopify Storefront API. Tokens in `src/app.css`, guards in
-`src/lib/palette.test.ts`, rationale in `docs/PALETTE-NOTES.md`.
+`src/lib/palette.test.ts`, rationale in `docs/PALETTE-NOTES.md`. The
+homepage's dark scenes — what was decided, what was rejected, and what the
+first build got wrong — are in `docs/HOME-SCENES.md`.
 
 ## COLOR RULES — non-negotiable
 
