@@ -136,22 +136,21 @@ export function useScrollProgress(): MotionValue<number> {
  * event: a `getBoundingClientRect()` on every scroll tick forces layout
  * at exactly the moment the compositor is trying to stay out of the way.
  *
- * A native `scroll` listener runs alongside the Lenis one. Lenis leaves
- * touch scrolling native (`syncTouch: false`), and it is null for the
- * first client render — the second subscription is what makes this
- * correct on a phone and during hydration. Both read the same
- * `window.scrollY`, so agreeing is automatic and a double update is one
- * redundant `set` of an identical number.
+ * Lenis emits both smoothed wheel and native touch scroll updates. Use
+ * its subscription once mounted, with a native listener only as the
+ * pre-mount fallback, so every scene updates once per scroll event.
+ * Disabled scenes do not install observers or scroll listeners.
  */
 export function useElementScrollProgress(
   ref: RefObject<HTMLElement | null>,
+  enabled = true,
 ): MotionValue<number> {
   const progress = useMotionValue(0)
   const lenis = useLenis()
 
   useEffect(() => {
     const element = ref.current
-    if (!element) return
+    if (!element || !enabled) return
 
     let top = 0
     let range = 0
@@ -182,8 +181,11 @@ export function useElementScrollProgress(
     const observer = new ResizeObserver(remeasure)
     observer.observe(element)
     window.addEventListener('resize', remeasure)
-    window.addEventListener('scroll', update, { passive: true })
-    lenis?.on('scroll', update)
+    if (lenis) {
+      lenis.on('scroll', update)
+    } else {
+      window.addEventListener('scroll', update, { passive: true })
+    }
 
     return () => {
       observer.disconnect()
@@ -191,7 +193,7 @@ export function useElementScrollProgress(
       window.removeEventListener('scroll', update)
       lenis?.off('scroll', update)
     }
-  }, [lenis, progress, ref])
+  }, [lenis, progress, ref, enabled])
 
   return progress
 }

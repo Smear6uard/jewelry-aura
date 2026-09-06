@@ -187,6 +187,7 @@ export const Route = createFileRoute('/')({
           rel: 'preload',
           href: '/new-hero-horizontal.avif',
           as: 'image',
+          type: 'image/avif',
           media: '(min-width: 1024px)',
           fetchPriority: 'high',
         },
@@ -194,6 +195,7 @@ export const Route = createFileRoute('/')({
           rel: 'preload',
           href: '/new-hero-vertical.avif',
           as: 'image',
+          type: 'image/avif',
           media: '(max-width: 1023px)',
           fetchPriority: 'high',
         },
@@ -286,7 +288,6 @@ function HomePage() {
           limit={CASE_LIMIT}
           link={{ href: '/shop', label: 'View all' }}
           minProducts={MIN_RAIL_PRODUCTS}
-          eager
         />
 
         <FeaturedExhibit />

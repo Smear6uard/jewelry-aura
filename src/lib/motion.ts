@@ -21,10 +21,8 @@
  */
 
 import type { Variants } from 'framer-motion'
-import {
-  cubicBezier,
-  useReducedMotion as useFramerReducedMotion,
-} from 'framer-motion'
+import { cubicBezier } from 'framer-motion'
+import { useMediaQuery } from './use-media-query'
 
 // ─── Easing tokens ───────────────────────────────────────────────────────
 
@@ -212,4 +210,9 @@ export const splitWordChild: Variants = {
 // ─── Reduced-motion ──────────────────────────────────────────────────────
 // Re-exported so every component imports motion concerns from a single path.
 
-export const useReducedMotion = useFramerReducedMotion
+// Keep the server and hydration render identical before applying the
+// preference. Framer's client-only initial value can change element types
+// in Unmask/SplitText during hydration and force React to rebuild the page.
+export function useReducedMotion(): boolean {
+  return useMediaQuery('(prefers-reduced-motion: reduce)')
+}

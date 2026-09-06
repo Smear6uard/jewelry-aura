@@ -61,7 +61,7 @@
  */
 
 import { useRef } from 'react'
-import { motion, useTransform, type MotionValue } from 'framer-motion'
+import { m as motion, useTransform, type MotionValue } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import { DURATION, easeOutExpo, easeOutExpoFn, useReducedMotion } from '~/lib/motion'
 import { useElementScrollProgress } from '~/lib/lenis'
@@ -98,8 +98,8 @@ const WORD_SPAN = 0.13
 
 export function Hero() {
   const stageRef = useRef<HTMLElement>(null)
-  const progress = useElementScrollProgress(stageRef)
   const reduced = !!useReducedMotion()
+  const progress = useElementScrollProgress(stageRef, !reduced)
 
   // Act 1 — the photograph steps back so the type has a ground.
   const photoScale = useTransform(progress, [0, ACT1_END], [1, 1.03])

@@ -16,7 +16,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, m as motion } from 'framer-motion'
 import { useCart } from '~/components/commerce/CartProvider'
 import { DURATION, easeOutExpo, useReducedMotion } from '~/lib/motion'
 import type { VariantModel } from '~/lib/shopify/adapters'

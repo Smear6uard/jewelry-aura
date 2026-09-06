@@ -1,5 +1,6 @@
 /// <reference types="vite/client" />
 import type { ReactNode } from 'react'
+import { LazyMotion, domAnimation } from 'framer-motion'
 import {
   Outlet,
   createRootRoute,
@@ -29,9 +30,6 @@ import {
 const GOOGLE_FONTS_URL =
   'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..700&family=Manrope:wght@400;500;600&display=swap'
 
-const FRAUNCES_NORMAL_400_FONT =
-  'https://fonts.gstatic.com/s/fraunces/v38/6NUh8FyLNQOQZAnv9bYEvDiIdE9Ea92uemAk_WBq8U_9v0c2Wa0K7iN7hzFUPJH58nib1603gg7S2nfgRYIctxujDg.ttf'
-
 // Runs before first paint: a visitor who dismissed the announcement bar
 // earlier in the session never sees it render and then disappear, and
 // the header never jumps 36px up the page. Paired with the CSS rule
@@ -57,13 +55,6 @@ export const Route = createRootRoute({
     links: [
       { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
       { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous' },
-      {
-        rel: 'preload',
-        href: FRAUNCES_NORMAL_400_FONT,
-        as: 'font',
-        type: 'font/ttf',
-        crossOrigin: 'anonymous',
-      },
       { rel: 'stylesheet', href: GOOGLE_FONTS_URL },
       // Canonical is set per-route (each page owns its URL); a root-level
       // canonical would duplicate on every catalog page.
@@ -98,20 +89,24 @@ function RootComponent() {
           scroll-bound animation reads from a single smoothed source.
           Routes are NOT allowed to spin up their own Lenis instance —
           two instances fight each other on the wheel events. */}
-      <LenisProvider>
-        {/* Cart state lives above every route: the header badge and the
-            PDP add-to-cart both read it. Hydrates post-paint (KTD3). */}
-        <CartProvider>
-          {/* Store chrome is rendered once, here, so no route can ship
-              without an announcement bar, a header or a footer. Routes
-              own their <main> and nothing else. */}
-          <AnnouncementBar />
-          <Header />
-          <Outlet />
-          <Footer />
-          <CartDrawer />
-        </CartProvider>
-      </LenisProvider>
+      {/* Synchronous features preserve first-frame reveals while omitting
+          unused drag and layout animation code from the client bundle. */}
+      <LazyMotion features={domAnimation} strict>
+        <LenisProvider>
+          {/* Cart state lives above every route: the header badge and the
+              PDP add-to-cart both read it. Hydrates post-paint (KTD3). */}
+          <CartProvider>
+            {/* Store chrome is rendered once, here, so no route can ship
+                without an announcement bar, a header or a footer. Routes
+                own their <main> and nothing else. */}
+            <AnnouncementBar />
+            <Header />
+            <Outlet />
+            <Footer />
+            <CartDrawer />
+          </CartProvider>
+        </LenisProvider>
+      </LazyMotion>
     </RootDocument>
   )
 }

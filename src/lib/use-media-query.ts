@@ -13,20 +13,39 @@
  * after mount, so the initial false is never rendered.
  */
 
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
+
+// One browser listener per query, shared by all consumers. The server
+// snapshot is also used during hydration so responsive markup matches.
+const stores = new Map<string, ReturnType<typeof createMediaStore>>()
+const serverSnapshot = () => false
+
+function createMediaStore(query: string) {
+  let media: MediaQueryList | undefined
+  const listeners = new Set<() => void>()
+  const getMedia = () => (media ??= window.matchMedia(query))
+  const notify = () => listeners.forEach((listener) => listener())
+
+  return {
+    getSnapshot: () => getMedia().matches,
+    subscribe(listener: () => void) {
+      if (listeners.size === 0) getMedia().addEventListener('change', notify)
+      listeners.add(listener)
+      return () => {
+        listeners.delete(listener)
+        if (listeners.size === 0) getMedia().removeEventListener('change', notify)
+      }
+    },
+  }
+}
 
 export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(false)
-
-  useEffect(() => {
-    const list = window.matchMedia(query)
-    setMatches(list.matches)
-    const onChange = (event: MediaQueryListEvent) => setMatches(event.matches)
-    list.addEventListener('change', onChange)
-    return () => list.removeEventListener('change', onChange)
-  }, [query])
-
-  return matches
+  let store = stores.get(query)
+  if (!store) {
+    store = createMediaStore(query)
+    stores.set(query, store)
+  }
+  return useSyncExternalStore(store.subscribe, store.getSnapshot, serverSnapshot)
 }
 
 /** True from Tailwind's `md` breakpoint up — where drawers gain a side. */

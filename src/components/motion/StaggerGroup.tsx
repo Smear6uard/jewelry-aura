@@ -14,7 +14,7 @@
  */
 
 import type { ReactNode } from 'react'
-import { motion, type Variants } from 'framer-motion'
+import { m as motion, type Variants } from 'framer-motion'
 import { STAGGER, useReducedMotion } from '~/lib/motion'
 
 type StaggerGroupProps = {

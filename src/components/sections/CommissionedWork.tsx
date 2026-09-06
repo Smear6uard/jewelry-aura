@@ -50,7 +50,7 @@
  */
 
 import { useRef } from 'react'
-import { motion, useTransform, type MotionValue } from 'framer-motion'
+import { m as motion, useTransform, type MotionValue } from 'framer-motion'
 import { easeOutExpoFn, useReducedMotion } from '~/lib/motion'
 import { useElementScrollProgress } from '~/lib/lenis'
 import { useIsWide } from '~/lib/use-media-query'
@@ -64,10 +64,10 @@ const ARRIVAL = 0.34
 
 export function CommissionedWork() {
   const stageRef = useRef<HTMLDivElement>(null)
-  const progress = useElementScrollProgress(stageRef)
   const reduced = !!useReducedMotion()
   const wide = useIsWide()
   const pinned = wide && !reduced
+  const progress = useElementScrollProgress(stageRef, pinned)
 
   return (
     <section

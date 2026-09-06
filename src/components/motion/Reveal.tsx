@@ -10,7 +10,7 @@
  */
 
 import type { JSX, ReactNode } from 'react'
-import { motion, type Variants } from 'framer-motion'
+import { m as motion, type Variants } from 'framer-motion'
 import {
   DURATION,
   easeOutExpo,

@@ -20,7 +20,7 @@
  */
 
 import { useEffect, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, m as motion } from 'framer-motion'
 import { X } from 'lucide-react'
 import { DURATION, easeApple, useReducedMotion } from '~/lib/motion'
 import { FREE_SHIPPING_THRESHOLD } from '~/lib/catalog'

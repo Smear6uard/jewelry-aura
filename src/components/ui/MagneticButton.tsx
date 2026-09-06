@@ -13,7 +13,7 @@
  */
 
 import { useCallback, useRef } from 'react'
-import { motion, useMotionValue, useSpring } from 'framer-motion'
+import { m as motion, useMotionValue, useSpring } from 'framer-motion'
 
 type MagneticButtonProps = {
   children: React.ReactNode

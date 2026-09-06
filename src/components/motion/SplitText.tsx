@@ -17,7 +17,7 @@
  */
 
 import { Fragment, createElement, useMemo, type JSX, type ReactElement } from 'react'
-import { motion, type Variants } from 'framer-motion'
+import { m as motion, type Variants } from 'framer-motion'
 import {
   DURATION,
   STAGGER,

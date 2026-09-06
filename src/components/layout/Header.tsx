@@ -38,7 +38,7 @@
  * has a burger that does nothing and, below lg, no way into the catalog.
  */
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Search, ShoppingBag, User } from 'lucide-react'
 import { CATEGORIES, NAV_LINKS, WOMENS } from '~/lib/catalog'
 import { useCart } from '~/components/commerce/CartProvider'
@@ -62,10 +62,25 @@ export function Header() {
   // truer than a permanent hairline — there is nothing to separate from
   // yet, and the palette has no shadow to fall back on.
   useEffect(() => {
-    const onScroll = () => setLifted(window.scrollY > 8)
+    let previous = false
+    const onScroll = () => {
+      const next = window.scrollY > 8
+      if (next === previous) return
+      previous = next
+      setLifted(next)
+    }
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  const closeMenu = useCallback(() => {
+    setMenuOpen(false)
+    burgerRef.current?.focus()
+  }, [])
+  const closeSearch = useCallback(() => {
+    setSearchOpen(false)
+    searchTriggerRef.current?.focus()
   }, [])
 
   return (
@@ -228,17 +243,11 @@ export function Header() {
 
       <MenuDrawer
         open={menuOpen}
-        onClose={() => {
-          setMenuOpen(false)
-          burgerRef.current?.focus()
-        }}
+        onClose={closeMenu}
       />
       <SearchOverlay
         open={searchOpen}
-        onClose={() => {
-          setSearchOpen(false)
-          searchTriggerRef.current?.focus()
-        }}
+        onClose={closeSearch}
       />
     </>
   )

@@ -42,7 +42,7 @@
  */
 
 import { useRef } from 'react'
-import { motion, useTransform, type MotionValue } from 'framer-motion'
+import { m as motion, useTransform, type MotionValue } from 'framer-motion'
 import { easeOutExpoFn, useReducedMotion } from '~/lib/motion'
 import { useElementScrollProgress } from '~/lib/lenis'
 import { useIsWide } from '~/lib/use-media-query'
@@ -75,12 +75,12 @@ const TERM_SPAN = 0.2
 
 export function FeaturedExhibit() {
   const stageRef = useRef<HTMLElement>(null)
-  const progress = useElementScrollProgress(stageRef)
   const reduced = !!useReducedMotion()
   const wide = useIsWide()
 
   /** The scrubbed timeline is the desktop scene and nothing else. */
   const pinned = wide && !reduced
+  const progress = useElementScrollProgress(stageRef, pinned)
 
   const photoScale = useTransform(progress, [0, ACT1_END], [1.06, 1])
   const dim = useTransform(progress, [0, ACT1_END], [0, 0.42])
